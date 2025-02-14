@@ -1,39 +1,34 @@
-# Impulsa Tu Futuro
 
-## Problemática
 
-Aplicación web enfocada a estudiantes que empiezan su desarrollo en los niveles medio superior y superior que les permita compartir y encontrar oportunidades de crecimiento académico, desarrollo profesional y curricular, como; becas de maestría, doctorado, estancias de investigación, cursos de habilidades duras y blandas, bootcamps, hackathons y concursos.
-## Diferenciador
 
-Actualmente existen preformas como *Linkedln* donde se pueden encontrar ofertas laborales y de pasantías, pero su enfoque se centra en el mundo laboral. En contraste, nuestro enfoque se acerca hacia los estudiantes que podrían
-estar iniciando su proceso de desarrollo desde la educación media para continuar sus estudios.
+# Impulsa Tu Futuro  
 
-Además de proporcionarle un medio a otras plataformas de becas que existen en Mexico y diferentes canales de difusión que no tienen una plataforma aparte de redes sociales o correo para compartir esta información. También existen creadores de contenido cuyo eje es difundir y ayudar a estudiantes a conseguir una beca o difundir distintos eventos  y oportunidades que no cuentan con una plataforma para difundirlos. 
+## Introducción  
 
-| Plaformas de Becas                                                                          | Creadores de Contenido y Difusión                        |
-| ------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [Becas para latinos](https://becasparalatinos.com/becas-para-universitarios/)               | [Arturo Fenton](https://www.instagram.com/arturogaijin/) |
-| [Santander Open Academy](https://app.santanderopenacademy.com/es/program/search?)           | [Opportuni](https://www.instagram.com/opportuni_mx/)     |
-| [Becas Unam](https://www.becas.unam.mx/)                                                    | [Fer Pons](https://www.tiktok.com/@ferpons_)             |
-| [Big Future](https://bigfuture.collegeboard.org/scholarship-search)                         |                                                          |
-| [Gobierno de México](https://www.gob.mx/amexcid/acciones-y-programas/oferta-para-mexicanos) |                                                          |
+Durante la tercera década del siglo XXI, en un mundo globalizado y en constante evolución, la competencia en el ámbito académico y profesional es más intensa que nunca. Para los estudiantes de educación media superior y superior, contar con herramientas adecuadas que les permitan acceder a oportunidades de desarrollo se ha vuelto esencial. Sin embargo, muchas de estas oportunidades —como becas de maestría y doctorado, estancias de investigación, cursos de habilidades duras y blandas, bootcamps, hackatones y concursos— suelen estar dispersas en distintos canales, dificultando su acceso y aprovechamiento.  
 
-## Funcionalidades
+## Problemática  
 
-* Crear usuarios de estudiantes y de difusión.
+**Impulsa Tu Futuro** nace de la necesidad de proporcionar un espacio centralizado y accesible donde los estudiantes puedan descubrir y compartir oportunidades que potencien su crecimiento académico y profesional. Si bien en la actualidad existen plataformas como LinkedIn, estas están orientadas principalmente al mundo laboral, dejando de lado a aquellos estudiantes que aún se encuentran en proceso de formación.  
 
-* Crear tarjetas con la informacion de la convocatoria
+Por otro lado, diversas plataformas de becas y convocatorias en México carecen de una infraestructura digital robusta más allá de redes sociales y correos electrónicos, lo que dificulta su difusión y acceso eficiente. De hecho, se ha observado que en algunas áreas hasta un **30 % de las becas quedan sin utilizar** debido a que los estudiantes a quienes estaban dirigidas nunca se enteraron de su existencia.  
 
-* Crear un sistema de filtros entre las convocatorias
+## Solución  
 
-* Diseñar un menu principal con recomendaciones de oportunidades para estudiantes
+Nuestra solución es una plataforma dirigida a estudiantes en sus primeras etapas de desarrollo profesional, que les permitirá **crear un perfil** en el que podrán estructurar su currículo, registrando sus logros académicos, intereses y experiencia relevante. La seguridad y privacidad serán una prioridad en el diseño de la plataforma, permitiendo a los estudiantes **gestionar la visibilidad** de su información de contacto y decidir qué datos compartir con otros usuarios o instituciones.  
 
-* Diseñar un perfil para que los estudiantes puedan escribir su curriculum
+Para facilitar la exploración de oportunidades, la plataforma incluirá un **sistema de búsqueda con filtros avanzados** que permitirá encontrar becas, cursos, concursos y estancias según criterios específicos. También ofrecerá una sección donde se publicarán **tarjetas informativas** sobre cada convocatoria, proporcionando detalles clave como requisitos, plazos y beneficios.  
 
-* Crear un modulo de foro para comentar sobre las distintas convocatorias o cursos y tener la posibilidad de encontrar equipos de trabajo para los concursos.
+Además, el sistema contará con un **módulo de foros** donde los estudiantes podrán comentar sobre las distintas oportunidades, resolver dudas, intercambiar experiencias e incluso formar equipos de trabajo para concursos y hackatones.  
 
-* Tener opciones de privacidad para enseñar el medio de contacto de los estudiantes.
+El **sistema de búsqueda incluirá un historial** que permitirá enviar notificaciones a los estudiantes sobre nuevas convocatorias en sus áreas de interés, además de mejorar las recomendaciones que se muestran en el menú principal de la plataforma.  
 
-* Tener un historial de búsqueda del usuario que le recomiende por medio de notificaciones nuevas oportunidades de acuerdo a sus intereses.
-* 
-* Poder conectar con mas estudiantes y hacer amigos. Poder crear organizaciones dentro de la aplicación de estudiantes que organicen concursos de robótica, voluntariados, den clases de regularización, etc.
+Asimismo, además de las cuentas de estudiantes, se implementarán **cuentas dedicadas a la difusión de oportunidades**, donde organizaciones, universidades y empresas podrán registrar y promover sus convocatorias de manera organizada y accesible.  
+
+Se incorporarán también **características enfocadas en el aspecto social**, como la posibilidad de agregar amigos y la creación de organizaciones que permitan a los estudiantes formar grupos de estudio en sus áreas de interés.  
+
+## Conclusión  
+
+Impulsa Tu Futuro no solo facilitará el acceso a oportunidades de crecimiento académico y profesional, sino que también fomentará la colaboración entre estudiantes, universidades y organizaciones. Con una interfaz intuitiva, un sistema de recomendaciones personalizadas y un enfoque en la seguridad de la información, la plataforma buscará convertirse en una herramienta indispensable para quienes desean fortalecer su trayectoria educativa y profesional.  
+
+A futuro, el proyecto podrá expandirse con funciones adicionales, como la integración de eventos en vivo, mentorías y conexiones con profesionales de diversas industrias, consolidándose así como un ecosistema de apoyo integral para el desarrollo estudiantil.  
