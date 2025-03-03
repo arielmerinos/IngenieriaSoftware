@@ -52,7 +52,8 @@ services:
       - .env
     volumes:
       - ./src/frontend:/app 
-    command: ["npm", "start"]
+      - /app/node_modules
+    command: ["sh", "-c", "npm install && npm run dev"]
 
 volumes:
   postgres_data:
