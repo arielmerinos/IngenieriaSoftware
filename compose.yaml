@@ -14,7 +14,7 @@ services:
     env_file:
       - .env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: ["CMD-SHELL", "pg_isready -d ${DATABASE_NAME} -U ${DATABASE_USERNAME}"]
       interval: 1s
       timeout: 5s
       retries: 10
@@ -24,7 +24,7 @@ services:
     restart: always
     ports:
       - 8080:8080
-      
+
   django-web:
     build:
       context: ./src/backend/
