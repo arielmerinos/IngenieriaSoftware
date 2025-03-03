@@ -15,7 +15,7 @@ services:
 
   django-web:
     build:
-      context: ./src/backend/backend
+      context: ./src/backend/
     container_name: django-docker
     ports:
       - "8000:8000"
