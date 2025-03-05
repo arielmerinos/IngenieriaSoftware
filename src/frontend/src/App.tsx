@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import LoginModal from './components/LoginModal';
 import './App.css'
 
 interface DataResponse {
@@ -49,7 +50,7 @@ function App() {
   ];
 
   return (
-    <section className="w-full min-h-screen bg-white font-sans">
+    <section className="w-full min-h-screen">
       {/* Header */}
       <header className="w-full bg-white shadow-sm">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -66,15 +67,9 @@ function App() {
           </nav>
           
           <div className="flex items-center space-x-4">
-            <button className="p-2 rounded-full hover:bg-gray-100">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700">
-              Acceder
-            </button>
-            <button className="text-gray-700">ES</button>
+            <button>...</button>
+            <LoginModal />
+            <button>...</button>
           </div>
         </div>
       </header>
