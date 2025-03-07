@@ -17,6 +17,7 @@ const LoginModal: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   // Estado para alternar entre modo de inicio de sesión y registro
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Obtén las funciones de autenticación del contexto
   // Renombramos 'register' a 'registerUser' para evitar conflicto con el register de react-hook-form
@@ -66,11 +67,13 @@ const LoginModal: React.FC = () => {
   // Función onSubmit usando react-hook-form
   const onSubmit: SubmitHandler<Credentials> = async (data) => {
     if (isLoginMode) {
+      // Clear previous error
+      setLoginError(null);
       const success = await login(data.username, data.password);
       if (success) {
         window.location.href = 'https://http.cat/status/100';
       } else {
-        console.error('Login failed');
+        setLoginError('Credenciales incorrectas');
       }
     } else {
       const success = await registerUser(data.username, data.password, data.name || '');
@@ -177,6 +180,11 @@ const LoginModal: React.FC = () => {
           >
             {isLoginMode ? 'Iniciar Sesión' : 'Registrarse'}
           </button>
+          {loginError && (
+            <div className="text-red-500 text-sm mt-2 text-center">
+              {loginError}
+            </div>
+          )}
           <div className="flex items-center my-4">
             <div className="flex-grow border-t border-gray-300"></div>
             <span className="mx-4 text-gray-500 text-sm">o</span>
@@ -185,7 +193,7 @@ const LoginModal: React.FC = () => {
           <div className="flex justify-center">
             <button
               type="button"
-              className="flex items-center justify-center w-full border border-gray-300 rounded-full py-2 hover:bg-gray-50 transition duration-300"
+              className=" hidden flex items-center justify-center w-full border border-gray-300 rounded-full py-2 hover:bg-gray-50 transition duration-300"
             >
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
@@ -242,4 +250,4 @@ const LoginModal: React.FC = () => {
   );
 };
 
-export default LoginModal;
+export default LoginModal;  
