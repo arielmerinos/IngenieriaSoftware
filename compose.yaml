@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+       - ./src/backend/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${DATABASE_NAME} -U ${DATABASE_USERNAME}"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  django-web:
+    build:
+      context: ./src/backend/
+    container_name: django-docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DEBUG: ${DEBUG}
+      DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+      DATABASE_ENGINE: ${DATABASE_ENGINE}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+    env_file:
+      - .env
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  react-web:
+    build:
+      context: ./src/frontend
+    container_name: react-docker
+    ports:
+      - "3000:3000"
+    depends_on:
+      - django-web
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+    env_file:
+      - .env
+    volumes:
+      - ./src/frontend:/app 
+      - /app/node_modules
+    command: ["sh", "-c", "npm install && npm run dev"]
+
+volumes:
+  postgres_data:

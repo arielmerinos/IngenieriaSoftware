@@ -1,12 +1,34 @@
-*.aux
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
+# Entornos virtuales de Python
+venv/
+.env
+
+# Archivos de configuración sensibles
+*.env
+
+# Dependencias de Node.js
+node_modules/
+
+# Archivos de construcción
+dist/
+build/
+
+# Archivos de logs
 *.log
-*.synctex.gz
-*.bcf
-*.out
-*.run.xml
-*__init__.py
-*__pycache__*
+
+# Archivos temporales
+tmp/
+temp/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Configuraciones de entornos de desarrollo
+.vscode/
+
+# Archivos de migraciones de Django
+**/migrations/*.pyc
+**/migrations/*.pyo
+**/migrations/*.pyd
+**/migrations/__pycache__/
+.env
