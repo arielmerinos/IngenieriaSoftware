@@ -1,8 +1,10 @@
 // src/components/Header.tsx
 import React from 'react';
 import LoginModal from './LoginModal';
+import { useAuth } from "../contexts/AuthContext";
 
 const Header: React.FC = () => {
+  const { isAuthenticated, user } = useAuth();
   return (
     <header className="w-full bg-white shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -20,7 +22,13 @@ const Header: React.FC = () => {
         
         <div className="flex items-center space-x-4">
           <button>...</button>
-          <LoginModal />
+          {
+            isAuthenticated ? (
+              <button>{user?.id}</button>
+            ) : (
+              <LoginModal />
+            )
+          }
           <button>...</button>
         </div>
       </div>

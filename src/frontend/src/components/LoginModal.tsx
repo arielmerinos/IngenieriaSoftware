@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { useAuth } from '../contexts/AuthContext';
 
 // Interfaz para definir la estructura de las credenciales del usuario
 interface Credentials {
@@ -9,44 +11,48 @@ interface Credentials {
 }
 
 const LoginModal: React.FC = () => {
-    // Estado para controlar la visibilidad del modal
+  // Estado para controlar la visibilidad del modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // Estado para mostrar/ocultar la contraseña
+  // Estado para mostrar/ocultar la contraseña
   const [showPassword, setShowPassword] = useState(false);
-
-    // Estado para alternar entre modo de inicio de sesión y registro
+  // Estado para alternar entre modo de inicio de sesión y registro
   const [isLoginMode, setIsLoginMode] = useState(true);
 
-    // Estado para almacenar las credenciales del usuario
-  const [credentials, setCredentials] = useState<Credentials>({
-    username: '',
-    password: '',
-    name: ''
+  // Obtén las funciones de autenticación del contexto
+  // Renombramos 'register' a 'registerUser' para evitar conflicto con el register de react-hook-form
+  const { login, register: registerUser } = useAuth();
+
+  // Configuración de react-hook-form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<Credentials>({
+    defaultValues: {
+      username: '',
+      password: '',
+      name: ''
+    }
   });
 
+  // useEffect para manejar el modal y la tecla Escape
   useEffect(() => {
-        // Función para cerrar el modal con la tecla Escape
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isModalOpen) {
         setIsModalOpen(false);
       }
     };
 
-        // Configuraciones cuando el modal está abierto
     if (isModalOpen) {
-            // Evita el scroll de fondo
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = '0';
-            // Agrega el listener de tecla Escape
       document.addEventListener('keydown', handleEscapeKey);
     } else {
-            // Restaura el estilo del body
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = '0';
     }
 
-        // Función de limpieza para remover listeners y restaurar estilos
     return () => {
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = '0';
@@ -54,41 +60,26 @@ const LoginModal: React.FC = () => {
     };
   }, [isModalOpen]);
 
-  
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setCredentials(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const endpoint = isLoginMode ? '/api/token/' : '/api/user/register/';
-    try {
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials)
-      });
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem('authToken', data.token);
-        if (isLoginMode) {
-          window.location.href = 'https://http.cat/status/100';
-        } else {
-          setIsModalOpen(false);
-        }
+  // Función onSubmit usando react-hook-form
+  const onSubmit: SubmitHandler<Credentials> = async (data) => {
+    if (isLoginMode) {
+      const success = await login(data.username, data.password);
+      if (success) {
+        window.location.href = 'https://http.cat/status/100';
       } else {
-        console.error(isLoginMode ? 'Login failed' : 'Registration failed', data);
+        console.error('Login failed');
       }
-    } catch (error) {
-      console.error('Network error', error);
+    } else {
+      const success = await registerUser(data.username, data.password, data.name || '');
+      if (success) {
+        setIsModalOpen(false);
+      } else {
+        console.log(errors)
+        console.error('Registration failed');
+      }
     }
+    // Reinicia los campos del formulario
+    reset();
   };
 
   const modalContent = (
@@ -107,7 +98,7 @@ const LoginModal: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
           {isLoginMode ? 'Iniciar Sesión' : 'Registrarse'}
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {!isLoginMode && (
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -116,29 +107,25 @@ const LoginModal: React.FC = () => {
               <input
                 type="text"
                 id="name"
-                name="name"
-                value={credentials.name}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Tu nombre completo"
+                {...register('name', { required: !isLoginMode ? 'El nombre es obligatorio' : false })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
             </div>
           )}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
               Correo Electrónico
             </label>
             <input
               type="email"
               id="username"
-              name="username"
-              value={credentials.username}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="tucorreo@ejemplo.com"
+              {...register('username', { required: 'El correo es obligatorio' })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            {errors.username && <span className="text-red-500 text-sm">{errors.username.message}</span>}
           </div>
           <div className="relative">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
@@ -146,21 +133,19 @@ const LoginModal: React.FC = () => {
             </label>
             <div className="relative">
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 id="password"
-                name="password"
-                value={credentials.password}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
                 placeholder="••••••••"
+                {...register('password', { required: 'La contraseña es obligatoria' })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
               />
+              {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
               >
-                {showPassword ? "Ocultar" : "Mostrar"}
+                {showPassword ? 'Ocultar' : 'Mostrar'}
               </button>
             </div>
           </div>
