@@ -75,8 +75,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Opcional: cargar datos del usuario al iniciar o cuando cambia el token
     useEffect(() => {
         if (authToken) {
-            // Aquí podrías hacer una petición para obtener la información del usuario
-            // Ejemplo:
             fetchUserData(authToken)
         }
     }, [authToken]);
