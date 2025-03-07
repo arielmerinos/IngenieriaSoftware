@@ -2,6 +2,8 @@
 import React from 'react';
 import LoginModal from './LoginModal';
 import { useAuth } from "../contexts/AuthContext";
+import UserMenu from './UserMenu';
+
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -24,7 +26,7 @@ const Header: React.FC = () => {
           <button>...</button>
           {
             isAuthenticated ? (
-              <button>{user?.username}</button>
+              <UserMenu />
             ) : (
               <LoginModal />
             )

@@ -2,7 +2,6 @@ import React, { Suspense } from 'react'
 import './App.css'
 
 // Lazy load components
-const LoginModal = React.lazy(() => import('./components/LoginModal'));
 const Header = React.lazy(() => import('./components/Header'));
 const HeroSection = React.lazy(() => import('./components/HeroSection'));
 const OpportunitiesSection = React.lazy(() => import('./components/OpportunitiesSection'));
