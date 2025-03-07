@@ -32,6 +32,8 @@ const LoginModal: React.FC = () => {
     mode: 'onChange',
     defaultValues: {
       username: '',
+      access: '',
+      refresh: '',
       password: '',
       name: ''
     }

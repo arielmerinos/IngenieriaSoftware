@@ -1,5 +1,4 @@
 import React, { Suspense } from 'react'
-import { useFetchData } from './hooks/useFetchData';
 import './App.css'
 
 // Lazy load components
@@ -11,7 +10,6 @@ const FAQSection = React.lazy(() => import('./components/FAQSection'));
 const Footer = React.lazy(() => import('./components/Footer'));
 
 function App() {
-  const { data, loading, error } = useFetchData("http://localhost:8000/api/hello/");
 
   // Loader component can be simple
   const Loader = () => (
@@ -28,13 +26,7 @@ function App() {
         <OpportunitiesSection />
         <FAQSection />
         <Footer />
-        
-        {/* API Response Display */}
-        <div className="container mx-auto px-4 py-4 text-sm text-gray-500">
-          {loading && <p>Cargando API...</p>}
-          {error && <p>Error: {error.message}</p>}
-          {data ? <p>API Response: {data.message}</p> : null}
-        </div>
+      
       </Suspense>
     </section>
   );

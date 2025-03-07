@@ -12,6 +12,8 @@ interface User {
     id: number;
     username: string;
     name: string;
+    access: string;
+    refresh: string;
 }
 
 // Define la interfaz para el contexto de autenticación
@@ -140,7 +142,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("authToken", data.token);
                 setAuthToken(data.token);
                 localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
-                setUser({ id: data.id, username , name });
+                setUser({ id: data.id, username , name, access: data.access, refresh: data.refresh });
+                setAuthToken(data.access);
                 console.log("Usuario registrado:", user);
                 return true;
             } else {
