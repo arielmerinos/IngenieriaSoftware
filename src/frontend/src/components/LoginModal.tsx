@@ -26,9 +26,10 @@ const LoginModal: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     reset
   } = useForm<Credentials>({
+    mode: 'onChange',
     defaultValues: {
       username: '',
       password: '',
@@ -108,7 +109,13 @@ const LoginModal: React.FC = () => {
                 type="text"
                 id="name"
                 placeholder="Tu nombre completo"
-                {...register('name', { required: !isLoginMode ? 'El nombre es obligatorio' : false })}
+              {...register('name', { 
+                required: !isLoginMode ? 'El nombre es obligatorio' : false,
+                pattern: {
+                  value: /^[A-Za-zÀ-ÿ\s]+$/,
+                  message: 'El nombre no debe contener números'
+                }
+              })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
@@ -122,7 +129,13 @@ const LoginModal: React.FC = () => {
               type="email"
               id="username"
               placeholder="tucorreo@ejemplo.com"
-              {...register('username', { required: 'El correo es obligatorio' })}
+              {...register('username', { 
+                required: 'El correo es obligatorio',
+                pattern: {
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                  message: 'Ingresa un correo válido'
+                }
+              })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {errors.username && <span className="text-red-500 text-sm">{errors.username.message}</span>}
@@ -136,7 +149,13 @@ const LoginModal: React.FC = () => {
                 type={showPassword ? 'text' : 'password'}
                 id="password"
                 placeholder="••••••••"
-                {...register('password', { required: 'La contraseña es obligatoria' })}
+                {...register('password', { 
+                  required: 'La contraseña es obligatoria',
+                  minLength: {
+                    value: 8,
+                    message: 'La contraseña debe tener al menos 8 caracteres'
+                  }
+                })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
               />
               {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
@@ -151,7 +170,8 @@ const LoginModal: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-full hover:bg-blue-700 transition duration-300"
+            disabled={!isValid}
+            className={`w-full text-white py-2 rounded-full transition duration-300 ${isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
           >
             {isLoginMode ? 'Iniciar Sesión' : 'Registrarse'}
           </button>
