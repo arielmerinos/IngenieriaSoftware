@@ -7,5 +7,6 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000, // Para no usar el puerto de Vite
+    allowedHosts: ['in.arielmerinos.com']
   }
 })
