@@ -6,6 +6,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views import View
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -34,3 +38,20 @@ class UserDetailView(APIView):
         print(user)
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+
+@method_decorator(login_required, name='dispatch')
+class UserTokenView(View):
+    def get(self, request, *args, **kwargs):
+        access_token = request.session.get('jwt_access_token')
+        refresh_token = request.session.get('jwt_refresh_token')
+        username = request.session.get('username')
+
+        if not (access_token and refresh_token and username):
+            return JsonResponse({'error': 'No se encontraron los tokens'}, status=400)
+
+        return JsonResponse({
+            'username': username,
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        })

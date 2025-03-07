@@ -44,6 +44,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.getItem("authToken")
     );
 
+    useEffect(() => {
+        fetch('http://localhost:8000/api/auth/tokens/', {
+            method: 'GET',
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener los tokens');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data)
+                setAuthToken(data.access_token);
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }, []);
+
     const isAuthenticated = !!authToken;
 
     const fetchUserData = async (token: string) => {
@@ -58,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     },
                 }
             );
-    
+
             if (response.ok) {
                 const userData = await response.json();
                 setUser(userData);
@@ -90,7 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     ): Promise<boolean> => {
         try {
             const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
                 }/api/token/`,
                 {
                     method: "POST",
@@ -140,7 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("authToken", data.token);
                 setAuthToken(data.token);
                 localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
-                setUser({ id: data.id, username , name, access: data.access, refresh: data.refresh });
+                setUser({ id: data.id, username, name, access: data.access, refresh: data.refresh });
                 setAuthToken(data.access);
                 localStorage.setItem("authToken", data.access);
                 console.log("Usuario registrado:", user);
