@@ -1,38 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
+// Interfaz para definir la estructura de las credenciales del usuario
 interface Credentials {
-  email: string;
+  username: string;
   password: string;
   name?: string;
 }
 
 const LoginModal: React.FC = () => {
+    // Estado para controlar la visibilidad del modal
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Estado para mostrar/ocultar la contraseña
   const [showPassword, setShowPassword] = useState(false);
+
+    // Estado para alternar entre modo de inicio de sesión y registro
   const [isLoginMode, setIsLoginMode] = useState(true);
+
+    // Estado para almacenar las credenciales del usuario
   const [credentials, setCredentials] = useState<Credentials>({
-    email: '',
+    username: '',
     password: '',
     name: ''
   });
 
   useEffect(() => {
+        // Función para cerrar el modal con la tecla Escape
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isModalOpen) {
         setIsModalOpen(false);
       }
     };
 
+        // Configuraciones cuando el modal está abierto
     if (isModalOpen) {
+            // Evita el scroll de fondo
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = '0';
+            // Agrega el listener de tecla Escape
       document.addEventListener('keydown', handleEscapeKey);
     } else {
+            // Restaura el estilo del body
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = '0';
     }
 
+        // Función de limpieza para remover listeners y restaurar estilos
     return () => {
       document.body.style.overflow = 'unset';
       document.body.style.paddingRight = '0';
@@ -40,6 +54,8 @@ const LoginModal: React.FC = () => {
     };
   }, [isModalOpen]);
 
+  
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCredentials(prev => ({
@@ -50,7 +66,7 @@ const LoginModal: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const endpoint = isLoginMode ? '/api/login/' : '/api/register/';
+    const endpoint = isLoginMode ? '/api/token/' : '/api/user/register/';
     try {
       const response = await fetch(`http://localhost:8000${endpoint}`, {
         method: 'POST',
@@ -62,7 +78,11 @@ const LoginModal: React.FC = () => {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('authToken', data.token);
-        setIsModalOpen(false);
+        if (isLoginMode) {
+          window.location.href = 'https://http.cat/status/100';
+        } else {
+          setIsModalOpen(false);
+        }
       } else {
         console.error(isLoginMode ? 'Login failed' : 'Registration failed', data);
       }
@@ -111,9 +131,9 @@ const LoginModal: React.FC = () => {
             </label>
             <input
               type="email"
-              id="email"
-              name="email"
-              value={credentials.email}
+              id="username"
+              name="username"
+              value={credentials.username}
               onChange={handleInputChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
