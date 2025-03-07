@@ -24,7 +24,7 @@ const Header: React.FC = () => {
           <button>...</button>
           {
             isAuthenticated ? (
-              <button>{user?.id}</button>
+              <button>{user?.username}</button>
             ) : (
               <LoginModal />
             )
