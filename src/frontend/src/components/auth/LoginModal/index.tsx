@@ -11,7 +11,6 @@ const LoginModal: React.FC = () => {
     const [isLoginMode, setIsLoginMode] = useState(true);
     const [loginError, setLoginError] = useState<string | null>(null);
 
-    // Destructure and rename 'register' to avoid conflicts
     const { login, register: registerUser } = useAuth();
 
     const handleLogin = async (data: Credentials) => {
