@@ -124,8 +124,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 const data = await response.json();
                 localStorage.setItem("authToken", data.token);
                 setAuthToken(data.token);
-                // Opcional: cargar información del usuario y almacenarla en el estado
-                // setUser({ id: 1, username, name: 'Nombre de Usuario' });
+                setUser({ id: 1, username, name: "", access: data.access, refresh: data.refresh });
+
+                localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
+                console.log("Usuario registrado:", user);
+
                 return true;
             } else {
                 console.error("Error en login", await response.json());

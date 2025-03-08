@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useAuth } from '../contexts/AuthContext';
+import PasswordToggleButton from './PasswordToggleButton';
 
 // Interfaz para definir la estructura de las credenciales del usuario
 interface Credentials {
@@ -164,13 +165,10 @@ const LoginModal: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
               />
               {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-              >
-                {showPassword ? 'Ocultar' : 'Mostrar'}
-              </button>
+              <PasswordToggleButton 
+                showPassword={showPassword} 
+                togglePassword={() => setShowPassword(!showPassword)} 
+              />
             </div>
           </div>
           <button
@@ -251,4 +249,4 @@ const LoginModal: React.FC = () => {
   );
 };
 
-export default LoginModal;  
+export default LoginModal;
