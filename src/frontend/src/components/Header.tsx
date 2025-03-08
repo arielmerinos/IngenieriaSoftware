@@ -1,6 +1,6 @@
 // src/components/Header.tsx
 import React from 'react';
-import LoginModal from './LoginModal';
+import LoginModal from './auth/LoginModal'; // Ruta actualizada
 import { useAuth } from "../contexts/AuthContext";
 import UserMenu from './UserMenu';
 
