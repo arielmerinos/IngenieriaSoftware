@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface PasswordToggleButtonProps {
     showPassword: boolean;
@@ -9,13 +9,14 @@ interface PasswordToggleButtonProps {
 const PasswordToggleButton: React.FC<PasswordToggleButtonProps> = ({
     showPassword,
     togglePassword,
-    className = "absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 select-none focus:outline-none  focus:border-none",
+    className = "absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10 focus:outline-none hover:border-transparent "
 }) => {
     return (
         <button
             type="button"
             onClick={togglePassword}
             className={className}
+            style={{ pointerEvents: 'auto' }}
             aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
         >
             {showPassword ? (
