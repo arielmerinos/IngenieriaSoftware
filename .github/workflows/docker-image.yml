@@ -13,6 +13,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker compose build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker-compose build . --file Dockerfile --tag my-image-name:$(date +%s)
     - name: Run Django tests
-      run: docker compose run django-web python manage.py test
+      run: docker-compose run django-web python manage.py test
