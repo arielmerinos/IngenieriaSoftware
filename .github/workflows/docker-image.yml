@@ -18,7 +18,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y docker-compose
-    - name: Build the Docker image
-      run: docker-compose build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Build and run the Docker containers
+      run: docker-compose up --build -d
     - name: Run Django tests
-      run: docker-compose run django-web python manage.py test
+      run: docker-compose exec django-web python manage.py test
