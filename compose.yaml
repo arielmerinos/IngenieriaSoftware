@@ -74,3 +74,6 @@ services:
 
 volumes:
   postgres_data:
+
+
+# Path: .env
