@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-       - ./src/backend/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+       - ./src/backend/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
     env_file:
       - .env
     healthcheck:
@@ -52,6 +52,7 @@ services:
       - ./src/backend:/app
     command: >
       sh -c "python manage.py migrate &&
+             python manage.py test &&
              python manage.py runserver 0.0.0.0:8000"
 
   react-web:
