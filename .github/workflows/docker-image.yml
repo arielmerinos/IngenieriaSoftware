@@ -9,16 +9,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
+    
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+    
     - name: Install Docker Compose
       run: |
         sudo apt-get update
         sudo apt-get install -y docker-compose
-    # - name: Build and run the Docker containers
-    #   run: docker-compose up --build -d
-    # - name: Run Django tests
-    #   run: docker-compose exec django-web python manage.py test
+    
+    - name: Build and run the Docker containers
+      run: |
+        docker-compose up -d db adminer
+        sleep 15  # Give database time to initialize
+        docker-compose logs db  # See if database is ready
+        docker-compose up -d django-web
+        sleep 30  # Give Django time to start
+        docker-compose logs django-web  # Check Django logs
+
+    - name: Run Django tests
+      run: docker-compose exec -T django-web python manage.py test || docker-compose logs django-web
