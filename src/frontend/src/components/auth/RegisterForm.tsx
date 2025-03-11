@@ -1,0 +1,134 @@
+import React from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { Credentials, AuthFormProps } from './types';
+import PasswordToggleButton from './PasswordToggleButton';
+import GoogleAuthButton from './GoogleAuthButton';
+
+interface RegisterFormProps extends AuthFormProps {
+    onSwitchMode: () => void;
+}
+
+const RegisterForm: React.FC<RegisterFormProps> = ({
+    onSubmit,
+    onSwitchMode
+}) => {
+    const [showPassword, setShowPassword] = React.useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isValid }
+    } = useForm<Credentials>({
+        mode: 'onChange',
+        defaultValues: {
+            username: '',
+            password: '',
+            name: ''
+        }
+    });
+
+    const submitHandler: SubmitHandler<Credentials> = async (data) => {
+        await onSubmit(data);
+    };
+
+    return (
+        <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
+            <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre Completo
+                </label>
+                <input
+                    type="text"
+                    id="name"
+                    placeholder="Tu nombre completo"
+                    {...register('name', {
+                        required: 'El nombre es obligatorio',
+                        pattern: {
+                            value: /^[A-Za-zÀ-ÿ\s]+$/,
+                            message: 'El nombre no debe contener números'
+                        }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+            </div>
+
+            <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                    Correo Electrónico
+                </label>
+                <input
+                    type="email"
+                    id="username"
+                    placeholder="tucorreo@ejemplo.com"
+                    {...register('username', {
+                        required: 'El correo es obligatorio',
+                        pattern: {
+                            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                            message: 'Ingresa un correo válido'
+                        }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {errors.username && <span className="text-red-500 text-sm">{errors.username.message}</span>}
+            </div>
+
+            <div className="relative">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                    Contraseña
+                </label>
+                <div className="relative">
+                    <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        placeholder="••••••••"
+                        {...register('password', {
+                            required: 'La contraseña es obligatoria',
+                            minLength: {
+                                value: 8,
+                                message: 'La contraseña debe tener al menos 8 caracteres'
+                            }
+                        })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+                    />
+                    <PasswordToggleButton
+                        showPassword={showPassword}
+                        togglePassword={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10 flex items-center justify-center focus:outline-none hover:border-transparent"
+                    />
+                </div>
+                {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
+            </div>
+
+            <button
+                type="submit"
+                disabled={!isValid}
+                className={`w-full text-white py-2 rounded-full transition duration-300 ${isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+            >
+                Registrarse
+            </button>
+
+            <div className="flex items-center my-4">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="mx-4 text-gray-500 text-sm">o</span>
+                <div className="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <div className="flex justify-center">
+                <GoogleAuthButton isLoginMode={false} />
+            </div>
+
+            <div className="text-center mt-4">
+                <button
+                    type="button"
+                    onClick={onSwitchMode}
+                    className="text-sm text-blue-600 hover:underline"
+                >
+                    ¿Ya tienes una cuenta? Inicia sesión
+                </button>
+            </div>
+        </form>
+    );
+};
+
+export default RegisterForm;
