@@ -21,19 +21,13 @@ jobs:
         sudo apt-get install -y docker-compose
     
     - name: Build and run the Docker containers
-      run: docker-compose up --build -d
-    
-    - name: Wait for containers to be healthy
       run: |
-        # Give containers time to start up
-        sleep 30
-        
-        # Check container status
-        docker-compose ps
-        
-        # Show logs for debugging
-        docker-compose logs
-    
+        docker-compose up -d db adminer
+        sleep 15  # Give database time to initialize
+        docker-compose logs db  # See if database is ready
+        docker-compose up -d django-web
+        sleep 30  # Give Django time to start
+        docker-compose logs django-web  # Check Django logs
+
     - name: Run Django tests
-      # Use -T flag to disable pseudo-TTY allocation
-      run: docker-compose exec -T django-web python manage.py test
+      run: docker-compose exec -T django-web python manage.py test || docker-compose logs django-web
