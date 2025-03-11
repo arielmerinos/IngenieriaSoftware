@@ -1,12 +1,12 @@
 // src/components/Header.tsx
 import React from 'react';
-import LoginModal from './LoginModal';
+import LoginModal from './auth/LoginModal'; // Ruta actualizada
 import { useAuth } from "../contexts/AuthContext";
 import UserMenu from './UserMenu';
 
 
 const Header: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   return (
     <header className="w-full bg-white shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
