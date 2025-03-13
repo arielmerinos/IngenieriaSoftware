@@ -13,5 +13,5 @@ urlpatterns = [
     path('oauth/', include('social_django.urls', namespace='social')),
     path('api/auth/tokens/', UserTokenView.as_view(), name='user_tokens'),
     path('api/scholarships/', ScholarshipListView.as_view(), name='scholarship-list'),
-    path("api/", include("api.urls")),
+    # path("api/", include("api.urls")),
 ]
