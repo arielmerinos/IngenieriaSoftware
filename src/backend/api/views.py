@@ -61,7 +61,6 @@ class UserTokenView(View):
 class ScholarshipListView(generics.ListCreateAPIView):
     queryset = Scholarship.objects.all()
     model = Scholarship
-    template_name = 'scholarships/scholarship_list.html'
     context_object_name = 'scholarships'
     serializer_class = ScholarshipSerializer
 
