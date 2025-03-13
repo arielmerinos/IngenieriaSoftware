@@ -2,6 +2,9 @@
 venv/
 .env
 
+# pycache
+__pycache__/
+
 # Archivos de configuración sensibles
 *.env
 

@@ -6,7 +6,7 @@ urlpatterns = [
     # path('students/<int:pk>/', views.StudentDetail.as_view()),
     # path('organizations/', views.OrganizationList.as_view()),
     # path('organizations/<int:pk>/', views.OrganizationDetail.as_view()),
-    path('scholarships/', views.ScholarshipList.as_view(), name='scholarship-list'),
+    path('scholarships/', views.ScholarshipListView.as_view(), name='scholarship-list'),
     # path('scholarships/<int:pk>/', views.ScholarshipDetail.as_view()),
     # path('follow/', views.FollowList.as_view()),
     # path('follow/<int:pk>/', views.FollowDetail.as_view()),
