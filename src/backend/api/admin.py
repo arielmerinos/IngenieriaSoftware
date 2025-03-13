@@ -7,6 +7,6 @@ from .models.organization import Membership
 # Register your models here.
 
 admin.site.register(Student)
-# admin.site.register(Scholarship)
-# admin.site.register(Organization)
-# admin.site.register(Membership)
+admin.site.register(Scholarship)
+admin.site.register(Organization)
+admin.site.register(Membership)

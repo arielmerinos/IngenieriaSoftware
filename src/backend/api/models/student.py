@@ -7,3 +7,4 @@ class Student(models.Model):
     phone_number = models.CharField(max_length=15, blank=True, unique=True)
     birthday = models.DateField(blank=True, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student')
+    id = models.AutoField(primary_key=True)
