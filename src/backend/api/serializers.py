@@ -16,6 +16,6 @@ class UserSerializer(serializers.ModelSerializer):
 class ScholarshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scholarship
-        fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories"]
-        read_only_fields = ["publication_date", "created_at"]
+        fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by"]
+        read_only_fields = ["publication_date"]
         extra_kwargs = {"organization": {"read_only": True}}
