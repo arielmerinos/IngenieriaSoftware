@@ -5,11 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer
+from .serializers import UserSerializer, ScholarshipSerializer
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
+from .models.scholarship import Scholarship
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -55,3 +56,12 @@ class UserTokenView(View):
             'access_token': access_token,
             'refresh_token': refresh_token
         })
+
+
+class ScholarshipListView(generics.ListCreateAPIView):
+    queryset = Scholarship.objects.all()
+    model = Scholarship
+    template_name = 'scholarships/scholarship_list.html'
+    context_object_name = 'scholarships'
+    serializer_class = ScholarshipSerializer
+
