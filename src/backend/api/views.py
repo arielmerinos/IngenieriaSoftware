@@ -58,9 +58,9 @@ class UserTokenView(View):
         })
 
 
-class ScholarshipListView(View):
-    queryset = Scholarship.objects.all()
-    model = Scholarship
-    context_object_name = 'scholarships'
-    serializer_class = ScholarshipSerializer
+class ScholarshipListView(APIView):
+    def get(self, request):
+        scholarships = Scholarship.objects.all()
+        serializer = ScholarshipSerializer(scholarships, many=True)
+        return Response(serializer.data)
 
