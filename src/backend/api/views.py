@@ -58,7 +58,7 @@ class UserTokenView(View):
         })
 
 
-class ScholarshipListView(generics.ListCreateAPIView):
+class ScholarshipListView(View):
     queryset = Scholarship.objects.all()
     model = Scholarship
     context_object_name = 'scholarships'
