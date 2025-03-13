@@ -1,4 +1,4 @@
-import OpportunityCard from "../OpportunityCard"
+import OpportunityCard from "./OpportunityCard"
 
 const opportunityExample = {
     id: 2073600,
