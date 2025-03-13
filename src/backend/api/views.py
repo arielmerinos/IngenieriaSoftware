@@ -5,12 +5,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, ScholarshipSerializer
+from .serializers import UserSerializer, ScholarshipSerializer, StudentSerializer
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
 from .models.scholarship import Scholarship
+from .models.student import Student
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -64,3 +65,8 @@ class ScholarshipListView(APIView):
         serializer = ScholarshipSerializer(scholarships, many=True)
         return Response(serializer.data)
 
+class StudentListView(APIView):
+    def get(self, request):
+        students = Student.objects.all()
+        serializer = StudentSerializer(students, many=True)
+        return Response(serializer.data)
