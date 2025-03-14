@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, ScholarshipSerializer, OrganizationSerializer, MembershipSerializer, CategorySerializer, UserDataSerializer
+from .serializers import UserSerializer, ScholarshipSerializer, OrganizationSerializer, MembershipSerializer, CategorySerializer, UserDataSerializer, TypeSerializer, CountrySerializer
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -15,6 +15,8 @@ from .models.user_data import UserData
 from .models.organization import Organization
 from .models.organization import Membership
 from .models.category import Category
+from .models.type import Type
+from .models.country import Country
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -90,4 +92,16 @@ class CategoryListView(APIView):
     def get(self, request):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data)
+    
+class TypeListView(APIView):
+    def get(self, request):
+        types = Type.objects.all()
+        serializer = TypeSerializer(types, many=True)
+        return Response(serializer.data)
+
+class CountryListView(APIView):
+    def get(self, request):
+        countries = Country.objects.all()
+        serializer = CountrySerializer(countries, many=True)
         return Response(serializer.data)

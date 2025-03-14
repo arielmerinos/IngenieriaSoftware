@@ -5,6 +5,8 @@ from .models.user_data import UserData
 from .models.organization import Organization
 from .models.organization import Membership
 from .models.category import Category
+from .models.type import Type
+from .models.country import Country
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,15 +22,16 @@ class UserSerializer(serializers.ModelSerializer):
 class ScholarshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scholarship
-        fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by"]
-        read_only_fields = ["publication_date"]
+        fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by","country"]
+        read_only_fields = ["publication_date", "created_by","id","organization"]
         extra_kwargs = {"organization": {"read_only": True}}
         
 
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserData
-        fields = ["id", "search", "interests", "phone_number", "birthday", "user"]
+        fields = ["id", "history_search", "interests", "phone_number", "birthday", "user", "memberships", "history_search"]
+        read_only_fields = ["user", "id"]
         extra_kwargs = {"user": {"read_only": True}}
         
         
@@ -58,4 +61,14 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ["id", "name"]
+
+class TypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Type
+        fields = ["id", "name"]
+        
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+    fields = ["id", "name", "emoji"]
     
