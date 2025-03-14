@@ -4,6 +4,7 @@ from .type import Type
 from .country import Country
 from .organization import Organization
 from django.contrib.auth.models import User
+from .interests import Interest
 
 class Scholarship(models.Model):
     id = models.AutoField(primary_key=True)
@@ -15,7 +16,7 @@ class Scholarship(models.Model):
     type = models.ManyToManyField(Type, related_name='scholarship_types', related_query_name='scholarship_type', help_text="Type of the scholarship")
     image = models.ImageField(upload_to='scholarships', null=True, blank=True, help_text="Image related to the scholarship")
     content = models.TextField(help_text="Description of the scholarship")
-    categories = models.ManyToManyField(Category, related_name='scholarship_categories', related_query_name='scholarship_category', help_text="Categories describing the scholarship")
+    interests = models.ManyToManyField(Interest, related_name='scholarship_interests', related_query_name='scholarship_interest', help_text="Interests describing the scholarship")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_scholarships', help_text="User who created the scholarship")
     country = models.ManyToManyField(Country, related_name='scholarship_countries', related_query_name='scholarship_country', help_text="Country where the scholarship is offered")
 
