@@ -7,6 +7,7 @@ from .models.organization import Membership
 from .models.category import Category
 from .models.type import Type
 from .models.country import Country
+from .models.interests import Interest
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,4 +72,10 @@ class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
     fields = ["id", "name", "emoji"]
+    
+class InterestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interest
+    fields = ["id", "name","color"]
+        
     

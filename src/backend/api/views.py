@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
@@ -5,8 +6,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, ScholarshipSerializer, OrganizationSerializer, MembershipSerializer, CategorySerializer, UserDataSerializer, TypeSerializer, CountrySerializer
-from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -17,6 +16,12 @@ from .models.organization import Membership
 from .models.category import Category
 from .models.type import Type
 from .models.country import Country
+from .models.interests import Interest
+from .serializers import (
+    UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
+    MembershipSerializer, CategorySerializer, UserDataSerializer, 
+    TypeSerializer, CountrySerializer, InterestSerializer
+)
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -27,7 +32,10 @@ class CreateUserView(generics.CreateAPIView):
         response = super().create(request, *args, **kwargs)
         user = User.objects.get(username=request.data["username"])
 
-        # Generar tokens para el usuario recién creado
+        # Create UserData instance for the newly created user
+        UserData.objects.create(user=user)
+
+        # Generate tokens for the newly created user
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
@@ -46,7 +54,6 @@ class UserDetailView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
-
 @method_decorator(login_required, name='dispatch')
 class UserTokenView(View):
     def get(self, request, *args, **kwargs):
@@ -62,7 +69,6 @@ class UserTokenView(View):
             'access_token': access_token,
             'refresh_token': refresh_token
         })
-
 
 class ScholarshipListView(APIView):
     def get(self, request):
@@ -104,4 +110,10 @@ class CountryListView(APIView):
     def get(self, request):
         countries = Country.objects.all()
         serializer = CountrySerializer(countries, many=True)
+        return Response(serializer.data)
+
+class InterestListView(APIView):
+    def get(self, request):
+        interests = Interest.objects.all()
+        serializer = InterestSerializer(interests, many=True)
         return Response(serializer.data)
