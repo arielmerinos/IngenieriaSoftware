@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router'
-import Landing from './Landing'
+import Landing from './Views/Landing'
 
 function App() {
   return (

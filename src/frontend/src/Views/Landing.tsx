@@ -1,12 +1,12 @@
 import React, { Suspense } from 'react'
-import './App.css'
+import './Landing.css'
 
 // Lazy load components
-const Header = React.lazy(() => import('./components/Header'));
-const HeroSection = React.lazy(() => import('./components/HeroSection'));
-const OpportunitiesSection = React.lazy(() => import('./components/OpportunitiesSection'));
-const FAQSection = React.lazy(() => import('./components/FAQSection'));
-const Footer = React.lazy(() => import('./components/Footer'));
+const Header = React.lazy(() => import('../components/Header'));
+const HeroSection = React.lazy(() => import('../components/HeroSection'));
+const OpportunitiesSection = React.lazy(() => import('../components/OpportunitiesSection'));
+const FAQSection = React.lazy(() => import('../components/FAQSection'));
+const Footer = React.lazy(() => import('../components/Footer'));
 
 function Landing() {
 
