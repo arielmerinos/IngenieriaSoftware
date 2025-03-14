@@ -18,6 +18,8 @@ class Scholarship(models.Model):
     content = models.TextField()
     categories = models.ManyToManyField(Category)
     created_by = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='scholarships')
+    country = models.CharField(max_length=50)
+    country_emoji = models.CharField(max_length=50)
     
     def __str__(self):
         return self.name

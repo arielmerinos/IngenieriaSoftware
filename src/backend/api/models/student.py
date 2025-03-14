@@ -1,6 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+"""
+
+history_search: several words that describe the student's search history
+interests: a list of categories that the student is interested in
+phone_number: the student's phone number
+birthday: the student's birthday
+user: the user that this student is associated with
+id: the primary key for this student
+"""
 class Student(models.Model):
     search = models.CharField(max_length=255)
     interests = models.CharField(max_length=255)

@@ -4,6 +4,7 @@ from .models.scholarship import Scholarship
 from .models.student import Student
 from .models.organization import Organization
 from .models.organization import Membership
+from .models.category import Category
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,3 +65,9 @@ class MembershipSerializer(serializers.ModelSerializer):
         instance.is_admin = validated_data.get("is_admin", instance.is_admin)
         instance.save()
         return instance
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name"]
+    
