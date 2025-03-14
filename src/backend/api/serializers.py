@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models.scholarship import Scholarship
-from .models.student import Student
+from .models.user_data import UserData
 from .models.organization import Organization
 from .models.organization import Membership
 from .models.category import Category
@@ -25,9 +25,9 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         extra_kwargs = {"organization": {"read_only": True}}
         
 
-class StudentSerializer(serializers.ModelSerializer):
+class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Student
+        model = UserData
         fields = ["id", "search", "interests", "phone_number", "birthday", "user"]
         extra_kwargs = {"user": {"read_only": True}}
         
@@ -37,18 +37,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = ["id", "name", "email", "phone_number", "website", "logo", "members"]
         
-    def get_members(self, obj):
-        memberships = Membership.objects.filter(organization=obj)
-        students = [membership.student for membership in memberships]
-        return StudentSerializer(students, many=True).dat
-
-    # Falta hacer un funcion para que los estudiantes puedan unirse a una organizacion, usar signals
-    def add_member(self, organization, student):
-        Membership.objects.create(organization=organization, student=student)
-
-    # Lo mismo pero para remover
-    def remove_member(self, organization, student):
-        Membership.objects.filter(organization=organization, student=student).delete()
         
 class MembershipSerializer(serializers.ModelSerializer):
     class Meta:

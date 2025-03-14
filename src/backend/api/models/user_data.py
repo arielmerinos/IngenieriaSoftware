@@ -9,9 +9,11 @@ phone_number: the student's phone number
 birthday: the student's birthday
 user: the user that this student is associated with
 id: the primary key for this student
+
+user data
 """
-class Student(models.Model):
-    search = models.CharField(max_length=255)
+class UserData(models.Model):
+    history_search = models.CharField(max_length=255)
     interests = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, unique=True)
     birthday = models.DateField(blank=True, null=True)

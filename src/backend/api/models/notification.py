@@ -1,8 +1,8 @@
 from django.db import models
-from .student import Student
+from django.contrib.auth.models import User
 
 class Notification(models.Model):
-    user = models.ForeignKey(Student, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.CharField(max_length=255)
     date = models.DateTimeField(auto_now_add=True)
-    notify = models.ManyToManyField(Student, related_name='notify')
+    notify = models.ManyToManyField(User, related_name='notify')
