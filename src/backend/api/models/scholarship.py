@@ -9,11 +9,11 @@ from django.contrib.auth.models import User
 Modelo para guardar todas las convocatorias
 id: llave primaria
 organization: llave foránea puede ser nulo, valor por defecto null
-type: tipo de convocatoria eg. beca, premio, concurso, hackathon (categoria)
+type: tipo de convocatoria eg. beca, premio, concurso, hackathon (categoría)
 content: descripción de la convocatoria
 categories: etiquetas que describen la convocatoria eg. ayuda económica, online, presencial, nacional, internacional
 created_by: llave foránea del usuario que creó la convocatoria
-country: país de la convocatoria (categoria)
+country: país de la convocatoria (categoría)
 '''
 class Scholarship(models.Model):
     id = models.AutoField(primary_key=True)
