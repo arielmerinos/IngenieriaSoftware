@@ -19,6 +19,7 @@ const Header: React.FC = () => {
           <a href="#" className="text-gray-700 hover:text-blue-600">Explora</a>
           <a href="#" className="text-gray-700 hover:text-blue-600">Blog</a>
           <a href="#" className="text-gray-700 hover:text-blue-600">Quiénes somos</a>
+          <a href="org" className="text-gray-700 hover:text-blue-600">Organizaciones</a>
           <a href="#" className="text-gray-700 hover:text-blue-600">Ayuda</a>
         </nav>
         
