@@ -1,3 +1,14 @@
+// Nombre del programa: Impulsa tu futuro
+// Copyright (C) 2025 - Autores:
+// Merino Peña Kevin Ariel
+// Ortíz Montiel Diego Iain
+// Rodríguez Dimayuga Laura Itzel
+// Sosa Romo Juan Mario
+// Vargas Campos Miguel Angel
+//
+// Este archivo se distribuye bajo los términos de la Licencia Pública General de GNU v3.
+// Consulte <https://www.gnu.org/licenses/> para más detalles.
+
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
