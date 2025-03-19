@@ -20,7 +20,6 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-
 interface GoogleAuthButtonProps {
     isLoginMode: boolean;
 }
