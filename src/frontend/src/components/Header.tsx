@@ -38,8 +38,8 @@ const Header: React.FC = () => {
         </div>
         
         <nav className="hidden md:flex space-x-6">
-          <a href="#" className="text-gray-700 hover:text-blue-600">Explora</a>
-          <a href="#" className="text-gray-700 hover:text-blue-600">Blog</a>
+          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
+          <a href="/feed" className="text-gray-700 hover:text-blue-600">Oportunidades</a>
           <a href="#" className="text-gray-700 hover:text-blue-600">Quiénes somos</a>
           <a href="org" className="text-gray-700 hover:text-blue-600">Organizaciones</a>
           <a href="#" className="text-gray-700 hover:text-blue-600">Ayuda</a>
