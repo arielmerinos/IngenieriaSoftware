@@ -24,6 +24,7 @@ import { Routes, Route } from 'react-router'
 import Landing from './Views/Landing'
 import OpportunityFeed from './Views/OpportunityFeed'
 import OrganizationsFeed from './Views/OrganizationsFeed'
+import OpportunityPost from './Views/OpportunityPost'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/feed" element={<OpportunityFeed />} />
         <Route path="/org" element={<OrganizationsFeed/>} />
+        <Route path="/post/:id" element={<OpportunityPost/>} />
         {/* Ejemplo: */}
         {/* <Route path="MiRuta" element={<MiComponente />} /> */}
          
