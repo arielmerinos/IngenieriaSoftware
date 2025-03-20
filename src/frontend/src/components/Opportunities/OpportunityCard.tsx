@@ -19,34 +19,29 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
-
 import React from 'react';
-// import penrose from "../assets/penrose.png"
+// import penrose from "../../assets/penrose.png"
+import { Opportunity } from '../../types/opportunity';
+import { Link } from 'react-router';
 
 const penrose = "penrose.png"
 
-interface OpportunityContent {
-    id: number,
-    name: string,
-    content: string,
-    published: Date,
-    beginning: Date,
-    end: Date,
-    type: string,
-    image: string,
-    author: string
-}
-
-interface Opportunity {
-    item: OpportunityContent
-}
-
 const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     return (
-        <div className='bg-white rounded-lg overflow-hidden shadow'>
+        <Link to={`/post/${item.id}`} 
+            className='
+                bg-white
+                rounded-lg
+                overflow-hidden
+                shadow
+                hover:text-black
+                 transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:shadow-xl'>
             <div className='grid grid-cols-[70%_30%]'>
                 <div className='p-4 text-left'>
-                    <p className='text-sm text-blue-500'>{item.author}</p>
+                    {item.organization != ""
+                        ? <p className='text-sm text-blue-500'>{item.organization} Org.</p>
+                        : <p className='text-sm text-gray-500'>{item.author}</p>
+                    }
                     <h1 className="font-bold text-lg mb-1">{item.name}</h1>
                     <p className='rounded-lg text-xs text-gray-500 bg-gray-200 w-fit px-2 py-px border-gray-500 rounded-full'>{item.type}</p>
                     <p className='mt-2'>{item.content}</p>
@@ -60,7 +55,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                     />
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 
