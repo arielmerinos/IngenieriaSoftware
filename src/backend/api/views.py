@@ -20,6 +20,7 @@
 
 # Imports de Django
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -93,11 +94,11 @@ class UserTokenView(View):
             'refresh_token': refresh_token
         })
 
-# class ScholarshipListView(APIView):
-#     def get(self, request):
-#         scholarships = Scholarship.objects.all()
-#         serializer = ScholarshipSerializer(scholarships, many=True)
-#         return Response(serializer.data)
+class ScholarshipListView(APIView):
+    def get(self, request):
+        scholarships = Scholarship.objects.all()
+        serializer = ScholarshipSerializer(scholarships, many=True)
+        return Response(serializer.data)
     
 class ScholarshipListCreateView(APIView):
     """
