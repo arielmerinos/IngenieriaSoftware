@@ -119,22 +119,25 @@ class JoinOrganizationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, format=None):
-        organization_id = request.data.get('organization_id')
+        organization_id = request.data.get("organization_id")
         if not organization_id:
-            return Response({'error': 'El id de la organización es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response({"error": "Se requiere el organization_id."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             organization = Organization.objects.get(id=organization_id)
         except Organization.DoesNotExist:
-            return Response({'error': 'Organización no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "La organización no existe."}, status=status.HTTP_404_NOT_FOUND)
         
-        # Verificar si ya existe una solicitud o membresía para este usuario en esta organización
-        if Membership.objects.filter(student=request.user, organization=organization).exists():
-            return Response({'error': 'Ya has solicitado o eres miembro de esta organización.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Verifica si ya existe una solicitud o el usuario ya es miembro
+        if Membership.objects.filter(user=request.user, organization=organization).exists():
+            return Response({"error": "Ya has solicitado o eres miembro de esta organización."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Crear la solicitud de membresía (pendiente de aceptación)
-        membership = Membership.objects.create(student=request.user, organization=organization, is_admin=False)
-        # Si agregaste is_accepted, se creará como False por defecto.
+        # Crear la solicitud: el usuario que se une no es admin y la solicitud queda pendiente
+        membership = Membership.objects.create(
+            user=request.user,
+            organization=organization,
+            is_admin=False,
+            is_active=False
+        )
         serializer = MembershipSerializer(membership)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
         
@@ -142,28 +145,28 @@ class AcceptMembershipView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, format=None):
-        membership_id = request.data.get('membership_id')
+        membership_id = request.data.get("membership_id")
         if not membership_id:
-            return Response({'error': 'El id de la membresía es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Se requiere el membership_id."}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             membership = Membership.objects.get(id=membership_id)
         except Membership.DoesNotExist:
-            return Response({'error': 'Solicitud de membresía no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "La solicitud de membresía no existe."}, status=status.HTTP_404_NOT_FOUND)
         
-        # Verificar que el usuario autenticado sea admin en la organización a la que se solicita pertenecer
-        admin_check = Membership.objects.filter(
-            student=request.user,
+        # Verificar que el usuario que realiza la solicitud sea administrador de la organización
+        admin_exists = Membership.objects.filter(
             organization=membership.organization,
-            is_admin=True
+            user=request.user,
+            is_admin=True,
+            is_active=True  # Se asume que el admin ya tiene la solicitud aceptada
         ).exists()
-        if not admin_check:
-            return Response({'error': 'No tienes permisos para aceptar miembros en esta organización.'}, status=status.HTTP_403_FORBIDDEN)
+        if not admin_exists:
+            return Response({"error": "No tienes permisos para aceptar miembros en esta organización."}, status=status.HTTP_403_FORBIDDEN)
         
         # Actualizar la solicitud a aceptada
         membership.is_accepted = True
         membership.save()
-        
         serializer = MembershipSerializer(membership)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

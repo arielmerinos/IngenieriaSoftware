@@ -35,6 +35,6 @@ urlpatterns = [
     path("api/", include("api.urls")),
 
     path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
-    path("organzation/<int:organization_id>/join/", JoinOrganizationView.as_view(), name='follow_organization'),
-    path("organization/<int:organization_id>/accept_user/<int:user_id>/", AcceptMembershipView.as_view(), name='accept_user'),
+    path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
+    path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
 ]
