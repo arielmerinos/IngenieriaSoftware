@@ -45,7 +45,7 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
         console.log('Form submitted:', data); // Debugging log
         try {
-            const token = localStorage.getItem('access_token'); // Retrieve the JWT token
+            const token = localStorage.getItem('authToken'); // Retrieve the JWT token
             if (!token) {
                 throw new Error('User is not authenticated');
             }
