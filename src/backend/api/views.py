@@ -533,6 +533,9 @@ class UserDataListView(APIView):
         return Response(serializer.data)
     
 class OrganizationListView(APIView):
+
+    permission_classes = [AllowAny]
+
     def get(self, request):
         organizations = Organization.objects.all()
         serializer = OrganizationSerializer(organizations, many=True)
