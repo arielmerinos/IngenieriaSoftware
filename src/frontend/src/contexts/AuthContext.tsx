@@ -1,3 +1,25 @@
+/*
+Nombre del programa: Impulsa tu futuro
+Copyright (C) 2025 - Autores:
+Merino Peña Kevin Ariel
+Ortíz Montiel Diego Iain
+Rodríguez Dimayuga Laura Itzel
+Sosa Romo Juan Mario
+Vargas Campos Miguel Angel
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU v3 publicada por
+la Free Software Foundation.
+
+Este programa se distribuye con la esperanza de que sea útil,
+pero SIN NINGUNA GARANTÍA; sin incluso la garantía implícita de
+COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
+Consulte la Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General de GNU
+junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
+*/
+
 // src/contexts/AuthContext.tsx
 import React, {
     createContext,
@@ -37,32 +59,11 @@ interface AuthProviderProps {
     children: ReactNode;
 }
 
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [authToken, setAuthToken] = useState<string | null>(
         localStorage.getItem("authToken")
     );
-
-    useEffect(() => {
-        fetch('http://localhost:8000/api/auth/tokens/', {
-            method: 'GET',
-            credentials: 'include'
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al obtener los tokens');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data)
-                setAuthToken(data.access_token);
-            })
-            .catch(err => {
-                console.error(err);
-            });
-    }, []);
 
     const isAuthenticated = !!authToken;
 
@@ -95,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Opcional: cargar datos del usuario al iniciar o cuando cambia el token
     useEffect(() => {
         if (authToken) {
-            fetchUserData(authToken)
+            fetchUserData(authToken);
         }
     }, [authToken]);
 
@@ -104,14 +105,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, [user]); // Se ejecutará cuando `user` cambie
 
     // Función para iniciar sesión
-    const login = async (
-        username: string,
-        password: string
-    ): Promise<boolean> => {
+    const login = async (username: string, password: string): Promise<boolean> => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
-                }/api/token/`,
+                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/token/`,
                 {
                     method: "POST",
                     headers: {
@@ -122,13 +119,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             );
             if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem("authToken", data.token);
-                setAuthToken(data.token);
-                setUser({ id: 1, username, name: "", access: data.access, refresh: data.refresh });
-
-                localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
-                console.log("Usuario registrado:", user);
-
+                // Guardamos el token de acceso usando el campo "access" que retorna el backend
+                localStorage.setItem("authToken", data.access);
+                localStorage.setItem("refreshToken", data.refresh);
+                setAuthToken(data.access);
+                // Actualizamos la información del usuario (puedes ajustar el id u otros campos según la respuesta)
+                setUser({ id: data.user_id || 1, username, name: "", access: data.access, refresh: data.refresh });
+                localStorage.setItem("username", username);
+                console.log("Login exitoso, token almacenado:", data.access);
                 return true;
             } else {
                 console.error("Error en login", await response.json());
