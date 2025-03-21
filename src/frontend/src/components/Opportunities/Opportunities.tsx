@@ -29,7 +29,7 @@ import exit from "../../assets/exit.png"
 const Opportunities: React.FC = () => {
     const [isOpen, setOpen] = useState(false);
     const [focusedOpportunity, setFocusedOpportunity] = useState(opportunityExample)
-    const [fetched, seFecthed] = useState([]);
+    const [fetched, setFecthed] = useState([]);
 
     /**
      * Las oportunidades del back en forma de OpportunityContent
@@ -65,22 +65,13 @@ const Opportunities: React.FC = () => {
         return newElem
     }
 
-    async function getData() {
+    useEffect(() =>{
         const url = "http://localhost:8000/scholarships/";
-        try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-    
-        const content = await response.json();
-        console.log(content.map((e: JSON) => organizationParse(e)))
-        seFecthed(content.map((e: JSON) => organizationParse(e)))
-        } catch (error) {
-        //   console.error(error.message);
-        }
-    }
-    useEffect(() => {getData()})
+        fetch(url)
+            .then(response => response.json())
+            .then(items => setFecthed(items.map((item:JSON) => organizationParse(item))))
+    }, []) // Sin el segundo param [] se va a ejecutar en loop, noc pq
+
     return (
         <div className="">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10 mb-10 auto-rows-[1fr]">
