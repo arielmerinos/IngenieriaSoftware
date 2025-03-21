@@ -116,6 +116,7 @@ class ScholarshipListCreateView(APIView):
     
     def post(self, request):
         """Crear una nueva beca"""
+        print(request.data)  # Imprimir los datos recibidos para depuración
         # Añadir el usuario actual como creador
         serializer = ScholarshipSerializer(data=request.data)
         
@@ -241,7 +242,6 @@ class OrganizationListView(APIView):
         organizations = Organization.objects.all()
         serializer = OrganizationSerializer(organizations, many=True)
         return Response(serializer.data)
-
 
 class OrganizationCreateView(generics.CreateAPIView): # Por alguna razon el post solo funciona si uso generics y no APIView
     permission_classes = [permissions.IsAuthenticated]
