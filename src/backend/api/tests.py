@@ -24,6 +24,12 @@ from rest_framework.test import APIClient, APITestCase
 from django.contrib.auth import get_user_model
 from rest_framework import status
 import json
+from datetime import date, timedelta
+from .models.scholarship import Scholarship
+from .models.type import Type
+from .models.country import Country
+from .models.interests import Interest
+from .models.organization import Organization, Membership
 
 User = get_user_model()
 
@@ -209,3 +215,132 @@ class SocialAuthTests(TestCase):
         
         # Debería redirigir al login ya que está decorado con @login_required
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        
+class ScholarshipTests(APITestCase):
+    def setUp(self):
+        # Crear usuario para pruebas
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='testpassword123',
+            email='test@example.com'
+        )
+        
+        # Autenticar al usuario
+        self.client.force_authenticate(user=self.user)
+        
+        # Crear tipos, países e intereses para las pruebas
+        self.scholarship_type = Type.objects.create(name='Beca', type_name='beca')
+        self.country = Country.objects.create(name='México', emoji='🇲🇽')
+        self.interest = Interest.objects.create(name='Tecnología', color='#3498db')
+        
+        # Crear organización y membresía para pruebas
+        self.organization = Organization.objects.create(
+            name='Universidad Test',
+            email='uni@test.com',
+            phone_number='123456789',
+            website='https://www.test.com'
+        )
+        
+        self.membership = Membership.objects.create(
+            user=self.user,
+            organization=self.organization,
+            is_admin=True,
+            is_active=True
+        )
+        
+        # Crear beca de prueba
+        self.scholarship = Scholarship.objects.create(
+            name='Beca de prueba',
+            start_date=date.today(),
+            end_date=date.today() + timedelta(days=30),
+            content='Descripción de la beca de prueba',
+            created_by=self.user,
+            organization=self.organization
+        )
+        
+        # Añadir relaciones muchos a muchos
+        self.scholarship.type.add(self.scholarship_type)
+        self.scholarship.country.add(self.country)
+        self.scholarship.interests.add(self.interest)
+        
+        # URLs para pruebas
+        self.list_create_url = reverse('scholarship-list-create')
+        self.detail_url = reverse('scholarship-detail', args=[self.scholarship.id])
+    
+    def test_list_scholarships(self):
+        """Prueba para listar todas las becas"""
+        response = self.client.get(self.list_create_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+    
+    def test_create_scholarship(self):
+        """Prueba para crear una nueva beca"""
+        data = {
+            'name': 'Nueva beca',
+            'start_date': date.today().strftime('%Y-%m-%d'),
+            'end_date': (date.today() + timedelta(days=60)).strftime('%Y-%m-%d'),
+            'content': 'Descripción de la nueva beca',
+            'organization': self.organization.id,
+            'type': [self.scholarship_type.id],
+            'country': [self.country.id],
+            'interests': [self.interest.id]
+        }
+        
+        response = self.client.post(self.list_create_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Scholarship.objects.count(), 2)
+        self.assertEqual(response.data['name'], 'Nueva beca')
+    
+    def test_retrieve_scholarship(self):
+        """Prueba para obtener detalle de una beca"""
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'Beca de prueba')
+    
+    def test_update_scholarship(self):
+        """Prueba para actualizar una beca completa"""
+        data = {
+            'name': 'Beca actualizada',
+            'start_date': date.today().strftime('%Y-%m-%d'),
+            'end_date': (date.today() + timedelta(days=90)).strftime('%Y-%m-%d'),
+            'content': 'Descripción actualizada',
+            'organization': self.organization.id,
+            'type': [self.scholarship_type.id],
+            'country': [self.country.id],
+            'interests': [self.interest.id]
+        }
+        
+        response = self.client.put(self.detail_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.scholarship.refresh_from_db()
+        self.assertEqual(self.scholarship.name, 'Beca actualizada')
+        self.assertEqual(self.scholarship.content, 'Descripción actualizada')
+    
+    def test_partial_update_scholarship(self):
+        """Prueba para actualizar parcialmente una beca"""
+        data = {
+            'name': 'Beca parcialmente actualizada'
+        }
+        
+        response = self.client.patch(self.detail_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.scholarship.refresh_from_db()
+        self.assertEqual(self.scholarship.name, 'Beca parcialmente actualizada')
+        # El resto de datos permanecen iguales
+        self.assertEqual(self.scholarship.content, 'Descripción de la beca de prueba')
+    
+    def test_delete_scholarship(self):
+        """Prueba para eliminar una beca"""
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Scholarship.objects.count(), 0)
+    
+    def test_unauthorized_access(self):
+        """Prueba para verificar acceso no autorizado"""
+        # Logout
+        self.client.force_authenticate(user=None)
+        
+        # Intentar acceder sin autenticación
+        response = self.client.get(self.list_create_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
