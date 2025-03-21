@@ -26,6 +26,7 @@ import './Landing.css'
 const Header = React.lazy(() => import('../components/Header'));
 const Footer = React.lazy(() => import('../components/Footer'));
 const Opportunities = React.lazy(() => import('../components/Opportunities/Opportunities'));
+const OpportunitiesButton = React.lazy(() => import('../components/Opportunities/OpportunityButton'));
 
 function OpportunityFeed() {
 
@@ -42,6 +43,7 @@ function OpportunityFeed() {
     <section className="w-full min-h-screen">
         <Suspense fallback={<Loader />}>
         <Header />
+        <OpportunitiesButton />
         <Opportunities></Opportunities>
         <Footer />
         </Suspense>

@@ -58,9 +58,9 @@ function OrganizationsFeed() {
                         <RegisterOrganizationForm
                             onSubmit={(data) => {
                                 console.log("Organización registrada:", data);
-                                setIsOpen(false); // Cierra el modal después de registrar
+                                setIsOpen(false);
                             }}
-                            onClose={() => setIsOpen(false)} // Asegura que el modal se cierre
+                            onClose={() => setIsOpen(false)} 
                         />
                     </div>
                 </div>
