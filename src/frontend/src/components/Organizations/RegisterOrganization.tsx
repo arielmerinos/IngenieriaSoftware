@@ -23,10 +23,9 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
-interface OrganizationData {
+export interface OrganizationData {
     name: string;
     email: string;
-    sector: string;
     website?: string;
     description?: string;
 }
@@ -46,7 +45,6 @@ const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onS
         defaultValues: {
             name: '',
             email: '',
-            sector: '',
             website: '',
             description: ''
         }
@@ -92,22 +90,6 @@ const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onS
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
-            </div>
-
-            <div>
-                <label htmlFor="sector" className="block text-sm font-medium text-gray-700 mb-2">
-                    Sector de la Organización
-                </label>
-                <input
-                    type="text"
-                    id="sector"
-                    placeholder="Ejemplo: Tecnología, Educación, Salud"
-                    {...register('sector', {
-                        required: 'El sector es obligatorio'
-                    })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.sector && <span className="text-red-500 text-sm">{errors.sector.message}</span>}
             </div>
 
             <div>

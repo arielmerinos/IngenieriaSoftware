@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/auth/tokens/', UserTokenView.as_view(), name='user_tokens'),
     path("api/", include("api.urls")),
 
+    # Organization views
     path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
     path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
     path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
