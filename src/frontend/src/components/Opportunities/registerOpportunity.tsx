@@ -61,7 +61,10 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 formData.append('image', data.image[0]);
             }
 
-            console.log('FormData being sent:', formData); // Debugging log
+            console.log('FormData being sent:');
+            for (const [key, value] of formData.entries()) {
+                console.log(`${key}:`, value);
+            }
 
             const response = await fetch('http://localhost:8000/scholarships/create/', {
                 method: 'POST',
@@ -72,6 +75,8 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
             });
 
             if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Backend validation errors:', errorData);
                 throw new Error('Failed to create opportunity');
             }
 

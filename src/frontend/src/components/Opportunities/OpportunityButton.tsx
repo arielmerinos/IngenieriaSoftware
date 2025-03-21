@@ -6,12 +6,12 @@ function OpportunitiesButton() {
 
     const handleCreateOpportunity = async (data: FormData) => {
         try {
-            const token = localStorage.getItem('access_token'); // Retrieve the token from localStorage
+            const token = localStorage.getItem('authToken'); // Retrieve the token from localStorage
             if (!token) {
                 throw new Error("User is not authenticated");
             }
 
-            const response = await fetch('http://localhost:8000/api/scholarships/create/', {
+            const response = await fetch('http://localhost:8000/scholarships/create/', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`, // Include the token in the Authorization header
