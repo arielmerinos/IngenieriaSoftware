@@ -129,7 +129,6 @@ class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
         fields = ["id", "user", "organization", "is_admin", "is_active"]
-        read_only_fields = ['id', 'user', 'organization', 'is_admin', 'is_active']
 
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)

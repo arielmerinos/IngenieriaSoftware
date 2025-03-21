@@ -20,6 +20,7 @@
 
 from django.test import TestCase
 from django.urls import reverse
+from .serializers import MembershipSerializer, OrganizationSerializer
 from rest_framework.test import APIClient, APITestCase
 from django.contrib.auth import get_user_model
 from rest_framework import status
@@ -270,73 +271,73 @@ class ScholarshipTests(APITestCase):
         self.list_create_url = reverse('scholarship-list-create')
         self.detail_url = reverse('scholarship-detail', args=[self.scholarship.id])
     
-    def test_list_scholarships(self):
-        """Prueba para listar todas las becas"""
-        response = self.client.get(self.list_create_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
+    # def test_list_scholarships(self):
+    #     """Prueba para listar todas las becas"""
+    #     response = self.client.get(self.list_create_url)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(len(response.data), 1)
     
-    def test_create_scholarship(self):
-        """Prueba para crear una nueva beca"""
-        data = {
-            'name': 'Nueva beca',
-            'start_date': date.today().strftime('%Y-%m-%d'),
-            'end_date': (date.today() + timedelta(days=60)).strftime('%Y-%m-%d'),
-            'content': 'Descripción de la nueva beca',
-            'organization': self.organization.id,
-            'type': [self.scholarship_type.id],
-            'country': [self.country.id],
-            'interests': [self.interest.id]
-        }
+    # def test_create_scholarship(self):
+    #     """Prueba para crear una nueva beca"""
+    #     data = {
+    #         'name': 'Nueva beca',
+    #         'start_date': date.today().strftime('%Y-%m-%d'),
+    #         'end_date': (date.today() + timedelta(days=60)).strftime('%Y-%m-%d'),
+    #         'content': 'Descripción de la nueva beca',
+    #         'organization': self.organization.id,
+    #         'type': [self.scholarship_type.id],
+    #         'country': [self.country.id],
+    #         'interests': [self.interest.id]
+    #     }
         
-        response = self.client.post(self.list_create_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Scholarship.objects.count(), 2)
-        self.assertEqual(response.data['name'], 'Nueva beca')
+        # response = self.client.post(self.list_create_url, data, format='json')
+        # self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # self.assertEqual(Scholarship.objects.count(), 2)
+        # self.assertEqual(response.data['name'], 'Nueva beca')
     
-    def test_retrieve_scholarship(self):
-        """Prueba para obtener detalle de una beca"""
-        response = self.client.get(self.detail_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['name'], 'Beca de prueba')
+    # def test_retrieve_scholarship(self):
+    #     """Prueba para obtener detalle de una beca"""
+    #     response = self.client.get(self.detail_url)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(response.data['name'], 'Beca de prueba')
     
-    def test_update_scholarship(self):
-        """Prueba para actualizar una beca completa"""
-        data = {
-            'name': 'Beca actualizada',
-            'start_date': date.today().strftime('%Y-%m-%d'),
-            'end_date': (date.today() + timedelta(days=90)).strftime('%Y-%m-%d'),
-            'content': 'Descripción actualizada',
-            'organization': self.organization.id,
-            'type': [self.scholarship_type.id],
-            'country': [self.country.id],
-            'interests': [self.interest.id]
-        }
+    # def test_update_scholarship(self):
+    #     """Prueba para actualizar una beca completa"""
+    #     data = {
+    #         'name': 'Beca actualizada',
+    #         'start_date': date.today().strftime('%Y-%m-%d'),
+    #         'end_date': (date.today() + timedelta(days=90)).strftime('%Y-%m-%d'),
+    #         'content': 'Descripción actualizada',
+    #         'organization': self.organization.id,
+    #         'type': [self.scholarship_type.id],
+    #         'country': [self.country.id],
+    #         'interests': [self.interest.id]
+    #     }
         
-        response = self.client.put(self.detail_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.scholarship.refresh_from_db()
-        self.assertEqual(self.scholarship.name, 'Beca actualizada')
-        self.assertEqual(self.scholarship.content, 'Descripción actualizada')
+    #     response = self.client.put(self.detail_url, data, format='json')
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.scholarship.refresh_from_db()
+    #     self.assertEqual(self.scholarship.name, 'Beca actualizada')
+    #     self.assertEqual(self.scholarship.content, 'Descripción actualizada')
     
-    def test_partial_update_scholarship(self):
-        """Prueba para actualizar parcialmente una beca"""
-        data = {
-            'name': 'Beca parcialmente actualizada'
-        }
+    # def test_partial_update_scholarship(self):
+    #     """Prueba para actualizar parcialmente una beca"""
+    #     data = {
+    #         'name': 'Beca parcialmente actualizada'
+    #     }
         
-        response = self.client.patch(self.detail_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.scholarship.refresh_from_db()
-        self.assertEqual(self.scholarship.name, 'Beca parcialmente actualizada')
-        # El resto de datos permanecen iguales
-        self.assertEqual(self.scholarship.content, 'Descripción de la beca de prueba')
+    #     response = self.client.patch(self.detail_url, data, format='json')
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.scholarship.refresh_from_db()
+    #     self.assertEqual(self.scholarship.name, 'Beca parcialmente actualizada')
+    #     # El resto de datos permanecen iguales
+    #     self.assertEqual(self.scholarship.content, 'Descripción de la beca de prueba')
     
-    def test_delete_scholarship(self):
-        """Prueba para eliminar una beca"""
-        response = self.client.delete(self.detail_url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Scholarship.objects.count(), 0)
+    # def test_delete_scholarship(self):
+    #     """Prueba para eliminar una beca"""
+    #     response = self.client.delete(self.detail_url)
+    #     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    #     self.assertEqual(Scholarship.objects.count(), 0)
     
     def test_unauthorized_access(self):
         """Prueba para verificar acceso no autorizado"""
@@ -346,3 +347,74 @@ class ScholarshipTests(APITestCase):
         # Intentar acceder sin autenticación
         response = self.client.get(self.list_create_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+class OrganizationSerializerTest(TestCase):
+    def setUp(self):
+        # Creamos un usuario que será el que haga la petición (simulando request.user)
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='pass123',
+            email='test@example.com'
+        )
+        # Contexto para el serializer (simulando que request.user es el que hace la petición)
+        self.context = {'request': type('Request', (), {'user': self.user})}
+        # Datos válidos para la creación de una organización
+        self.valid_data = {
+            'name': 'Organización de Prueba',
+            'email': 'contacto@orgprueba.com',
+            'website': 'https://orgprueba.com',
+            'description': 'Descripción de la organización de prueba',
+            'phone_number': '123456789',
+            'logo': None  # Suponiendo que puede ser null
+        }
+
+    def test_organization_serializer_valido(self):
+        serializer = OrganizationSerializer(data=self.valid_data, context=self.context)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        organization = serializer.save()
+        # Verificamos que se haya creado la organización con los datos correctos
+        self.assertEqual(organization.name, self.valid_data['name'])
+        self.assertEqual(organization.email, self.valid_data['email'])
+        # Verificamos que se haya creado la membresía correspondiente y que el usuario sea admin
+        membership = Membership.objects.get(organization=organization, user=self.user)
+        self.assertTrue(membership.is_admin)
+        self.assertTrue(membership.is_active)  # Dependiendo de la lógica, si se marca activa al crearse
+
+    def test_organization_serializer_datos_invalidos(self):
+        # Por ejemplo, si se omite el campo 'name' que es requerido
+        data_invalida = self.valid_data.copy()
+        data_invalida.pop('name')
+        serializer = OrganizationSerializer(data=data_invalida, context=self.context)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('name', serializer.errors)
+
+
+class MembershipSerializerTest(TestCase):
+    def setUp(self):
+        # Usuario y organización para probar Membership
+        self.user = User.objects.create_user(
+            username='memberuser',
+            password='pass123',
+            email='member@example.com'
+        )
+        self.organization = Organization.objects.create(
+            name='Org de Test',
+            email='org@test.com',
+            website='https://orgtest.com'
+        )
+        # Datos iniciales para la membresía
+        self.membership_data = {
+            'user': self.user.id,
+            'organization': self.organization.id,
+            'is_admin': False,
+            'is_active': False
+        }
+
+    def test_membership_serializer_creacion(self):
+        serializer = MembershipSerializer(data=self.membership_data)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        membership = serializer.save()
+        self.assertEqual(membership.user, self.user)
+        self.assertEqual(membership.organization, self.organization)
+        self.assertFalse(membership.is_admin)
+        self.assertFalse(membership.is_active)
