@@ -41,7 +41,8 @@ const LoginModal: React.FC = () => {
         if (success) {
             // window.location.href = 'https://http.cat/status/100';
             // Not a cat person tbh
-            window.location.reload()
+            // await new Promise(resolve => setTimeout(resolve, 3000));
+            // window.location.reload()
         } else {
             setLoginError('Credenciales incorrectas');
         }

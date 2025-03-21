@@ -78,9 +78,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 return response.json();
             })
             .then(data => {
-                console.log("Tokens obtenidos:", data);
+                console.log(data)
                 setAuthToken(data.access);
-                localStorage.setItem("authToken", data.access);
             })
             .catch(err => {
                 console.error(err);
@@ -130,7 +129,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const login = async (username: string, password: string): Promise<boolean> => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/token/`,
+                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+                }/api/token/`,
                 {
                     method: "POST",
                     headers: {
@@ -141,13 +141,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             );
             if (response.ok) {
                 const data = await response.json();
-                // Guardamos el token de acceso usando el campo "access" que retorna el backend
                 localStorage.setItem("authToken", data.access);
                 setAuthToken(data.access);
-                // Actualizamos la información del usuario (puedes ajustar el id u otros campos según la respuesta)
-                setUser({ id: data.user_id || 1, username, name: "", access: data.access, refresh: data.refresh });
-                localStorage.setItem("username", username);
-                console.log("Login exitoso, token almacenado:", data.access);
+                setUser({ id: 1, username, name: "", access: data.access, refresh: data.refresh });
+
+                localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
+                console.log("Usuario registrado:", user);
+
                 return true;
             } else {
                 console.error("Error en login", await response.json());
@@ -179,8 +179,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             );
             if (response.ok) {
                 const data = await response.json();
-                localStorage.setItem("authToken", data.token);
-                setAuthToken(data.token);
+                localStorage.setItem("authToken", data.access);
+                setAuthToken(data.access);
                 localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
                 setUser({ id: data.id, username, name, access: data.access, refresh: data.refresh });
                 setAuthToken(data.access);
@@ -201,6 +201,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Función para cerrar sesión
     const logout = () => {
         localStorage.removeItem("authToken");
+        localStorage.removeItem("username");
         setAuthToken(null);
         setUser(null);
     };
