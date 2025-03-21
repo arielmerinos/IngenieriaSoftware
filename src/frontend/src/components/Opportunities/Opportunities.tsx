@@ -72,7 +72,7 @@ const Opportunities: React.FC = () => {
                             bg-white
                             p-10
                             pt-5
-                            rounded-lg
+                            rounded-xl
                             overflow-visible
                             overflow-y-auto
                             shadow-2xl"
