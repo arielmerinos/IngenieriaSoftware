@@ -18,30 +18,33 @@
 # Debería haber recibido una copia de la Licencia Pública General de GNU
 # junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
+# Imports de Django
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from rest_framework import generics, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
-from .models.scholarship import Scholarship
-from .models.user_data import UserData
-from .models.organization import Organization, Membership
-from .models.category import Category
-from .models.type import Type
-from .models.country import Country
-from .models.interests import Interest
+
+# Imports de Django REST Framework
+from rest_framework import generics, permissions, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+
+# Imports nuestros
+from .models import (
+    Scholarship, UserData, Organization, Membership, Category,
+    Type, Country, Interest
+)
 from .serializers import (
     UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
     MembershipSerializer, CategorySerializer, UserDataSerializer, 
     TypeSerializer, CountrySerializer, InterestSerializer
 )
+
+### Vistas de la API ###
 
 class CreateUserView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -108,12 +111,11 @@ class OrganizationListView(APIView):
         serializer = OrganizationSerializer(organizations, many=True)
         return Response(serializer.data)
 
-#############################################################################3
 
-class OrganizationCreateView(generics.CreateAPIView):
+class OrganizationCreateView(generics.CreateAPIView): # Por alguna razon el post solo funciona si uso generics y no APIView
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 class JoinOrganizationView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -131,7 +133,6 @@ class JoinOrganizationView(APIView):
         if Membership.objects.filter(user=request.user, organization=organization).exists():
             return Response({"error": "Ya has solicitado o eres miembro de esta organización."}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Crear la solicitud: el usuario que se une no es admin y la solicitud queda pendiente
         membership = Membership.objects.create(
             user=request.user,
             organization=organization,
@@ -148,30 +149,24 @@ class AcceptMembershipView(APIView):
         membership_id = request.data.get("membership_id")
         if not membership_id:
             return Response({"error": "Se requiere el membership_id."}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
             membership = Membership.objects.get(id=membership_id)
         except Membership.DoesNotExist:
             return Response({"error": "La solicitud de membresía no existe."}, status=status.HTTP_404_NOT_FOUND)
         
-        # Verificar que el usuario que realiza la solicitud sea administrador de la organización
         admin_exists = Membership.objects.filter(
             organization=membership.organization,
             user=request.user,
             is_admin=True,
-            is_active=True  # Se asume que el admin ya tiene la solicitud aceptada
+            is_active=True  
         ).exists()
         if not admin_exists:
             return Response({"error": "No tienes permisos para aceptar miembros en esta organización."}, status=status.HTTP_403_FORBIDDEN)
         
-        # Actualizar la solicitud a aceptada
         membership.is_active = True
         membership.save()
         serializer = MembershipSerializer(membership)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-        
-############################################################################
     
 class MembershipListView(APIView):
     def get(self, request):

@@ -55,7 +55,6 @@ class UserDataSerializer(serializers.ModelSerializer):
         read_only_fields = ["user", "id"]
         extra_kwargs = {"user": {"read_only": True}}
         
-        
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
