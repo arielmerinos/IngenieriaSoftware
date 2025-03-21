@@ -25,6 +25,7 @@ import Landing from './Views/Landing'
 import OpportunityFeed from './Views/OpportunityFeed'
 import OrganizationsFeed from './Views/OrganizationsFeed'
 import OpportunityPost from './Views/OpportunityPost'
+import OrganizationPost from './Views/OrganizationPost'
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
         <Route path="/feed" element={<OpportunityFeed />} />
         <Route path="/org" element={<OrganizationsFeed/>} />
         <Route path="/post/:id" element={<OpportunityPost/>} />
+        <Route path= "/org/:id" element={<OrganizationPost/>} />
+
         {/* Ejemplo: */}
         {/* <Route path="MiRuta" element={<MiComponente />} /> */}
          
