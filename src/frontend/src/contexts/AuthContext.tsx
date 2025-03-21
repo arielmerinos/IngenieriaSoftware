@@ -59,33 +59,11 @@ interface AuthProviderProps {
     children: ReactNode;
 }
 
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [authToken, setAuthToken] = useState<string | null>(
         localStorage.getItem("authToken")
     );
-
-    useEffect(() => {
-        fetch('http://localhost:8000/api/auth/tokens/', {
-            method: 'GET',
-            credentials: 'include'
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al obtener los tokens');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Tokens obtenidos:", data);
-                setAuthToken(data.access);
-                localStorage.setItem("authToken", data.access);
-            })
-            .catch(err => {
-                console.error(err);
-            });
-    }, []);
 
     const isAuthenticated = !!authToken;
 
@@ -118,7 +96,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Opcional: cargar datos del usuario al iniciar o cuando cambia el token
     useEffect(() => {
         if (authToken) {
-            fetchUserData(authToken)
+            fetchUserData(authToken);
         }
     }, [authToken]);
 
