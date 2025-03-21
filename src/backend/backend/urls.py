@@ -20,7 +20,7 @@
 
 from django.contrib import admin
 from django.urls import path,include
-from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView, ScholarshipListCreateView, ScholarshipDetailView, TypeListCreateView, TypeDetailView, CountryListCreateView, CountryDetailView, InterestListCreateView, InterestDetailView
+from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView,OrganizationListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView, ScholarshipListCreateView, ScholarshipDetailView, TypeListCreateView, TypeDetailView, CountryListCreateView, CountryDetailView, InterestListCreateView, InterestDetailView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -35,6 +35,7 @@ urlpatterns = [
     path("api/", include("api.urls")),
 
     # Organization views
+    path("organizations/all/", OrganizationListView.as_view(), name="organization-list"),
     path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
     path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
     path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
