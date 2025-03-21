@@ -63,7 +63,7 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
             console.log('FormData being sent:', formData); // Debugging log
 
-            const response = await fetch('http://localhost:8000/api/scholarships/create/', {
+            const response = await fetch('http://localhost:8000/scholarships/create/', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`, // Include the JWT token in the Authorization header
