@@ -27,13 +27,13 @@ const OpportunityTypes = [
 const countries = [
     { id: 1, name: 'Mexico' },
     { id: 2, name: 'Estado Unidos' },
-    { id: 3, name: 'Cerru' },
+    { id: 3, name: 'Canada' },
 ];
 
 interface FormData {
     type: string[];
-    start_date: Date;
-    end_date: Date;
+    start_date: string;
+    end_date: string;
     image: FileList;
     content: string;
     interests: number[];
@@ -41,11 +41,22 @@ interface FormData {
     country: number[];
 }
 
-const RegisterOpportunity: React.FC<{ onSubmit: (data: FormData) => void; onClose: () => void }> = ({ onSubmit, onClose }) => {
+const RegisterOpportunity: React.FC<{ onSubmit: (data: FormData) => Promise<void>; onClose: () => void }> = ({ onSubmit, onClose }) => {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({ mode: 'onChange' });
 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
-        await onSubmit(data);
+        const formData = new FormData();
+        formData.append('type', JSON.stringify(data.type));
+        formData.append('start_date', data.start_date);
+        formData.append('end_date', data.end_date);
+        formData.append('content', data.content);
+        formData.append('interests', JSON.stringify(data.interests));
+        formData.append('country', JSON.stringify(data.country));
+        if (data.image.length > 0) {
+            formData.append('image', data.image[0]);
+        }
+
+        await onSubmit(formData as unknown as FormData);
     };
 
     return (

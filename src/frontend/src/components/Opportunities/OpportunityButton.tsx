@@ -4,6 +4,28 @@ import RegisterOpportunity from "./registerOpportunity";
 function OpportunitiesButton() {
     const [isOpen, setIsOpen] = useState(false);
 
+    const handleCreateOpportunity = async (data: FormData) => {
+        try {
+            const response = await fetch('http://localhost:8000/scholarships/create/', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                },
+                body: data,
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create opportunity');
+            }
+
+            const result = await response.json();
+            console.log('Opportunity created:', result);
+            setIsOpen(false);
+        } catch (error) {
+            console.error('Error creating opportunity:', error);
+        }
+    };
+
     return (
         <>
             <div className="text-center mt-10 mb-16">
@@ -20,10 +42,7 @@ function OpportunitiesButton() {
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                         <h2 className="text-lg font-bold mb-4">Registro de Convocatoria</h2>
                         <RegisterOpportunity
-                            onSubmit={(data) => {
-                                console.log("Convocatoria registrada:", data);
-                                setIsOpen(false);
-                            }}
+                            onSubmit={handleCreateOpportunity}
                             onClose={() => setIsOpen(false)}
                         />
                     </div>
