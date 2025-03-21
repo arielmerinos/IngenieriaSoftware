@@ -25,6 +25,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 import json
 from datetime import date, timedelta
+
 from .models.scholarship import Scholarship
 from .models.type import Type
 from .models.country import Country
@@ -215,7 +216,8 @@ class SocialAuthTests(TestCase):
         
         # Debería redirigir al login ya que está decorado con @login_required
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        
+
+
 class ScholarshipTests(APITestCase):
     def setUp(self):
         # Crear usuario para pruebas
