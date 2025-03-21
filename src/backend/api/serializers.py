@@ -40,64 +40,47 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
-# class ScholarshipSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Scholarship
-#         fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by","country"]
-#         read_only_fields = ["publication_date", "created_by","id","organization"]
-#         extra_kwargs = {"organization": {"read_only": True}}
-
 class ScholarshipSerializer(serializers.ModelSerializer):
+    # Override fields to handle them as strings
+    type = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
+    interests = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
+    country = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
+
     class Meta:
         model = Scholarship
         fields = [
-            "id", 
-            "organization", 
-            "name", 
-            "publication_date", 
-            "start_date", 
-            "end_date", 
-            "type", 
-            "image", 
-            "content", 
+            "id",
+            "organization",
+            "name",
+            "publication_date",
+            "start_date",
+            "end_date",
+            "type",
+            "image",
+            "content",
             "interests",
             "created_by",
-            "country"
+            "country",
         ]
-        read_only_fields = ["publication_date", "created_by", "id"]
-    
+        read_only_fields = ["id", "publication_date", "created_by"]  # These fields are handled in the backend
+
     def create(self, validated_data):
-        # Extraer relaciones ManyToMany antes de crear la beca
-        types = validated_data.pop('type', [])
-        interests = validated_data.pop('interests', [])
-        countries = validated_data.pop('country', [])
-        
-        # Crear la beca con los datos restantes
-        scholarship = Scholarship.objects.create(**validated_data)
-        
-        # Añadir relaciones ManyToMany después de crear
-        if types:
-            scholarship.type.set(types)
-        if interests:
-            scholarship.interests.set(interests)
-        if countries:
-            scholarship.country.set(countries)
-            
-        return scholarship
-    
+        # Handle created_by field
+        user = self.context['request'].user  # Get the authenticated user
+        validated_data['created_by'] = user
+
+        # Handle optional fields
+        validated_data['type'] = validated_data.get('type', '')  # Default to empty string if not provided
+        validated_data['interests'] = validated_data.get('interests', '')  # Default to empty string if not provided
+        validated_data['country'] = validated_data.get('country', '')  # Default to empty string if not provided
+
+        # Create the scholarship object
+        return Scholarship.objects.create(**validated_data)
+
     def update(self, instance, validated_data):
-        # Actualizar relaciones ManyToMany si están presentes
-        if 'type' in validated_data:
-            instance.type.set(validated_data.pop('type'))
-        if 'interests' in validated_data:
-            instance.interests.set(validated_data.pop('interests'))
-        if 'country' in validated_data:
-            instance.country.set(validated_data.pop('country'))
-        
-        # Actualizar campos normales
+        # Update the fields directly
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        
         instance.save()
         return instance
 
@@ -160,5 +143,4 @@ class InterestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interest
     fields = ["id", "name","color"]
-        
-    
+

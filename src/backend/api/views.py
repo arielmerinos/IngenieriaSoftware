@@ -121,23 +121,23 @@ class ScholarshipListCreateView(APIView):
         serializer = ScholarshipSerializer(data=request.data)
         
         if serializer.is_valid():
-            # Verificar si se especificó una organización
-            organization_id = request.data.get('organization')
+        #     # Verificar si se especificó una organización
+        #     organization_id = request.data.get('organization')
             
-            # Si se especificó organización, verificar que el usuario pertenezca a ella
-            if organization_id:
-                # Verificar que el usuario es miembro activo de la organización
-                is_member = Membership.objects.filter(
-                    user=request.user,
-                    organization_id=organization_id,
-                    is_active=True
-                ).exists()
+        #     # Si se especificó organización, verificar que el usuario pertenezca a ella
+        #     if organization_id:
+        #         # Verificar que el usuario es miembro activo de la organización
+        #         is_member = Membership.objects.filter(
+        #             user=request.user,
+        #             organization_id=organization_id,
+        #             is_active=True
+        #         ).exists()
                 
-                if not is_member:
-                    return Response(
-                        {"error": "No tienes permiso para crear becas para esta organización."},
-                        status=status.HTTP_403_FORBIDDEN
-                    )
+        #         if not is_member:
+        #             return Response(
+        #                 {"error": "No tienes permiso para crear becas para esta organización."},
+        #                 status=status.HTTP_403_FORBIDDEN
+        #             )
             
             # Guardar la beca con el usuario actual como creador
             scholarship = serializer.save(created_by=request.user)

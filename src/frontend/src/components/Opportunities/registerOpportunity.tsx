@@ -28,7 +28,15 @@ const countries = [
     { id: 3, name: 'Canada' },
 ];
 
+const interests = [
+    { id: 1, name: 'Ciencia' },
+    { id: 2, name: 'Tecnología' },
+    { id: 3, name: 'Ingeniería' },
+    { id: 4, name: 'Matemáticas' },
+];
+
 interface FormData {
+    name: string;
     type: string[];
     start_date: string;
     end_date: string;
@@ -51,14 +59,15 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
             }
 
             const formData = new FormData();
-            formData.append('type', JSON.stringify(data.type));
-            formData.append('start_date', data.start_date);
-            formData.append('end_date', data.end_date);
-            formData.append('content', data.content);
-            formData.append('interests', JSON.stringify(data.interests));
-            formData.append('country', JSON.stringify(data.country));
-            if (data.image.length > 0) {
-                formData.append('image', data.image[0]);
+            formData.append('name', data.name); // Add the name field
+            // formData.append('type', JSON.stringify(data.type)); // List of types
+            formData.append('start_date', data.start_date); // Start date
+            formData.append('end_date', data.end_date); // End date
+            formData.append('content', data.content); // Description
+            // formData.append('interests', JSON.stringify(data.interests)); // List of interests
+            // formData.append('country', JSON.stringify(data.country)); // List of countries
+            if (data.image && data.image.length > 0) {
+                formData.append('image', data.image[0]); // Image file
             }
 
             console.log('FormData being sent:');
@@ -97,7 +106,19 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
             }}
             className="space-y-4"
         >
+            {/* Name Field */}
             <div>
+                <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                <input
+                    type="text"
+                    {...register('name', { required: 'El nombre es obligatorio' })}
+                    className="w-full px-3 py-2 border rounded-md"
+                />
+                {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+            </div>
+
+            {/* Types Field */}
+            {/* <div>
                 <label className="block text-sm font-medium text-gray-700">Tipos</label>
                 <select multiple {...register('type', { required: 'El tipo es obligatorio' })} className="w-full px-3 py-2 border rounded-md h-24">
                     {OpportunityTypes.map(option => (
@@ -106,8 +127,9 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 </select>
                 <p className="text-xs text-gray-500">Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</p>
                 {errors.type && <span className="text-red-500 text-sm">{errors.type.message}</span>}
-            </div>
+            </div> */}
 
+            {/* Start and End Dates */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
@@ -129,19 +151,34 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 </div>
             </div>
 
+            {/* Image Field */}
             <div>
                 <label className="block text-sm font-medium text-gray-700">Imagen</label>
                 <input type="file" accept="image/*" {...register('image')} className="w-full px-3 py-2 border rounded-md" />
                 {errors.image && <span className="text-red-500 text-sm">{errors.image.message}</span>}
             </div>
 
+            {/* Content Field */}
             <div>
                 <label className="block text-sm font-medium text-gray-700">Descripción</label>
                 <textarea {...register('content', { required: 'La descripción es obligatoria' })} rows={4} className="w-full px-3 py-2 border rounded-md"></textarea>
                 {errors.content && <span className="text-red-500 text-sm">{errors.content.message}</span>}
             </div>
 
-            <div>
+            {/* Interests Field */}
+            {/* <div>
+                <label className="block text-sm font-medium text-gray-700">Intereses</label>
+                <select multiple {...register('interests', { required: 'El interés es obligatorio' })} className="w-full px-3 py-2 border rounded-md h-24">
+                    {interests.map(interest => (
+                        <option key={interest.id} value={interest.id}>{interest.name}</option>
+                    ))}
+                </select>
+                <p className="text-xs text-gray-500">Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</p>
+                {errors.interests && <span className="text-red-500 text-sm">{errors.interests.message}</span>}
+            </div> */}
+
+            {/* Countries Field */}
+            {/* <div>
                 <label className="block text-sm font-medium text-gray-700">Países</label>
                 <select multiple {...register('country', { required: 'El país es obligatorio' })} className="w-full px-3 py-2 border rounded-md h-24">
                     {countries.map(country => (
@@ -150,8 +187,9 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 </select>
                 <p className="text-xs text-gray-500">Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</p>
                 {errors.country && <span className="text-red-500 text-sm">{errors.country.message}</span>}
-            </div>
+            </div> */}
 
+            {/* Submit and Cancel Buttons */}
             <div className="flex gap-4">
                 <button type="submit" disabled={!isValid} className={`flex-1 text-white py-2 rounded-md ${isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400'}`}>
                     Publicar Convocatoria
