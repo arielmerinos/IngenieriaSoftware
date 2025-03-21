@@ -80,6 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             .then(data => {
                 console.log(data)
                 setAuthToken(data.access);
+                localStorage.setItem("authToken", data.access);
             })
             .catch(err => {
                 console.error(err);
