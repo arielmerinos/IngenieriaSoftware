@@ -54,18 +54,20 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         console.log('Form submitted:', data); // Debugging log
         try {
             const token = localStorage.getItem('authToken'); // Retrieve the JWT token
-            if (!token) {
+            const username = localStorage.getItem('username'); // Retrieve the username from localStorage or another source
+            if (!token || !username) {
                 throw new Error('User is not authenticated');
             }
 
             const formData = new FormData();
             formData.append('name', data.name); // Add the name field
-            // formData.append('type', JSON.stringify(data.type)); // List of types
             formData.append('start_date', data.start_date); // Start date
             formData.append('end_date', data.end_date); // End date
             formData.append('content', data.content); // Description
-            // formData.append('interests', JSON.stringify(data.interests)); // List of interests
-            // formData.append('country', JSON.stringify(data.country)); // List of countries
+            formData.append('created_by', username); // Send the username as the creator
+            // formData.append('type', data.type.join(',')); // Convert array to comma-separated string
+            // formData.append('interests', data.interests.join(',')); // Convert array to comma-separated string
+            // formData.append('country', data.country.join(',')); // Convert array to comma-separated string
             if (data.image && data.image.length > 0) {
                 formData.append('image', data.image[0]); // Image file
             }

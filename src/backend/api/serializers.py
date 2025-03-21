@@ -59,22 +59,13 @@ class ScholarshipSerializer(serializers.ModelSerializer):
             "image",
             "content",
             "interests",
-            "created_by",
+            "created_by",  # Allow this to be sent from the frontend
             "country",
         ]
-        read_only_fields = ["id", "publication_date", "created_by"]  # These fields are handled in the backend
+        read_only_fields = ["id", "publication_date"]  # Remove "created_by" from read-only fields
 
     def create(self, validated_data):
-        # Handle created_by field
-        user = self.context['request'].user  # Get the authenticated user
-        validated_data['created_by'] = user
-
-        # Handle optional fields
-        validated_data['type'] = validated_data.get('type', '')  # Default to empty string if not provided
-        validated_data['interests'] = validated_data.get('interests', '')  # Default to empty string if not provided
-        validated_data['country'] = validated_data.get('country', '')  # Default to empty string if not provided
-
-        # Create the scholarship object
+        # Create the scholarship object with all provided data
         return Scholarship.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
