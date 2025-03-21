@@ -111,7 +111,11 @@ class UserDataSerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ["id", "name", "email", "phone_number", "website", "logo", "members"]
+        fields = ['name', 'email', 'website', 'description', 'phone_number', 'logo']
+        extra_kwargs = {
+            'phone_number': {'required': False, 'allow_null': True},
+            'logo': {'required': False, 'allow_null': True},
+        }
     
     def create(self, validated_data):
         request = self.context.get('request')

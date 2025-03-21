@@ -25,9 +25,10 @@ class Organization(models.Model):
     name = models.CharField(max_length=255)
     id = models.AutoField(primary_key=True)
     email = models.EmailField(max_length=100, unique=True)
-    phone_number = models.CharField(max_length=15, blank=True, unique=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True, unique=True)
     website = models.URLField(max_length=200, null=True)
     logo = models.ImageField(upload_to='logos/', null=True)
+    description = models.TextField(blank=True)
     members = models.ManyToManyField(User, through='Membership', related_name='members')
 
 class Membership(models.Model):
