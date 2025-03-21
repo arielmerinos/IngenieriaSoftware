@@ -21,28 +21,81 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
 import OpportunityCard from "./OpportunityCard"
-import { opportunityExample } from "../../types/opportunity";
+import { OpportunityContent, opportunityExample, opportunityExample2 } from "../../types/opportunity";
+import { useState } from "react";
+import OpportunityDetails from "./OpportunityDetails";
+import exit from "../../assets/exit.png"
 
 const Opportunities: React.FC = () => {
+    const [isOpen, setOpen] = useState(false);
+    const [focusedOpportunity, setFocusedOpportunity] = useState(opportunityExample)
+
+    /**
+     * Las oportunidades del back en forma de OpportunityContent
+     */
+    const content = [opportunityExample, opportunityExample2, opportunityExample2]
+
+    /**
+     * Abre el Pop Up de la oportunidad que le hace click
+     * @param OpportunityContent de la oportunidad que le hace click
+     */
+    function openPopUp(opportunity: OpportunityContent){
+        setFocusedOpportunity(opportunity)
+        setOpen(true)
+    }
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10 mb-10">
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            <OpportunityCard item={opportunityExample}></OpportunityCard>
-            
+        <div className="">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10 mb-10 auto-rows-[1fr]">
+                { content.map(opportunity => (
+                <div onClick={() => {openPopUp(opportunity)}}>
+                    <OpportunityCard item={opportunity}></OpportunityCard>
+                </div>
+                ))}
+            </div>
+            {isOpen && 
+                <div
+                    onBlur={() => {setOpen(false)}}
+                    className="
+                        fixed
+                        inset-0
+                        h-full
+                        bg-black
+                        bg-opacity-50">
+                    <div
+                        className="
+                            w-1/2
+                            max-h-[80%]
+                            mx-auto
+                            mt-20
+                            mb-20
+                            bg-white
+                            p-10
+                            pt-5
+                            rounded-lg
+                            overflow-visible
+                            overflow-y-auto
+                            shadow-2xl"
+                    >
+                        <div className="flow-root">
+                            <p
+                                className="
+                                    float-right
+                                    w-fit
+                                    p-2
+                                    rounded-full
+                                    hover:bg-gray-100"
+                                onClick={() => {setOpen(false)}}
+                            >
+                                <img src={exit} className="w-4 h-4" />
+                            </p>
+                        </div>
+                        <OpportunityDetails item={focusedOpportunity} />
+                    </div>
+                </div>
+            }
         </div>
+        
     )
 }
 

@@ -26,8 +26,8 @@ const penrose = "penrose.png"
 
 const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
     return (
-        <div className='container mx-auto mt-10 mb-10 w-full'>
-            <div className='p-10'>
+        <div className='container mx-auto w-full'>
+            <div className=''>
                 <h1 className='font-bold text-2xl mb-1 text-left'>{item.name}</h1>
                 {item.organization != ""
                     ? <p className='text-sm text-blue-500 text-left'>{item.organization} Org.</p>
@@ -65,7 +65,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                         </p>
                     ))}
                 </div>
-                <div className='grid grid grid-cols-[50%_50%]'>
+                {/* <div className='grid grid grid-cols-[50%_50%]'> */}
                     <div>
                         <p className='text-left mt-3 mb-3'>{item.content}</p>
                     </div>
@@ -74,7 +74,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                         alt={item.image}
                         className="rounded-xl max-w-[50%] mx-auto"
                     />
-                </div>
+                {/* </div> */}
             </div>
             <p className='text-xs text-right text-gray-500 mt-1'>Publicado: {item.published.toLocaleDateString()}</p>
             <p className='text-xs text-right text-gray-500 mt-1'>País: {item.country}</p>
