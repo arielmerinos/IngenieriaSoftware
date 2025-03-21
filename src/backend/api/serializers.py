@@ -45,6 +45,11 @@ class ScholarshipSerializer(serializers.ModelSerializer):
     type = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
     interests = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
     country = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
+    created_by = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username',  # Accept the username instead of the pk
+        required=True
+    )
 
     class Meta:
         model = Scholarship
@@ -59,10 +64,10 @@ class ScholarshipSerializer(serializers.ModelSerializer):
             "image",
             "content",
             "interests",
-            "created_by",  # Allow this to be sent from the frontend
+            "created_by",  # Accept username from the frontend
             "country",
         ]
-        read_only_fields = ["id", "publication_date"]  # Remove "created_by" from read-only fields
+        read_only_fields = ["id", "publication_date"]
 
     def create(self, validated_data):
         # Create the scholarship object with all provided data
