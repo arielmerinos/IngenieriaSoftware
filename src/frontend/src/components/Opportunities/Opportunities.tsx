@@ -22,13 +22,14 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 import OpportunityCard from "./OpportunityCard"
 import { OpportunityContent, opportunityExample, opportunityExample2 } from "../../types/opportunity";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OpportunityDetails from "./OpportunityDetails";
 import exit from "../../assets/exit.png"
 
 const Opportunities: React.FC = () => {
     const [isOpen, setOpen] = useState(false);
     const [focusedOpportunity, setFocusedOpportunity] = useState(opportunityExample)
+    const [fetched, seFecthed] = useState([]);
 
     /**
      * Las oportunidades del back en forma de OpportunityContent
@@ -44,10 +45,46 @@ const Opportunities: React.FC = () => {
         setOpen(true)
     }
 
+    function organizationParse(element: JSON){
+        // console.log(element)
+        let newElem =  {
+            id: element.id,
+            organization: "",
+            name: element.name,
+            published: new Date(element.publication_date),
+            beginning: new Date(element.start_date),
+            end: new Date(element.end_date),
+            type: "Convocatoria",
+            image: "placeholder.png",
+            content: element.content,
+            interests: [],
+            author: element.created_by,
+            country: "Mexico"
+        };
+        console.log(newElem);
+        return newElem
+    }
+
+    async function getData() {
+        const url = "http://localhost:8000/scholarships/";
+        try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+    
+        const content = await response.json();
+        console.log(content.map((e: JSON) => organizationParse(e)))
+        seFecthed(content.map((e: JSON) => organizationParse(e)))
+        } catch (error) {
+        //   console.error(error.message);
+        }
+    }
+    useEffect(() => {getData()})
     return (
         <div className="">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10 mb-10 auto-rows-[1fr]">
-                { content.map(opportunity => (
+                { fetched.map(opportunity => (
                 <div onClick={() => {openPopUp(opportunity)}}>
                     <OpportunityCard item={opportunity}></OpportunityCard>
                 </div>
