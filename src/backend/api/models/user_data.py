@@ -26,7 +26,7 @@ from .interests import Interest
 class UserData(models.Model):
     id = models.AutoField(primary_key=True)
     interests = models.ManyToManyField(Interest, related_name='student_interests', related_query_name='student_interest')
-    phone_number = models.CharField(max_length=15, blank=True, unique=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     birthday = models.DateField(blank=True, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=True)
     memberships = models.ManyToManyField(Membership, related_name='students', related_query_name='student')
