@@ -165,7 +165,7 @@ class AcceptMembershipView(APIView):
             return Response({"error": "No tienes permisos para aceptar miembros en esta organización."}, status=status.HTTP_403_FORBIDDEN)
         
         # Actualizar la solicitud a aceptada
-        membership.is_accepted = True
+        membership.is_active = True
         membership.save()
         serializer = MembershipSerializer(membership)
         return Response(serializer.data, status=status.HTTP_200_OK)
