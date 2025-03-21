@@ -61,6 +61,8 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 formData.append('image', data.image[0]);
             }
 
+            console.log('FormData being sent:', formData); // Debugging log
+
             const response = await fetch('http://localhost:8000/api/scholarships/create/', {
                 method: 'POST',
                 headers: {
@@ -82,7 +84,14 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
     };
 
     return (
-        <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
+        <form
+            onSubmit={(e) => {
+                e.preventDefault(); // Prevent default behavior for debugging
+                console.log('Form onSubmit triggered');
+                handleSubmit(submitHandler)(e); // Call react-hook-form's handleSubmit
+            }}
+            className="space-y-4"
+        >
             <div>
                 <label className="block text-sm font-medium text-gray-700">Tipos</label>
                 <select multiple {...register('type', { required: 'El tipo es obligatorio' })} className="w-full px-3 py-2 border rounded-md h-24">
