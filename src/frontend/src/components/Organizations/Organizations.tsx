@@ -19,8 +19,15 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
-
+import { useEffect, useState } from "react";
 import OrganizationCard from "../Organizations/OrganizationCard";
+
+interface OrganizationContent {
+    name: string,
+    content: string,
+    type: string,
+    image: string,
+}
 
 const opportunityExample = {
     name: "maicroso",
@@ -30,11 +37,33 @@ const opportunityExample = {
 }
 
 const Organizations: React.FC = () => {
+
+    const [fetched, setFecthed] = useState([]);
+
+    function organizationParse(org: JSON){
+        return {
+            name: org.name,
+            content: org.website,
+            type: org.email,
+            image: "penrose.png"
+        }
+    }
+
+
+    useEffect(() =>{
+            const url = "http://localhost:8000/organizations/all/";
+            fetch(url)
+                .then(response => response.json())
+                .then(items => setFecthed(items.map((item:JSON) => organizationParse(item))))
+        }, [])
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10">
-            <OrganizationCard item={opportunityExample}></OrganizationCard>
-            <OrganizationCard item={opportunityExample}></OrganizationCard>
+            { fetched.map(org => (
+                <OrganizationCard item={org}></OrganizationCard>
+            ))
 
+            }
         </div>
     )
 }
