@@ -20,7 +20,7 @@
 
 from django.contrib import admin
 from django.urls import path,include
-from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView, ScholarshipListCreateView, ScholarshipDetailView
+from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView, ScholarshipListCreateView, ScholarshipDetailView, TypeListCreateView, TypeDetailView, CountryListCreateView, CountryDetailView, InterestListCreateView, InterestDetailView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -41,4 +41,16 @@ urlpatterns = [
     
     path('scholarships/create/', ScholarshipListCreateView.as_view(), name='scholarship-list-create'),
     path('scholarships/<int:pk>/', ScholarshipDetailView.as_view(), name='scholarship-detail'),
+    
+        # Endpoints para Types
+    path('types/', TypeListCreateView.as_view(), name='type-list-create'),
+    path('types/<int:pk>/', TypeDetailView.as_view(), name='type-detail'),
+    
+    # Endpoints para Countries
+    path('countries/', CountryListCreateView.as_view(), name='country-list-create'),
+    path('countries/<int:pk>/', CountryDetailView.as_view(), name='country-detail'),
+    
+    # Endpoints para Interests
+    path('interests/', InterestListCreateView.as_view(), name='interest-list-create'),
+    path('interests/<int:pk>/', InterestDetailView.as_view(), name='interest-detail'),
 ]

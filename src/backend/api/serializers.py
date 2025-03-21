@@ -40,6 +40,28 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
+# class ScholarshipSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Scholarship
+#         fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by","country"]
+#         read_only_fields = ["publication_date", "created_by","id","organization"]
+#         extra_kwargs = {"organization": {"read_only": True}}
+
+class TypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Type
+        fields = ['id', 'name', 'type_name']
+        
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ['id', 'name', 'emoji']
+    
+class InterestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interest
+        fields = ['id', 'name', 'color']
+
 class ScholarshipSerializer(serializers.ModelSerializer):
     # Override fields to handle them as strings
     type = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string

@@ -45,6 +45,294 @@ from .serializers import (
     TypeSerializer, CountrySerializer, InterestSerializer
 )
 
+class TypeListCreateView(APIView):
+    """
+    Vista para listar todos los tipos y crear nuevos.
+    GET: Listar todos los tipos
+    POST: Crear un nuevo tipo
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        """Listar todos los tipos"""
+        types = Type.objects.all()
+        serializer = TypeSerializer(types, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        """Crear un nuevo tipo"""
+        serializer = TypeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class TypeDetailView(APIView):
+    """
+    Vista para recuperar, actualizar o eliminar un tipo específico.
+    GET: Obtener detalle de un tipo
+    PUT: Actualizar un tipo completo
+    PATCH: Actualizar parcialmente un tipo
+    DELETE: Eliminar un tipo
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_object(self, pk):
+        """Obtener objeto de tipo por ID"""
+        return get_object_or_404(Type, pk=pk)
+    
+    def get(self, request, pk):
+        """Obtener detalle de un tipo específico"""
+        type_obj = self.get_object(pk)
+        serializer = TypeSerializer(type_obj)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        """Actualizar un tipo completo"""
+        type_obj = self.get_object(pk)
+        serializer = TypeSerializer(type_obj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, pk):
+        """Actualizar parcialmente un tipo"""
+        type_obj = self.get_object(pk)
+        serializer = TypeSerializer(type_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        """Eliminar un tipo"""
+        type_obj = self.get_object(pk)
+        type_obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# ------------ VISTAS PARA PAÍS ------------
+
+class CountryListCreateView(APIView):
+    """
+    Vista para listar todos los países y crear nuevos.
+    GET: Listar todos los países
+    POST: Crear un nuevo país
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        """Listar todos los países"""
+        countries = Country.objects.all()
+        serializer = CountrySerializer(countries, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        """Crear un nuevo país"""
+        serializer = CountrySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CountryDetailView(APIView):
+    """
+    Vista para recuperar, actualizar o eliminar un país específico.
+    GET: Obtener detalle de un país
+    PUT: Actualizar un país completo
+    PATCH: Actualizar parcialmente un país
+    DELETE: Eliminar un país
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_object(self, pk):
+        """Obtener objeto de país por ID"""
+        return get_object_or_404(Country, pk=pk)
+    
+    def get(self, request, pk):
+        """Obtener detalle de un país específico"""
+        country = self.get_object(pk)
+        serializer = CountrySerializer(country)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        """Actualizar un país completo"""
+        country = self.get_object(pk)
+        serializer = CountrySerializer(country, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, pk):
+        """Actualizar parcialmente un país"""
+        country = self.get_object(pk)
+        serializer = CountrySerializer(country, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        """Eliminar un país"""
+        country = self.get_object(pk)
+        country.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# ------------ VISTAS PARA INTERÉS ------------
+
+class InterestListCreateView(APIView):
+    """
+    Vista para listar todos los intereses y crear nuevos.
+    GET: Listar todos los intereses
+    POST: Crear un nuevo interés
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        """Listar todos los intereses"""
+        interests = Interest.objects.all()
+        serializer = InterestSerializer(interests, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        """Crear un nuevo interés"""
+        serializer = InterestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class InterestDetailView(APIView):
+    """
+    Vista para recuperar, actualizar o eliminar un interés específico.
+    GET: Obtener detalle de un interés
+    PUT: Actualizar un interés completo
+    PATCH: Actualizar parcialmente un interés
+    DELETE: Eliminar un interés
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_object(self, pk):
+        """Obtener objeto de interés por ID"""
+        return get_object_or_404(Interest, pk=pk)
+    
+    def get(self, request, pk):
+        """Obtener detalle de un interés específico"""
+        interest = self.get_object(pk)
+        serializer = InterestSerializer(interest)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        """Actualizar un interés completo"""
+        interest = self.get_object(pk)
+        serializer = InterestSerializer(interest, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, pk):
+        """Actualizar parcialmente un interés"""
+        interest = self.get_object(pk)
+        serializer = InterestSerializer(interest, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        """Eliminar un interés"""
+        interest = self.get_object(pk)
+        interest.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ScholarshipDetailView(APIView):
+    """
+    Vista para recuperar, actualizar o eliminar una beca específica.
+    GET: Obtener detalle de una beca
+    PUT: Actualizar una beca completa
+    PATCH: Actualizar parcialmente una beca
+    DELETE: Eliminar una beca
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_object(self, pk):
+        """Obtener objeto de beca por ID"""
+        return get_object_or_404(Scholarship, pk=pk)
+    
+    def check_permission(self, scholarship, user):
+        """Verificar si el usuario tiene permiso para modificar la beca"""
+        # El creador de la beca siempre puede modificarla
+        if scholarship.created_by == user:
+            return True
+            
+        # Si la beca pertenece a una organización, verificar si el usuario es admin
+        if scholarship.organization:
+            is_admin = Membership.objects.filter(
+                user=user,
+                organization=scholarship.organization,
+                is_admin=True,
+                is_active=True
+            ).exists()
+            return is_admin
+            
+        return False
+    
+    def get(self, request, pk):
+        """Obtener detalle de una beca específica"""
+        scholarship = self.get_object(pk)
+        serializer = ScholarshipSerializer(scholarship)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        """Actualizar una beca completa"""
+        scholarship = self.get_object(pk)
+        
+        # Verificar permisos
+        if not self.check_permission(scholarship, request.user):
+            return Response(
+                {"error": "No tienes permiso para modificar esta beca."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = ScholarshipSerializer(scholarship, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, pk):
+        """Actualizar parcialmente una beca"""
+        scholarship = self.get_object(pk)
+        
+        # Verificar permisos
+        if not self.check_permission(scholarship, request.user):
+            return Response(
+                {"error": "No tienes permiso para modificar esta beca."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = ScholarshipSerializer(scholarship, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        """Eliminar una beca"""
+        scholarship = self.get_object(pk)
+        
+        # Verificar permisos
+        if not self.check_permission(scholarship, request.user):
+            return Response(
+                {"error": "No tienes permiso para eliminar esta beca."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        scholarship.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 ### Vistas de la API ###
 
 class CreateUserView(generics.CreateAPIView):
