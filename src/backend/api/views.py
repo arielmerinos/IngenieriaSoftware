@@ -519,6 +519,13 @@ class ScholarshipDetailView(APIView):
         scholarship.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class ScholarshipListView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request):
+        scholarship_data = Scholarship.objects.all()
+        serializer = ScholarshipSerializer(scholarship_data, many=True)
+        return Response(serializer.data)
+
 class UserDataListView(APIView):
     def get(self, request):
         user_data = UserData.objects.all()
