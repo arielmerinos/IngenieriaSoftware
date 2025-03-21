@@ -22,21 +22,22 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 import React from 'react';
 // import penrose from "../../assets/penrose.png"
 import { Opportunity } from '../../types/opportunity';
-import { Link } from 'react-router';
+// import { Link } from 'react-router';
 
 const penrose = "penrose.png"
 
 const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     return (
-        <Link to={`/post/${item.id}`} 
+        <div
             className='
+                h-full
                 bg-white
                 rounded-lg
                 overflow-hidden
                 shadow
                 hover:text-black
                  transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:shadow-xl'>
-            <div className='grid grid-cols-[70%_30%]'>
+            <div className='grid grid-cols-[70%_30%] h-full'>
                 <div className='p-4 text-left'>
                     {item.organization != ""
                         ? <p className='text-sm text-blue-500'>{item.organization} Org.</p>
@@ -44,8 +45,8 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                     }
                     <h1 className="font-bold text-lg mb-1">{item.name}</h1>
                     <p className='rounded-lg text-xs text-gray-500 bg-gray-200 w-fit px-2 py-px border-gray-500 rounded-full'>{item.type}</p>
-                    <p className='mt-2'>{item.content}</p>
-                    <p className='mt-5 text-xs text-gray-500'>{item.beginning.toLocaleDateString()} - {item.end.toLocaleDateString()}</p>
+                    <p className='mt-2 text-xs text-gray-500'>{item.beginning.toLocaleDateString()} - {item.end.toLocaleDateString()}</p>
+                    <p className='mt-1'>{item.content}</p>
                 </div>
                 <div>
                     <img
@@ -55,7 +56,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                     />
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }
 

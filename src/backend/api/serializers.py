@@ -40,13 +40,66 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
+# class ScholarshipSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Scholarship
+#         fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by","country"]
+#         read_only_fields = ["publication_date", "created_by","id","organization"]
+#         extra_kwargs = {"organization": {"read_only": True}}
+
 class ScholarshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scholarship
-        fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by","country"]
-        read_only_fields = ["publication_date", "created_by","id","organization"]
-        extra_kwargs = {"organization": {"read_only": True}}
+        fields = [
+            "id", 
+            "organization", 
+            "name", 
+            "publication_date", 
+            "start_date", 
+            "end_date", 
+            "type", 
+            "image", 
+            "content", 
+            "interests",
+            "created_by",
+            "country"
+        ]
+        read_only_fields = ["publication_date", "created_by", "id"]
+    
+    def create(self, validated_data):
+        # Extraer relaciones ManyToMany antes de crear la beca
+        types = validated_data.pop('type', [])
+        interests = validated_data.pop('interests', [])
+        countries = validated_data.pop('country', [])
         
+        # Crear la beca con los datos restantes
+        scholarship = Scholarship.objects.create(**validated_data)
+        
+        # Añadir relaciones ManyToMany después de crear
+        if types:
+            scholarship.type.set(types)
+        if interests:
+            scholarship.interests.set(interests)
+        if countries:
+            scholarship.country.set(countries)
+            
+        return scholarship
+    
+    def update(self, instance, validated_data):
+        # Actualizar relaciones ManyToMany si están presentes
+        if 'type' in validated_data:
+            instance.type.set(validated_data.pop('type'))
+        if 'interests' in validated_data:
+            instance.interests.set(validated_data.pop('interests'))
+        if 'country' in validated_data:
+            instance.country.set(validated_data.pop('country'))
+        
+        # Actualizar campos normales
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance
 
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,18 +108,28 @@ class UserDataSerializer(serializers.ModelSerializer):
         read_only_fields = ["user", "id"]
         extra_kwargs = {"user": {"read_only": True}}
         
-        
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ["id", "name", "email", "phone_number", "website", "logo", "members"]
+        fields = ['name', 'email', 'website', 'description', 'phone_number', 'logo']
+        extra_kwargs = {
+            'phone_number': {'required': False, 'allow_null': True},
+            'logo': {'required': False, 'allow_null': True},
+        }
+    
+    def create(self, validated_data):
+        request = self.context.get('request')
+        organization = Organization.objects.create(**validated_data)
+        Membership.objects.create(user=request.user, organization=organization, is_admin=True)
+        return organization
         
         
 class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
-        fields = ["id", "student", "organization", "is_admin"]
-    
+        fields = ["id", "user", "organization", "is_admin", "is_active"]
+        read_only_fields = ['id', 'user', 'organization', 'is_admin', 'is_active']
+
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)
 
