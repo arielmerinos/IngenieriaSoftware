@@ -47,6 +47,21 @@ class UserSerializer(serializers.ModelSerializer):
 #         read_only_fields = ["publication_date", "created_by","id","organization"]
 #         extra_kwargs = {"organization": {"read_only": True}}
 
+class TypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Type
+        fields = ['id', 'name', 'type_name']
+        
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Country
+        fields = ['id', 'name', 'emoji']
+    
+class InterestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interest
+        fields = ['id', 'name', 'color']
+
 class ScholarshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scholarship
