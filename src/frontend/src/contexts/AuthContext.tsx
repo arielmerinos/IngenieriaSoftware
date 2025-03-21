@@ -143,6 +143,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 const data = await response.json();
                 // Guardamos el token de acceso usando el campo "access" que retorna el backend
                 localStorage.setItem("authToken", data.access);
+                localStorage.setItem("refreshToken", data.refresh);
                 setAuthToken(data.access);
                 // Actualizamos la información del usuario (puedes ajustar el id u otros campos según la respuesta)
                 setUser({ id: data.user_id || 1, username, name: "", access: data.access, refresh: data.refresh });
