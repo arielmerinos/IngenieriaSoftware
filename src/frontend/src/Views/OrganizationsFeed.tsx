@@ -21,8 +21,10 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
 import React, { Suspense, useState } from "react";
+import axios from 'axios';
 import "./Landing.css";
 import RegisterOrganizationForm from "../components/Organizations/RegisterOrganization";
+import { OrganizationData } from '../components/Organizations/RegisterOrganization'; 
 
 const Header = React.lazy(() => import("../components/Header"));
 const Footer = React.lazy(() => import("../components/Footer"));
@@ -30,6 +32,31 @@ const Organizations = React.lazy(() => import("../components/Organizations/Organ
 
 function OrganizationsFeed() {
     const [isOpen, setIsOpen] = useState(false);
+
+    const handleRegisterOrganization = async (data: OrganizationData) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.error('No se encontró token de autenticación.');
+                return;
+            }
+
+            const response = await axios.post(
+                'http://0.0.0.0:8000/organization/create/',
+                data,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+            console.log('Organización creada exitosamente:', response.data);
+            setIsOpen(false);
+        } catch (error) {
+            console.error('Error al registrar la organización:', error);
+        }
+    };
 
     return (
         <section className="w-full min-h-screen flex flex-col">
@@ -56,10 +83,7 @@ function OrganizationsFeed() {
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                         <h2 className="text-lg font-bold mb-4">Registro de Organización</h2>
                         <RegisterOrganizationForm
-                            onSubmit={(data) => {
-                                console.log("Organización registrada:", data);
-                                setIsOpen(false);
-                            }}
+                            onSubmit={handleRegisterOrganization}
                             onClose={() => setIsOpen(false)} 
                         />
                     </div>
@@ -70,3 +94,4 @@ function OrganizationsFeed() {
 }
 
 export default OrganizationsFeed;
+
