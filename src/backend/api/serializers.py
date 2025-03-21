@@ -60,12 +60,19 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ["id", "name", "email", "phone_number", "website", "logo", "members"]
+    
+    def create(self, validated_data):
+        request = self.context.get('request')
+        organization = Organization.objects.create(**validated_data)
+        Membership.objects.create(user=request.user, organization=organization, is_admin=True)
+        return organization
         
         
 class MembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membership
-        fields = ["id", "student", "organization", "is_admin"]
+        fields = ["id", "user", "organization", "is_admin", "is_active"]
+        read_only_fields = ["organization"]
     
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)

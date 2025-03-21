@@ -20,7 +20,7 @@
 
 from django.contrib import admin
 from django.urls import path,include
-from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView
+from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -33,4 +33,8 @@ urlpatterns = [
     path('oauth/', include('social_django.urls', namespace='social')),
     path('api/auth/tokens/', UserTokenView.as_view(), name='user_tokens'),
     path("api/", include("api.urls")),
+
+    path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
+    path("organzation/<int:organization_id>/join/", JoinOrganizationView.as_view(), name='follow_organization'),
+    path("organization/<int:organization_id>/accept_user/<int:user_id>/", AcceptMembershipView.as_view(), name='accept_user'),
 ]

@@ -21,18 +21,18 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
 from .models.scholarship import Scholarship
 from .models.user_data import UserData
-from .models.organization import Organization
-from .models.organization import Membership
+from .models.organization import Organization, Membership
 from .models.category import Category
 from .models.type import Type
 from .models.country import Country
@@ -107,6 +107,68 @@ class OrganizationListView(APIView):
         organizations = Organization.objects.all()
         serializer = OrganizationSerializer(organizations, many=True)
         return Response(serializer.data)
+
+#############################################################################3
+
+class OrganizationCreateView(generics.CreateAPIView):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class JoinOrganizationView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, format=None):
+        organization_id = request.data.get('organization_id')
+        if not organization_id:
+            return Response({'error': 'El id de la organización es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            organization = Organization.objects.get(id=organization_id)
+        except Organization.DoesNotExist:
+            return Response({'error': 'Organización no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Verificar si ya existe una solicitud o membresía para este usuario en esta organización
+        if Membership.objects.filter(student=request.user, organization=organization).exists():
+            return Response({'error': 'Ya has solicitado o eres miembro de esta organización.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Crear la solicitud de membresía (pendiente de aceptación)
+        membership = Membership.objects.create(student=request.user, organization=organization, is_admin=False)
+        # Si agregaste is_accepted, se creará como False por defecto.
+        serializer = MembershipSerializer(membership)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+class AcceptMembershipView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, format=None):
+        membership_id = request.data.get('membership_id')
+        if not membership_id:
+            return Response({'error': 'El id de la membresía es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            membership = Membership.objects.get(id=membership_id)
+        except Membership.DoesNotExist:
+            return Response({'error': 'Solicitud de membresía no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Verificar que el usuario autenticado sea admin en la organización a la que se solicita pertenecer
+        admin_check = Membership.objects.filter(
+            student=request.user,
+            organization=membership.organization,
+            is_admin=True
+        ).exists()
+        if not admin_check:
+            return Response({'error': 'No tienes permisos para aceptar miembros en esta organización.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Actualizar la solicitud a aceptada
+        membership.is_accepted = True
+        membership.save()
+        
+        serializer = MembershipSerializer(membership)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        
+############################################################################
     
 class MembershipListView(APIView):
     def get(self, request):
