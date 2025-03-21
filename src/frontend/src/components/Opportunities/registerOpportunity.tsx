@@ -1,7 +1,6 @@
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
-// Define opportunity types
 const OpportunityTypes = [
     { value: 'beca', label: 'Beca' },
     { value: 'maestria', label: 'Maestría' },
@@ -20,9 +19,8 @@ const OpportunityTypes = [
     { value: 'hackathon', label: 'Hackathon' },
     { value: 'evento', label: 'Evento' },
     { value: 'pasantia', label: 'Pasantía' },
-    { value: 'otro', label: 'Otro' }
+    { value: 'otro', label: 'Otro' },
 ];
-
 
 const countries = [
     { id: 1, name: 'Mexico' },
@@ -41,22 +39,45 @@ interface FormData {
     country: number[];
 }
 
-const RegisterOpportunity: React.FC<{ onSubmit: (data: FormData) => Promise<void>; onClose: () => void }> = ({ onSubmit, onClose }) => {
+const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({ mode: 'onChange' });
 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
-        const formData = new FormData();
-        formData.append('type', JSON.stringify(data.type));
-        formData.append('start_date', data.start_date);
-        formData.append('end_date', data.end_date);
-        formData.append('content', data.content);
-        formData.append('interests', JSON.stringify(data.interests));
-        formData.append('country', JSON.stringify(data.country));
-        if (data.image.length > 0) {
-            formData.append('image', data.image[0]);
-        }
+        try {
+            const token = localStorage.getItem('access_token'); // Retrieve the JWT token
+            if (!token) {
+                throw new Error('User is not authenticated');
+            }
 
-        await onSubmit(formData as unknown as FormData);
+            const formData = new FormData();
+            formData.append('type', JSON.stringify(data.type));
+            formData.append('start_date', data.start_date);
+            formData.append('end_date', data.end_date);
+            formData.append('content', data.content);
+            formData.append('interests', JSON.stringify(data.interests));
+            formData.append('country', JSON.stringify(data.country));
+            if (data.image.length > 0) {
+                formData.append('image', data.image[0]);
+            }
+
+            const response = await fetch('http://localhost:8000/api/scholarships/create/', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`, // Include the JWT token in the Authorization header
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create opportunity');
+            }
+
+            const result = await response.json();
+            console.log('Opportunity created:', result);
+            onClose(); // Close the form after successful submission
+        } catch (error) {
+            console.error('Error creating opportunity:', error);
+        }
     };
 
     return (
@@ -103,17 +124,6 @@ const RegisterOpportunity: React.FC<{ onSubmit: (data: FormData) => Promise<void
                 <label className="block text-sm font-medium text-gray-700">Descripción</label>
                 <textarea {...register('content', { required: 'La descripción es obligatoria' })} rows={4} className="w-full px-3 py-2 border rounded-md"></textarea>
                 {errors.content && <span className="text-red-500 text-sm">{errors.content.message}</span>}
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Creado por</label>
-                <input 
-                    type="text" 
-                    {...register('created_by', { required: 'El usuario creador es obligatorio' })} 
-                    className="w-full px-3 py-2 border rounded-md" 
-                    placeholder="Nombre del usuario" 
-                />
-                {errors.created_by && <span className="text-red-500 text-sm">{errors.created_by.message}</span>}
             </div>
 
             <div>
