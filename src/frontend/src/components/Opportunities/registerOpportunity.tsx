@@ -1,5 +1,7 @@
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { useGrid } from '../../contexts/GridContext';
+import { usePopUp } from '../../contexts/PopUpContext';
 
 const OpportunityTypes = [
     { value: 'beca', label: 'Beca' },
@@ -47,8 +49,11 @@ interface FormData {
     country: number[];
 }
 
-const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const RegisterOpportunity: React.FC = () => {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({ mode: 'onChange' });
+    
+    const gridContext = useGrid();
+    const popUpContext = usePopUp();
 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
         console.log('Form submitted:', data); // Debugging log
@@ -93,11 +98,34 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
             const result = await response.json();
             console.log('Opportunity created:', result);
-            onClose(); // Close the form after successful submission
+            gridContext?.addElem(opportunityParse(data));
+            popUpContext.setOpen(false); // Close the form after successful submission
         } catch (error) {
             console.error('Error creating opportunity:', error);
         }
     };
+
+    
+
+    function opportunityParse(element: any){
+        let newElem =  {
+            id: element.id,
+            organization: "",
+            name: element.name,
+            published: new Date(element.publication_date),
+            beginning: new Date(element.start_date),
+            end: new Date(element.end_date),
+            type: "Convocatoria",
+            image: "placeholder.png",
+            content: element.content,
+            interests: [],
+            author: localStorage.getItem('username'),
+            country: "Mexico"
+        };
+        console.log(newElem);
+        return newElem
+    }
+
 
     return (
         <form
@@ -105,9 +133,11 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
                 e.preventDefault(); // Prevent default behavior for debugging
                 console.log('Form onSubmit triggered');
                 handleSubmit(submitHandler)(e); // Call react-hook-form's handleSubmit
+
             }}
             className="space-y-4"
         >
+            <h2 className="text-lg font-bold mb-4">Registro de Convocatoria</h2>
             {/* Name Field */}
             <div>
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
@@ -195,9 +225,6 @@ const RegisterOpportunity: React.FC<{ onClose: () => void }> = ({ onClose }) => 
             <div className="flex gap-4">
                 <button type="submit" disabled={!isValid} className={`flex-1 text-white py-2 rounded-md ${isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400'}`}>
                     Publicar Convocatoria
-                </button>
-                <button type="button" onClick={onClose} className="flex-1 text-gray-600 py-2 rounded-md border border-gray-400 hover:bg-gray-100">
-                    Cancelar
                 </button>
             </div>
         </form>

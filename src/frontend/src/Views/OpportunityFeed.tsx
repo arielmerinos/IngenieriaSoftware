@@ -22,6 +22,9 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 import React, { Suspense } from 'react'
 import './Landing.css'
+import { useAuth } from '../contexts/AuthContext';
+import { PopUpProvider } from '../contexts/PopUpContext';
+import { GridProvider } from '../contexts/GridContext';
 
 const Header = React.lazy(() => import('../components/Header'));
 const Footer = React.lazy(() => import('../components/Footer'));
@@ -30,25 +33,33 @@ const OpportunitiesButton = React.lazy(() => import('../components/Opportunities
 
 function OpportunityFeed() {
 
+  const authContext = useAuth();
+
   // Loader component can be simple
   const Loader = () => (
     <div className="flex justify-center items-center h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-600"></div>
     </div>
   );
-  
 
   return (
     
     <section className="w-full min-h-screen">
         <Suspense fallback={<Loader />}>
         <Header />
-        <OpportunitiesButton />
-        <Opportunities></Opportunities>
+        {/* Es muy importante que primero este el grid y luego el Pop Up, sino el pop up no puede ver el grid */}
+        <GridProvider>
+        <PopUpProvider>
+          {authContext.isAuthenticated &&
+            <OpportunitiesButton />
+          }
+          <Opportunities />
+        </PopUpProvider>
+        </GridProvider>
         <Footer />
         </Suspense>
     </section>
   );
 }
 
-export default OpportunityFeed
+export default OpportunityFeed;

@@ -21,30 +21,29 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
 import OpportunityCard from "./OpportunityCard"
-import { OpportunityContent, opportunityExample, opportunityExample2 } from "../../types/opportunity";
-import { useEffect, useState } from "react";
+import { OpportunityContent } from "../../types/opportunity";
+import { useEffect } from "react";
 import OpportunityDetails from "./OpportunityDetails";
-import exit from "../../assets/exit.png"
+import { usePopUp } from "../../contexts/PopUpContext";
+import { useGrid } from "../../contexts/GridContext";
 
 const Opportunities: React.FC = () => {
-    const [isOpen, setOpen] = useState(false);
-    const [focusedOpportunity, setFocusedOpportunity] = useState(opportunityExample)
-    const [fetched, setFecthed] = useState([]);
-
-    /**
-     * Las oportunidades del back en forma de OpportunityContent
-     */
-    const content = [opportunityExample, opportunityExample2, opportunityExample2]
+    const cardsContext = useGrid();
+    const popUpContext = usePopUp();
 
     /**
      * Abre el Pop Up de la oportunidad que le hace click
      * @param OpportunityContent de la oportunidad que le hace click
      */
     function openPopUp(opportunity: OpportunityContent){
-        setFocusedOpportunity(opportunity)
-        setOpen(true)
+        popUpContext?.setContent(<OpportunityDetails item={opportunity} />)
+        popUpContext?.setOpen(true)
     }
 
+    /**
+     * @param element JSON
+     * @returns Una opportunity con la info del JSON.
+     */
     function organizationParse(element: JSON){
         // console.log(element)
         let newElem =  {
@@ -65,65 +64,26 @@ const Opportunities: React.FC = () => {
         return newElem
     }
 
+    /**
+     * Carga los datos de la api al abrir el componente.
+     */
     useEffect(() =>{
         const url = "http://localhost:8000/scholarships/";
         fetch(url)
             .then(response => response.json())
-            .then(items => setFecthed(items.map((item:JSON) => organizationParse(item))))
+            .then(items => cardsContext?.setElems(items.map((item:JSON) => organizationParse(item))))
     }, []) // Sin el segundo param [] se va a ejecutar en loop, noc pq
 
     return (
         <div className="">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10 mb-10 auto-rows-[1fr]">
-                { fetched.map(opportunity => (
+                { cardsContext?.elems.map(opportunity => (
                 <div onClick={() => {openPopUp(opportunity)}}>
                     <OpportunityCard item={opportunity}></OpportunityCard>
                 </div>
                 ))}
             </div>
-            {isOpen && 
-                <div
-                    onBlur={() => {setOpen(false)}}
-                    className="
-                        fixed
-                        inset-0
-                        h-full
-                        bg-black
-                        bg-opacity-50">
-                    <div
-                        className="
-                            w-1/2
-                            max-h-[80%]
-                            mx-auto
-                            mt-20
-                            mb-20
-                            bg-white
-                            p-10
-                            pt-5
-                            rounded-xl
-                            overflow-visible
-                            overflow-y-auto
-                            shadow-2xl"
-                    >
-                        <div className="flow-root">
-                            <p
-                                className="
-                                    float-right
-                                    w-fit
-                                    p-2
-                                    rounded-full
-                                    hover:bg-gray-100"
-                                onClick={() => {setOpen(false)}}
-                            >
-                                <img src={exit} className="w-4 h-4" />
-                            </p>
-                        </div>
-                        <OpportunityDetails item={focusedOpportunity} />
-                    </div>
-                </div>
-            }
         </div>
-        
     )
 }
 
