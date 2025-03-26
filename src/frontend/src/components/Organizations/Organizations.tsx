@@ -19,26 +19,13 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import OrganizationCard from "../Organizations/OrganizationCard";
-
-interface OrganizationContent {
-    name: string,
-    content: string,
-    type: string,
-    image: string,
-}
-
-const opportunityExample = {
-    name: "maicroso",
-    content: "Empresa dedicada al desarrollo de software",
-    type: "tecnologoia",
-    image: "penrose.png",
-}
+import { useGrid } from "../../contexts/GridContext";
 
 const Organizations: React.FC = () => {
 
-    const [fetched, setFecthed] = useState([]);
+    const gridContext = useGrid();
 
     function organizationParse(org: JSON){
         return {
@@ -54,12 +41,12 @@ const Organizations: React.FC = () => {
             const url = "http://localhost:8000/organizations/all/";
             fetch(url)
                 .then(response => response.json())
-                .then(items => setFecthed(items.map((item:JSON) => organizationParse(item))))
+                .then(items => gridContext.setElems(items.map((item:JSON) => organizationParse(item))))
         }, [])
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10">
-            { fetched.map(org => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10 mb-10">
+            { gridContext.elems.map(org => (
                 <OrganizationCard item={org}></OrganizationCard>
             ))
 

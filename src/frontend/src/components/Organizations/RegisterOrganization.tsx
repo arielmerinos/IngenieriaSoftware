@@ -20,8 +20,11 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import React from 'react';
+import axios from 'axios';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import { usePopUp } from '../../contexts/PopUpContext';
+import { useGrid } from '../../contexts/GridContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 export interface OrganizationData {
     name: string;
@@ -30,12 +33,12 @@ export interface OrganizationData {
     description?: string;
 }
 
-interface RegisterOrganizationFormProps {
-    onSubmit: (data: OrganizationData) => void;
-    onClose: () => void;
-}
+export function RegisterOrganizationForm(){
 
-const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onSubmit, onClose }) => {
+    const authContext = useAuth();
+    const popUpContext = usePopUp();
+    const gridContext = useGrid();
+
     const {
         register,
         handleSubmit,
@@ -50,12 +53,51 @@ const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onS
         }
     });
 
-    const submitHandler: SubmitHandler<OrganizationData> = async (data) => {
-        await onSubmit(data);
+    function organizationParse(org: any){
+        return {
+            name: org.name,
+            content: org.website,
+            type: org.email,
+            image: "penrose.png"
+        }
+    }
+
+    const handleRegisterOrganization = async (data: OrganizationData) => {
+        try {
+            const token = authContext.authToken;
+            if (!token) {
+                console.error('No se encontró token de autenticación.');
+                return;
+            }
+
+            const response = await axios.post(
+                'http://0.0.0.0:8000/organization/create/',
+                data,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+            console.log('Organización creada exitosamente:', response.data);
+            gridContext.addElem(organizationParse(data));
+            popUpContext.setOpen(false);
+        } catch (error) {
+            console.log(data)
+            console.error('Error al registrar la organización:', error);
+        }
+    };
+
+    const submitHandler: SubmitHandler<OrganizationData> = async (data : OrganizationData) => {
+        await handleRegisterOrganization(data);
     };
 
     return (
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
+            <h2 className="text-lg font-bold mb-4">
+                Registro de Organización
+            </h2>
             <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                     Nombre de la Organización
@@ -65,7 +107,7 @@ const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onS
                     id="name"
                     placeholder="Nombre de la organización"
                     {...register('name', {
-                        required: 'El nombre de la organización es obligatorio'
+                        required: 'El nombre de la organización es obligatorio.'
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -81,7 +123,7 @@ const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onS
                     id="email"
                     placeholder="contacto@empresa.com"
                     {...register('email', {
-                        required: 'El correo es obligatorio',
+                        required: 'El correo es obligatorio.',
                         pattern: {
                             value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
                             message: 'Ingresa un correo válido'
@@ -94,13 +136,14 @@ const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onS
 
             <div>
                 <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
-                    Sitio Web (opcional)
+                    Sitio Web
                 </label>
                 <input
                     type="url"
                     id="website"
                     placeholder="https://www.miempresa.com"
                     {...register('website', {
+                        required: 'El sitio web de la organización es obligatorio.',
                         pattern: {
                             value: /^(https?:\/\/)?([\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)?$/,
                             message: 'Ingresa una URL válida'
@@ -133,17 +176,6 @@ const RegisterOrganizationForm: React.FC<RegisterOrganizationFormProps> = ({ onS
                 }`}
             >
                 Registrar Organización
-            </button>
-
-            <button
-                type="button"
-                onClick={() => {
-                    console.log("Botón de cancelar presionado"); // Verifica en la consola si se ejecuta
-                    onClose();
-                }}
-                className="w-full text-gray-600 mt-2 py-2 rounded-full border border-gray-400 hover:bg-gray-100 transition"
-            >
-                Cancelar
             </button>
         </form>
     );

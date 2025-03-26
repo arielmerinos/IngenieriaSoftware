@@ -20,75 +20,36 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import React, { Suspense, useState } from "react";
-import axios from 'axios';
+import React, { Suspense } from "react";
 import "./Landing.css";
-import RegisterOrganizationForm from "../components/Organizations/RegisterOrganization";
-import { OrganizationData } from '../components/Organizations/RegisterOrganization'; 
+import Loader from "../components/Loader";
+import { GridProvider } from "../contexts/GridContext";
+import { PopUpProvider } from "../contexts/PopUpContext";
+import { useAuth } from "../contexts/AuthContext";
+import { AddOrganizationButton } from "../components/Organizations/AddOrganizationButton";
 
 const Header = React.lazy(() => import("../components/Header"));
 const Footer = React.lazy(() => import("../components/Footer"));
 const Organizations = React.lazy(() => import("../components/Organizations/Organizations"));
 
 function OrganizationsFeed() {
-    const [isOpen, setIsOpen] = useState(false);
 
-    const handleRegisterOrganization = async (data: OrganizationData) => {
-        try {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                console.error('No se encontró token de autenticación.');
-                return;
-            }
-
-            const response = await axios.post(
-                'http://0.0.0.0:8000/organization/create/',
-                data,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
-            );
-            console.log('Organización creada exitosamente:', response.data);
-            setIsOpen(false);
-        } catch (error) {
-            console.error('Error al registrar la organización:', error);
-        }
-    };
+    const authContext = useAuth();
 
     return (
-        <section className="w-full min-h-screen flex flex-col">
-            <Suspense fallback={<div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-600"></div>
-            </div>}>
+        <section className="w-full min-h-screen">
+            <Suspense fallback={<Loader />}>
                 <Header />
-                <div className="flex-1">
+                <GridProvider>
+                <PopUpProvider>
+                    {authContext.isAuthenticated &&
+                        <AddOrganizationButton />
+                    }
                     <Organizations />
-                </div>
-                <div className="text-center mt-10 mb-16">
-                    <button
-                        onClick={() => setIsOpen(true)}
-                        className="text-blue-600 font-medium px-6 py-2 rounded-full border border-blue-600 hover:bg-blue-50 transition"
-                    >
-                        Crear Organización
-                    </button>
-                </div>
+                </PopUpProvider>
+                </GridProvider>
                 <Footer />
             </Suspense>
-
-            {isOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <h2 className="text-lg font-bold mb-4">Registro de Organización</h2>
-                        <RegisterOrganizationForm
-                            onSubmit={handleRegisterOrganization}
-                            onClose={() => setIsOpen(false)} 
-                        />
-                    </div>
-                </div>
-            )}
         </section>
     );
 }

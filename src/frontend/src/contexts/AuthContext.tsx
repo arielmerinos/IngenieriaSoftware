@@ -20,7 +20,6 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-// src/contexts/AuthContext.tsx
 import React, {
     createContext,
     useState,
@@ -180,6 +179,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Función para cerrar sesión
     const logout = () => {
         localStorage.removeItem("authToken");
+        localStorage.removeItem("username");
+        localStorage.removeItem("refreshToken")
         setAuthToken(null);
         setUser(null);
     };
