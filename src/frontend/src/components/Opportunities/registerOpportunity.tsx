@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useGrid } from '../../contexts/GridContext';
 import { usePopUp } from '../../contexts/PopUpContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const OpportunityTypes = [
     { value: 'beca', label: 'Beca' },
@@ -54,12 +55,13 @@ const RegisterOpportunity: React.FC = () => {
     
     const gridContext = useGrid();
     const popUpContext = usePopUp();
+    const authContext = useAuth();
 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
         console.log('Form submitted:', data); // Debugging log
         try {
-            const token = localStorage.getItem('authToken'); // Retrieve the JWT token
-            const username = localStorage.getItem('username'); // Retrieve the username from localStorage or another source
+            const token = authContext.authToken; // Retrieve the JWT token
+            const username = authContext.user?.username; // Retrieve the username from authContext
             if (!token || !username) {
                 throw new Error('User is not authenticated');
             }
@@ -119,7 +121,7 @@ const RegisterOpportunity: React.FC = () => {
             image: "placeholder.png",
             content: element.content,
             interests: [],
-            author: localStorage.getItem('username'),
+            author: authContext.user?.username,
             country: "Mexico"
         };
         console.log(newElem);
