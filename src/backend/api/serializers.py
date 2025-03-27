@@ -92,8 +92,28 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "publication_date"]
 
     def create(self, validated_data):
-        # Create the scholarship object with all provided data
-        return Scholarship.objects.create(**validated_data)
+        # Extract Many-to-Many fields
+        type_data = validated_data.pop('type', '')
+        interests_data = validated_data.pop('interests', '')
+        country_data = validated_data.pop('country', '')
+
+        # Create the Scholarship object
+        scholarship = Scholarship.objects.create(**validated_data)
+
+        # Handle Many-to-Many fields
+        if type_data:
+            type_ids = [int(type_id) for type_id in type_data.split(',')]
+            scholarship.type.set(type_ids)
+
+        if interests_data:
+            interest_ids = [int(interest_id) for interest_id in interests_data.split(',')]
+            scholarship.interests.set(interest_ids)
+
+        if country_data:
+            country_ids = [int(country_id) for country_id in country_data.split(',')]
+            scholarship.country.set(country_ids)
+
+        return scholarship
 
     def update(self, instance, validated_data):
         # Update the fields directly
