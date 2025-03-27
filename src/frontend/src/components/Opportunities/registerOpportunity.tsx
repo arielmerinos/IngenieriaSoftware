@@ -18,9 +18,9 @@ interface FormData {
 
 const RegisterOpportunity: React.FC = () => {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({ mode: 'onChange' });
-    const [opportunityTypes, setOpportunityTypes] = useState<{ value: string; label: string }[]>([]);
-    const [countries, setCountries] = useState<{ id: number; name: string }[]>([]);
-    const [interests, setInterests] = useState<{ id: number; name: string }[]>([]);
+    const [opportunityTypes, setOpportunityTypes] = useState<{ id:number, name:string }[]>([]);
+    const [countries, setCountries] = useState<{ id: number; name: string, emoji:string }[]>([]);
+    const [interests, setInterests] = useState<{ id: number; name: string, color: string}[]>([]);
 
     const gridContext = useGrid();
     const popUpContext = usePopUp();
@@ -54,7 +54,7 @@ const RegisterOpportunity: React.FC = () => {
                 const countriesData = await countriesResponse.json();
                 const interestsData = await interestsResponse.json();
 
-                setOpportunityTypes(typesData.map((type: any) => ({ value: type.type_name, label: type.name })));
+                setOpportunityTypes(typesData);
                 setCountries(countriesData);
                 setInterests(interestsData);
             } catch (error) {
@@ -158,16 +158,24 @@ const RegisterOpportunity: React.FC = () => {
             </div>
 
             {/* Types Field */}
-            {/* <div>
+            <div>
                 <label className="block text-sm font-medium text-gray-700">Tipos</label>
-                <select multiple {...register('type', { required: 'El tipo es obligatorio' })} className="w-full px-3 py-2 border rounded-md h-24">
-                    {OpportunityTypes.map(option => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
+                <select
+                    multiple
+                    {...register('type', { required: 'El tipo es obligatorio' })}
+                    className="w-full px-3 py-2 border rounded-md h-24"
+                >
+                    {opportunityTypes.map(option => (
+                        <option key={option.id} value={option.id}>
+                            {option.name}
+                        </option>
                     ))}
                 </select>
-                <p className="text-xs text-gray-500">Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</p>
+                <p className="text-xs text-gray-500">
+                    Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
+                </p>
                 {errors.type && <span className="text-red-500 text-sm">{errors.type.message}</span>}
-            </div> */}
+            </div>
 
             {/* Start and End Dates */}
             <div className="grid grid-cols-2 gap-4">
