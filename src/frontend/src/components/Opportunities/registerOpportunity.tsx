@@ -60,6 +60,9 @@ const RegisterOpportunity: React.FC = () => {
 
                 // Debugging: Log the fetched opportunity types
                 console.log('Fetched opportunity types:', typesData);
+                console.log('Fetched countries:', countriesData);
+                console.log('Fetched interests:', interestsData);
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -219,7 +222,7 @@ const RegisterOpportunity: React.FC = () => {
             </div>
 
             {/* Interests Field */}
-            {/* <div>
+            <div>
                 <label className="block text-sm font-medium text-gray-700">Intereses</label>
                 <select multiple {...register('interests', { required: 'El interés es obligatorio' })} className="w-full px-3 py-2 border rounded-md h-24">
                     {interests.map(interest => (
@@ -228,19 +231,27 @@ const RegisterOpportunity: React.FC = () => {
                 </select>
                 <p className="text-xs text-gray-500">Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</p>
                 {errors.interests && <span className="text-red-500 text-sm">{errors.interests.message}</span>}
-            </div> */}
+            </div>
 
             {/* Countries Field */}
-            {/* <div>
+            <div>
                 <label className="block text-sm font-medium text-gray-700">Países</label>
-                <select multiple {...register('country', { required: 'El país es obligatorio' })} className="w-full px-3 py-2 border rounded-md h-24">
+                <select
+                    multiple
+                    {...register('country', { required: 'El país es obligatorio' })}
+                    className="w-full px-3 py-2 border rounded-md h-24"
+                >
                     {countries.map(country => (
-                        <option key={country.id} value={country.id}>{country.name}</option>
+                        <option key={country.id} value={country.id}>
+                            {country.emoji || '🌍'} {country.name}
+                        </option>
                     ))}
                 </select>
-                <p className="text-xs text-gray-500">Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones</p>
+                <p className="text-xs text-gray-500">
+                    Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
+                </p>
                 {errors.country && <span className="text-red-500 text-sm">{errors.country.message}</span>}
-            </div> */}
+            </div>
 
             {/* Submit and Cancel Buttons */}
             <div className="flex gap-4">
