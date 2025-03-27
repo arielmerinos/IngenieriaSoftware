@@ -16,6 +16,15 @@ interface FormData {
     country: number[]; // Array of selected country IDs
 }
 
+// Función para convertir iniciales de país a emoji de bandera
+const countryCodeToEmoji = (countryCode: string): string => {
+    return countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => String.fromCodePoint(0x1F1E6 + char.charCodeAt(0) - 65))
+        .join('');
+};
+
 const RegisterOpportunity: React.FC = () => {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({ mode: 'onChange' });
     const [opportunityTypes, setOpportunityTypes] = useState<{ id:number, name:string }[]>([]);
@@ -243,7 +252,7 @@ const RegisterOpportunity: React.FC = () => {
                 >
                     {countries.map(country => (
                         <option key={country.id} value={country.id}>
-                            {country.emoji || '🌍'} {country.name}
+                            {countryCodeToEmoji(country.emoji)} {country.name}
                         </option>
                     ))}
                 </select>
