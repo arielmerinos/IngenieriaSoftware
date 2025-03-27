@@ -167,7 +167,8 @@ const RegisterOpportunity: React.FC = () => {
                 >
                     {opportunityTypes.map(option => (
                         <option key={option.id} value={option.id}>
-                            {option.name}
+                            console.log(option.name)
+                            {option.name || 'Tipo sin nombre'}
                         </option>
                     ))}
                 </select>
