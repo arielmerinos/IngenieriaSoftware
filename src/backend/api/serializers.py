@@ -154,10 +154,10 @@ class TypeSerializer(serializers.ModelSerializer):
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-    fields = ["id", "name", "emoji"]
+        fields = ["id", "name", "emoji"]
     
 class InterestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interest
-    fields = ["id", "name","color"]
+        fields = ["id", "name","color"]
 

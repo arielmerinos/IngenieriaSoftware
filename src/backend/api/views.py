@@ -614,15 +614,3 @@ class TypeListView(APIView):
         types = Type.objects.all()
         serializer = TypeSerializer(types, many=True)
         return Response(serializer.data)
-
-class CountryListView(APIView):
-    def get(self, request):
-        countries = Country.objects.all()
-        serializer = CountrySerializer(countries, many=True)
-        return Response(serializer.data)
-
-class InterestListView(APIView):
-    def get(self, request):
-        interests = Interest.objects.all()
-        serializer = InterestSerializer(interests, many=True)
-        return Response(serializer.data)
