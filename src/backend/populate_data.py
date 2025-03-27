@@ -62,6 +62,11 @@ def create_scholarship_types():
 
 def create_countries():
     # Definir países más relevantes para becas
+    
+        # Eliminar todos los países existentes
+    Country.objects.all().delete()
+    print('- Todos los países existentes han sido eliminados')
+    
     countries_data = [
         {'name': 'México', 'emoji': 'MX'},
         {'name': 'España', 'emoji': 'ES'},
