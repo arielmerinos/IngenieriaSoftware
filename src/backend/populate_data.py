@@ -63,16 +63,16 @@ def create_scholarship_types():
 def create_countries():
     # Definir países más relevantes para becas
     countries_data = [
-        {'name': 'México', 'emoji': '🇲🇽'},
-        {'name': 'España', 'emoji': '🇪🇸'},
-        {'name': 'Estados Unidos', 'emoji': '🇺🇸'},
-        {'name': 'Canadá', 'emoji': '🇨🇦'},
-        {'name': 'Reino Unido', 'emoji': '🇬🇧'},
-        {'name': 'Francia', 'emoji': '🇫🇷'},
-        {'name': 'Alemania', 'emoji': '🇩🇪'},
-        {'name': 'Japón', 'emoji': '🇯🇵'},
-        {'name': 'Australia', 'emoji': '🇦🇺'},
-        {'name': 'Brasil', 'emoji': '🇧🇷'},
+        {'name': 'México', 'emoji': 'MX'},
+        {'name': 'España', 'emoji': 'ES'},
+        {'name': 'Estados Unidos', 'emoji': 'US'},
+        {'name': 'Canadá', 'emoji': 'CA'},
+        {'name': 'Reino Unido', 'emoji': 'GB'},
+        {'name': 'Francia', 'emoji': 'FR'},
+        {'name': 'Alemania', 'emoji': 'DE'},
+        {'name': 'Japón', 'emoji': 'JP'},
+        {'name': 'Australia', 'emoji': 'AU'},
+        {'name': 'Brasil', 'emoji': 'BR'},
     ]
     
     for country_data in countries_data:
