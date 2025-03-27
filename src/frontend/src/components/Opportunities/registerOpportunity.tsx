@@ -57,6 +57,9 @@ const RegisterOpportunity: React.FC = () => {
                 setOpportunityTypes(typesData);
                 setCountries(countriesData);
                 setInterests(interestsData);
+
+                // Debugging: Log the fetched opportunity types
+                console.log('Fetched opportunity types:', typesData);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -166,7 +169,6 @@ const RegisterOpportunity: React.FC = () => {
                     className="w-full px-3 py-2 border rounded-md h-24"
                 >
                     {opportunityTypes.map(option => {
-                        console.log(option.name); // Log the name to the console
                         return (
                             <option key={option.id} value={option.id}>
                                 {option.name || 'Tipo sin nombre'}
