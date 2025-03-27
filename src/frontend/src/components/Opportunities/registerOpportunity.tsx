@@ -1,61 +1,55 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useGrid } from '../../contexts/GridContext';
 import { usePopUp } from '../../contexts/PopUpContext';
 import { useAuth } from '../../contexts/AuthContext';
 
-const OpportunityTypes = [
-    { value: 'beca', label: 'Beca' },
-    { value: 'maestria', label: 'Maestría' },
-    { value: 'doctorado', label: 'Doctorado' },
-    { value: 'postdoc', label: 'Postdoc' },
-    { value: 'investigacion', label: 'Investigación' },
-    { value: 'intercambio', label: 'Intercambio' },
-    { value: 'curso', label: 'Curso' },
-    { value: 'taller', label: 'Taller' },
-    { value: 'seminario', label: 'Seminario' },
-    { value: 'conferencia', label: 'Conferencia' },
-    { value: 'congreso', label: 'Congreso' },
-    { value: 'simposio', label: 'Simposio' },
-    { value: 'foro', label: 'Foro' },
-    { value: 'voluntariado', label: 'Voluntariado' },
-    { value: 'hackathon', label: 'Hackathon' },
-    { value: 'evento', label: 'Evento' },
-    { value: 'pasantia', label: 'Pasantía' },
-    { value: 'otro', label: 'Otro' },
-];
-
-const countries = [
-    { id: 1, name: 'Mexico' },
-    { id: 2, name: 'Estado Unidos' },
-    { id: 3, name: 'Canada' },
-];
-
-const interests = [
-    { id: 1, name: 'Ciencia' },
-    { id: 2, name: 'Tecnología' },
-    { id: 3, name: 'Ingeniería' },
-    { id: 4, name: 'Matemáticas' },
-];
-
 interface FormData {
     name: string;
-    type: string[];
+    type: string[]; // Array of selected opportunity types
     start_date: string;
     end_date: string;
     image: FileList;
     content: string;
-    interests: number[];
+    interests: number[]; // Array of selected interest IDs
     created_by: number;
-    country: number[];
+    country: number[]; // Array of selected country IDs
 }
 
 const RegisterOpportunity: React.FC = () => {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({ mode: 'onChange' });
-    
+    const [opportunityTypes, setOpportunityTypes] = useState<{ value: string; label: string }[]>([]);
+    const [countries, setCountries] = useState<{ id: number; name: string }[]>([]);
+    const [interests, setInterests] = useState<{ id: number; name: string }[]>([]);
+
     const gridContext = useGrid();
     const popUpContext = usePopUp();
     const authContext = useAuth();
+
+    // Fetch data from the backend
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [typesResponse, countriesResponse, interestsResponse] = await Promise.all([
+                    fetch('http://localhost:8000/types/'), // Replace with your API endpoint for types
+                    fetch('http://localhost:8000/countries/'), // Replace with your API endpoint for countries
+                    fetch('http://localhost:8000/interests/'), // Replace with your API endpoint for interests
+                ]);
+
+                const typesData = await typesResponse.json();
+                const countriesData = await countriesResponse.json();
+                const interestsData = await interestsResponse.json();
+
+                setOpportunityTypes(typesData.map((type: any) => ({ value: type.type_name, label: type.name })));
+                setCountries(countriesData);
+                setInterests(interestsData);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
         console.log('Form submitted:', data); // Debugging log
@@ -72,9 +66,9 @@ const RegisterOpportunity: React.FC = () => {
             formData.append('end_date', data.end_date); // End date
             formData.append('content', data.content); // Description
             formData.append('created_by', username); // Send the username as the creator
-            // formData.append('type', data.type.join(',')); // Convert array to comma-separated string
-            // formData.append('interests', data.interests.join(',')); // Convert array to comma-separated string
-            // formData.append('country', data.country.join(',')); // Convert array to comma-separated string
+            formData.append('type', data.type.join(',')); // Convert array to comma-separated string
+            formData.append('interests', data.interests.join(',')); // Convert array to comma-separated string
+            formData.append('country', data.country.join(',')); // Convert array to comma-separated string
             if (data.image && data.image.length > 0) {
                 formData.append('image', data.image[0]); // Image file
             }
@@ -107,10 +101,8 @@ const RegisterOpportunity: React.FC = () => {
         }
     };
 
-    
-
-    function opportunityParse(element: any){
-        let newElem =  {
+    function opportunityParse(element: any) {
+        let newElem = {
             id: element.id,
             organization: "",
             name: element.name,
@@ -125,7 +117,7 @@ const RegisterOpportunity: React.FC = () => {
             country: "Mexico"
         };
         console.log(newElem);
-        return newElem
+        return newElem;
     }
 
 
