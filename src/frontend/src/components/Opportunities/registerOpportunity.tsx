@@ -165,12 +165,14 @@ const RegisterOpportunity: React.FC = () => {
                     {...register('type', { required: 'El tipo es obligatorio' })}
                     className="w-full px-3 py-2 border rounded-md h-24"
                 >
-                    {opportunityTypes.map(option => (
-                        <option key={option.id} value={option.id}>
-                            console.log(option.name)
-                            {option.name || 'Tipo sin nombre'}
-                        </option>
-                    ))}
+                    {opportunityTypes.map(option => {
+                        console.log(option.name); // Log the name to the console
+                        return (
+                            <option key={option.id} value={option.id}>
+                                {option.name || 'Tipo sin nombre'}
+                            </option>
+                        );
+                    })}
                 </select>
                 <p className="text-xs text-gray-500">
                     Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
