@@ -30,11 +30,25 @@ const RegisterOpportunity: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = authContext.authToken; // Retrieve the JWT token from the auth context
+                if (!token) {
+                    throw new Error('User is not authenticated');
+                }
+
+                const headers = {
+                    Authorization: `Bearer ${token}`, // Include the JWT token in the Authorization header
+                    'Content-Type': 'application/json',
+                };
+
                 const [typesResponse, countriesResponse, interestsResponse] = await Promise.all([
-                    fetch('http://localhost:8000/types/'), // Replace with your API endpoint for types
-                    fetch('http://localhost:8000/countries/'), // Replace with your API endpoint for countries
-                    fetch('http://localhost:8000/interests/'), // Replace with your API endpoint for interests
+                    fetch('http://localhost:8000/types/', { headers }), // Replace with your API endpoint for types
+                    fetch('http://localhost:8000/countries/', { headers }), // Replace with your API endpoint for countries
+                    fetch('http://localhost:8000/interests/', { headers }), // Replace with your API endpoint for interests
                 ]);
+
+                if (!typesResponse.ok || !countriesResponse.ok || !interestsResponse.ok) {
+                    throw new Error('Failed to fetch data from the backend');
+                }
 
                 const typesData = await typesResponse.json();
                 const countriesData = await countriesResponse.json();
@@ -49,7 +63,7 @@ const RegisterOpportunity: React.FC = () => {
         };
 
         fetchData();
-    }, []);
+    }, [authContext.authToken]); // Re-run if the auth token changes
 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
         console.log('Form submitted:', data); // Debugging log
