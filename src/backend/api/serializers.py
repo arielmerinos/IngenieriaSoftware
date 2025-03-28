@@ -112,7 +112,7 @@ class UserDataSerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['name', 'email', 'website', 'description', 'phone_number', 'logo']
+        fields = ['id','name', 'email', 'website', 'description', 'phone_number', 'logo']
         extra_kwargs = {
             'phone_number': {'required': False, 'allow_null': True},
             'logo': {'required': False, 'allow_null': True},

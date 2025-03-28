@@ -71,7 +71,7 @@ export function RegisterOrganizationForm(){
             }
 
             const response = await axios.post(
-                'http://0.0.0.0:8000/organization/create/',
+                'http://0.0.0.0:8000/api/organizations/',
                 data,
                 {
                     headers: {
