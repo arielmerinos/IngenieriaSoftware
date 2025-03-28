@@ -38,7 +38,7 @@ const Organizations: React.FC = () => {
 
 
     useEffect(() =>{
-            const url = "http://localhost:8000/organizations/all/";
+            const url = "http://0.0.0.0:8000/api/organizations/";
             fetch(url)
                 .then(response => response.json())
                 .then(items => gridContext.setElems(items.map((item:JSON) => organizationParse(item))))

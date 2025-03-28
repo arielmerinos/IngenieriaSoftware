@@ -20,8 +20,22 @@
 
 from django.contrib import admin
 from django.urls import path,include
-from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView,OrganizationListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView, ScholarshipListCreateView, ScholarshipDetailView, TypeListCreateView, TypeDetailView, CountryListCreateView, CountryDetailView, InterestListCreateView, InterestDetailView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.routers import DefaultRouter
+
+from api.views import (
+    CreateUserView, UserDetailView, UserTokenView,
+    ScholarshipListView, JoinOrganizationView, AcceptMembershipView,
+    ScholarshipListCreateView, ScholarshipDetailView, 
+    TypeListCreateView, TypeDetailView,
+    CountryListCreateView, CountryDetailView,
+    InterestListCreateView, InterestDetailView,
+    OrganizationViewSet  
+)
+
+# Nueva manera de agregar rutas hechas automaticamente
+router = DefaultRouter()
+router.register(r'organizations', OrganizationViewSet, basename='organization')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,10 +49,11 @@ urlpatterns = [
     path("api/", include("api.urls")),
 
     # Organization views
-    path("organizations/all/", OrganizationListView.as_view(), name="organization-list"),
-    path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
+    # path("organizations/all/", OrganizationListView.as_view(), name="organization-list"),
+    # path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
     path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
     path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
+    path('api/', include(router.urls)), # esto nos da CRUD de orgs
     
     path('scholarships/', ScholarshipListView.as_view(), name='scholarship-list'),
     path('scholarships/create/', ScholarshipListCreateView.as_view(), name='scholarship-list-create'),
