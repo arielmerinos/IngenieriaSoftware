@@ -22,6 +22,8 @@ from django.contrib import admin
 from django.urls import path,include
 from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView,OrganizationListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView, ScholarshipListCreateView, ScholarshipDetailView, TypeListCreateView, TypeDetailView, CountryListCreateView, CountryDetailView, InterestListCreateView, InterestDetailView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -55,4 +57,4 @@ urlpatterns = [
     # Endpoints para Interests
     path('interests/', InterestListCreateView.as_view(), name='interest-list-create'),
     path('interests/<int:pk>/', InterestDetailView.as_view(), name='interest-detail'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
