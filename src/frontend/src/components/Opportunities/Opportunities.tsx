@@ -44,9 +44,8 @@ const Opportunities: React.FC = () => {
      * @param element JSON
      * @returns Una opportunity con la info del JSON.
      */
-    function organizationParse(element: JSON){
-        // console.log(element)
-        let newElem =  {
+    function organizationParse(element: any) {
+        let newElem = {
             id: element.id,
             organization: "",
             name: element.name,
@@ -54,14 +53,14 @@ const Opportunities: React.FC = () => {
             beginning: new Date(element.start_date),
             end: new Date(element.end_date),
             type: "Convocatoria",
-            image: "placeholder.png",
+            image: element.image || "/call-placeholder.png", // Use the image from the JSON or fallback to the placeholder
             content: element.content,
-            interests: [],
+            interests: element.interests || [],
             author: element.created_by,
-            country: "Mexico"
+            country: element.country || "Mexico"
         };
         console.log(newElem);
-        return newElem
+        return newElem;
     }
 
     /**

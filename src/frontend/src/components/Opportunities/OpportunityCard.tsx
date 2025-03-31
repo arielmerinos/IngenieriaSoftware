@@ -20,11 +20,9 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import React from 'react';
-// import penrose from "../../assets/penrose.png"
 import { Opportunity } from '../../types/opportunity';
 // import { Link } from 'react-router';
 
-const penrose = "penrose.png"
 
 const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     return (
@@ -50,8 +48,8 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                 </div>
                 <div>
                     <img
-                        src={penrose}
-                        alt={item.image}
+                        src={item.image} // Use the image from the item object
+                        alt={item.name} // Use the item's name as the alt text
                         className="w-full h-full object-cover"
                     />
                 </div>
