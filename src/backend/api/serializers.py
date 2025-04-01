@@ -63,13 +63,24 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'color']
 
 class ScholarshipSerializer(serializers.ModelSerializer):
-    
-    # Define SerializerMethodFields for type, interests, and country
-    type = serializers.SerializerMethodField()
-    interests = serializers.SerializerMethodField()
-    country = serializers.SerializerMethodField()
+    # Use PrimaryKeyRelatedField for type, interests, and country
+    type = serializers.PrimaryKeyRelatedField(
+        queryset=Type.objects.all(),
+        many=True,
+        required=False
+    )
+    interests = serializers.PrimaryKeyRelatedField(
+        queryset=Interest.objects.all(),
+        many=True,
+        required=False
+    )
+    country = serializers.PrimaryKeyRelatedField(
+        queryset=Country.objects.all(),
+        many=True,
+        required=False
+    )
     organization = serializers.SerializerMethodField()
-    
+
     created_by = serializers.SlugRelatedField(
         queryset=User.objects.all(),
         slug_field='username',  # Accept the username instead of the pk
@@ -96,7 +107,6 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Extract Many-to-Many fields
-        print("Validated Data:", validated_data)
         type_data = validated_data.pop('type', [])
         interests_data = validated_data.pop('interests', [])
         country_data = validated_data.pop('country', [])
@@ -120,17 +130,8 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 
         return scholarship
 
-    def get_type(self, obj):
-        return [t.name for t in obj.type.all()]  # Return the names of the types
-
-    def get_interests(self, obj):
-        return [i.name for i in obj.interests.all()]  # Return the names of the interests
-
-    def get_country(self, obj):
-        return [c.name for c in obj.country.all()]  # Return the names of the countries
-    
     def get_organization(self, obj):
-        return obj.organization.name if obj.organization else None # Return the name of the organization
+        return obj.organization.name if obj.organization else None  # Return the name of the organization
     
     def update(self, instance, validated_data):
         # Update the fields directly
