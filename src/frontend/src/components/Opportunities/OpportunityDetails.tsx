@@ -21,8 +21,6 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import React from 'react';
 import { Opportunity } from '../../types/opportunity';
-const penrose = "penrose.png"
-// import penrose from "../../assets/penrose.png"
 
 const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
     return (
@@ -70,7 +68,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                         <p className='text-left mt-3 mb-3'>{item.content}</p>
                     </div>
                     <img
-                        src={penrose}
+                        src={item.image} // Use the image from the item object
                         alt={item.image}
                         className="rounded-xl max-w-[50%] mx-auto"
                     />
