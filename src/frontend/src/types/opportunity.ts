@@ -17,6 +17,30 @@ export interface Opportunity {
     item: OpportunityContent
 }
 
+    /**
+     * @param element JSON
+     * @returns Una opportunity con la info del JSON.
+     */
+export function parseOpportunity(element : any){
+    const baseUrl = "http://localhost:8000"; // Base URL for media files
+    let newElem = {
+        id: element.id,
+        organization: element.organization || "", // Default to empty string if not present
+        name: element.name,
+        published: new Date(element.publication_date),
+        beginning: new Date(element.start_date),
+        end: new Date(element.end_date),
+        type: element.type,
+        image: element.image ? `${baseUrl}${element.image}` : "/call-placeholder.png", // Prepend base URL or use placeholder
+        content: element.content,
+        interests: element.interests || [],
+        author: element.created_by,
+        country: element.country || "Mexico"
+    };
+    // console.log(newElem);
+    return newElem;
+}
+
 export const opportunityExample = {
     id: 2073600,
     organization: "Eusan Nation",
