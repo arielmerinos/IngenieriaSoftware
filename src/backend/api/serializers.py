@@ -122,6 +122,9 @@ class ScholarshipSerializer(serializers.ModelSerializer):
     def get_country(self, obj):
         return [c.name for c in obj.country.all()]  # Return the names of the countries
     
+    def get_organization(self, obj):
+        return obj.organization.name if obj.organization else None # Return the name of the organization
+    
     def update(self, instance, validated_data):
         # Update the fields directly
         for attr, value in validated_data.items():
