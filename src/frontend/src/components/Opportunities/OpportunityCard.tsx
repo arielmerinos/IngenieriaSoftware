@@ -37,13 +37,23 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                  transition delay-150 duration-300 ease-in-out hover:-translate-y-1 hover:scale-110 hover:shadow-xl'>
             <div className='grid grid-cols-[70%_30%] h-full'>
                 <div className='p-4 text-left'>
-                    {item.organization != ""
+                    {item.organization !== ""
                         ? <p className='text-sm text-blue-500'>{item.organization}</p>
                         : <p className='text-sm text-gray-500'>{item.author}</p>
                     }
                     <h1 className="font-bold text-lg mb-1">{item.name}</h1>
                     
-                    <p className='rounded-lg text-xs text-gray-500 bg-gray-200 w-fit px-2 py-px border-gray-500 rounded-full'>{item.type}</p>
+                    {/* Render each type as a separate <p> element */}
+                    <div className="flex flex-wrap gap-2">
+                        {item.type.map((type, index) => (
+                            <p
+                                key={index}
+                                className='rounded-lg text-xs text-gray-500 bg-gray-200 w-fit px-2 py-px border-gray-500 rounded-full'
+                            >
+                                {type}
+                            </p>
+                        ))}
+                    </div>
 
                     <p className='mt-2 text-xs text-gray-500'>{item.beginning.toLocaleDateString()} - {item.end.toLocaleDateString()}</p>
                     <p className='mt-1'>{item.content}</p>

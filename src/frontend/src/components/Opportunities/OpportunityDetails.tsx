@@ -28,7 +28,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
             <div className=''>
                 <h1 className='font-bold text-2xl mb-1 text-left'>{item.name}</h1>
                 {item.organization != ""
-                    ? <p className='text-sm text-blue-500 text-left'>{item.organization} Org.</p>
+                    ? <p className='text-sm text-blue-500 text-left'>{item.organization}</p>
                     : <p className='text-sm text-gray-500 text-left'>{item.author}</p>
                 }
                 <p className='text-xs text-left text-gray-500 mt-1'>{item.beginning.toLocaleDateString()} - {item.end.toLocaleDateString()}</p>

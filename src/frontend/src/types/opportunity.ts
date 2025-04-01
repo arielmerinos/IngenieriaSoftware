@@ -64,7 +64,10 @@ export const opportunityExample2 = {
     published: new Date("13-Mar-25"),
     beginning: new Date("13-Mar-25"),
     end: new Date("13-Mar-26"),
-    type: "Chalán",
+    type: [
+        "Internacional",
+        "Beca completa"
+    ],
     image: "miku.png",
     content: "¿Te gusta Vocaloid? Ayudame a preparar todo para mis presentaciones.",
     interests: ["Música"],
