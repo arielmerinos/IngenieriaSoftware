@@ -19,40 +19,45 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
-import { useEffect } from "react";
+
+import React, { useEffect } from "react";
 import OrganizationCard from "../Organizations/OrganizationCard";
 import { useGrid } from "../../contexts/GridContext";
+import { AddOrganizationButton } from "./AddOrganizationButton"; 
+import { Organization } from "../../models/organization";
 
 const Organizations: React.FC = () => {
+  const gridContext = useGrid();
 
-    const gridContext = useGrid();
+  useEffect(() => {
+    refreshOrganizations();
+  }, []);  
 
-    function organizationParse(org: JSON){
-        return {
-            name: org.name,
-            content: org.website,
-            type: org.email,
-            image: "penrose.png"
-        }
+  const refreshOrganizations = async () => {
+    try {
+      const response = await fetch("http://0.0.0.0:8000/api/organizations/");
+      const items: Organization[] = await response.json();
+      gridContext.setElems(items);
+    } catch (error) {
+      console.error("Error al recargar organizaciones:", error);
     }
+  };  
+
+  return (
+    <div className="container mx-auto px-4">
+      <AddOrganizationButton onUpdate={(newOrg) => {
+        gridContext.addElem(newOrg);
+        refreshOrganizations(); 
+      }} />
 
 
-    useEffect(() =>{
-            const url = "http://0.0.0.0:8000/api/organizations/";
-            fetch(url)
-                .then(response => response.json())
-                .then(items => gridContext.setElems(items.map((item:JSON) => organizationParse(item))))
-        }, [])
-
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 container mx-auto px-4 mt-10 mb-10">
-            { gridContext.elems.map(org => (
-                <OrganizationCard item={org}></OrganizationCard>
-            ))
-
-            }
-        </div>
-    )
-}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 mb-10">
+        {gridContext.elems.map(org => (
+          <OrganizationCard key={org.id} item={org} />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default Organizations;

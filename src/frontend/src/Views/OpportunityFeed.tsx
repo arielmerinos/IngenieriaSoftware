@@ -46,7 +46,6 @@ function OpportunityFeed() {
     
     <section className="w-full min-h-screen">
         <Suspense fallback={<Loader />}>
-        <Header />
         {/* Es muy importante que primero este el grid y luego el Pop Up, sino el pop up no puede ver el grid */}
         <GridProvider>
         <PopUpProvider>
@@ -56,7 +55,6 @@ function OpportunityFeed() {
           <Opportunities />
         </PopUpProvider>
         </GridProvider>
-        <Footer />
         </Suspense>
     </section>
   );

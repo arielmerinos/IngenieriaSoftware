@@ -20,28 +20,27 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import React, { Suspense } from "react";
-import "./Landing.css";
-import Loader from "../components/Loader";
-import { GridProvider } from "../contexts/GridContext";
-import { PopUpProvider } from "../contexts/PopUpContext";
-import { useAuth } from "../contexts/AuthContext";
-import Organizations from "../components/Organizations/Organizations";
-
-function OrganizationsFeed() {
-    const authContext = useAuth();
-
-    return (
-        <section className="w-full min-h-screen">
-            <Suspense fallback={<Loader />}>
-                <GridProvider>
-                    <PopUpProvider>
-                        <Organizations />
-                    </PopUpProvider>
-                </GridProvider>
-            </Suspense>
-        </section>
-    );
+export interface Organization {
+  id?: number; 
+  name: string;
+  email: string;
+  website: string;
+  description: string;
+  phone_number?: string; 
+  logo?: string;
 }
 
-export default OrganizationsFeed;
+// Función de parse (útil si la API retorna algún dato adicional o diferente)
+export function organizationParse(org: any): Organization {
+  return {
+    id: org.id,
+    name: org.name,
+    email: org.email,
+    website: org.website,
+    description: org.description,
+    phone_number: org.phone_number,
+    logo: org.logo,
+  };
+}
+
+  
