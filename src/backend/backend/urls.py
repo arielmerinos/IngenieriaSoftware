@@ -24,7 +24,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
 
 from api.views import (
-    CreateUserView, UserDetailView, UserTokenView,
+    CreateUserView, UserDetailView, UserMembershipsView, UserTokenView,
     ScholarshipListView, JoinOrganizationView, AcceptMembershipView,
     ScholarshipListCreateView, ScholarshipDetailView, 
     TypeListCreateView, TypeDetailView,
@@ -59,7 +59,7 @@ urlpatterns = [
     path('scholarships/create/', ScholarshipListCreateView.as_view(), name='scholarship-list-create'),
     path('scholarships/<int:pk>/', ScholarshipDetailView.as_view(), name='scholarship-detail'),
     
-        # Endpoints para Types
+    # Endpoints para Types
     path('types/', TypeListCreateView.as_view(), name='type-list-create'),
     path('types/<int:pk>/', TypeDetailView.as_view(), name='type-detail'),
     
@@ -70,4 +70,7 @@ urlpatterns = [
     # Endpoints para Interests
     path('interests/', InterestListCreateView.as_view(), name='interest-list-create'),
     path('interests/<int:pk>/', InterestDetailView.as_view(), name='interest-detail'),
+
+    # Endpoints utiles 
+    path('user/<int:user_id>/memberships/', UserMembershipsView.as_view(), name='user-memberships'),
 ]

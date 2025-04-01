@@ -535,34 +535,6 @@ class UserDataListView(APIView):
 
 ## Vistas de Organización ##
 
-# class OrganizationListView(APIView):
-#     """
-#     Vista para listar todas las organizaciones.
-
-#     GET: Listar todas las organizaciones
-#     """
-
-#     permission_classes = [AllowAny]
-
-#     def get(self, request):
-#         organizations = Organization.objects.all()
-#         serializer = OrganizationSerializer(organizations, many=True)
-#         return Response(serializer.data)
-
-# class OrganizationCreateView(APIView):
-#     """
-#     Vista para crear una nueva organización.
-    
-#     POST: Crear una nueva organización
-#     """
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def post(self, request, format=None):
-#         serializer = OrganizationSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class OrganizationViewSet(viewsets.ModelViewSet): # Ala verga esto se hace todo el crud, el parametro nos da el crud
     """
@@ -644,6 +616,24 @@ class AcceptMembershipView(APIView):
         membership.is_active = True
         membership.save()
         serializer = MembershipSerializer(membership)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UserMembershipsView(APIView):
+    """
+    Vista para obtener las memberships de un usuario dado su id.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "El usuario no existe."},
+                            status=status.HTTP_404_NOT_FOUND)
+        
+        # Obtener las memberships donde el usuario es el propietario (foreign key en Membership)
+        memberships = Membership.objects.filter(user=user)
+        serializer = MembershipSerializer(memberships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class MembershipListView(APIView):

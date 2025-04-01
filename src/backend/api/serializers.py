@@ -121,7 +121,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         organization = Organization.objects.create(**validated_data)
-        Membership.objects.create(user=request.user, organization=organization, is_admin=True)
+        Membership.objects.create(user=request.user, organization=organization, is_admin=True, is_active=True)
         return organization
         
         
