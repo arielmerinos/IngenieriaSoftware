@@ -123,7 +123,9 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                 />
             </div>
             <p className='text-xs text-right text-gray-500 mt-1'>Publicado: {item.published.toLocaleDateString()}</p>
-            <p className='text-xs text-right text-gray-500 mt-1'>País: {item.country}</p>
+            <p className='text-xs text-right text-gray-500 mt-1'>
+                País: {Array.isArray(item.country) ? item.country.join(', ') : item.country}
+            </p>
 
             {/* Show delete button if the current user is the author */}
             {user?.username === item.author && (
