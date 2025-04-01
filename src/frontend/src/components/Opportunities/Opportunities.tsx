@@ -53,12 +53,12 @@ const Opportunities: React.FC = () => {
             published: new Date(element.publication_date),
             beginning: new Date(element.start_date),
             end: new Date(element.end_date),
-            type: element.type,
+            type: element.type.join(', '), // Join type names into a single string
             image: element.image ? `${baseUrl}${element.image}` : "/call-placeholder.png", // Prepend base URL or use placeholder
             content: element.content,
-            interests: element.interests || [],
+            interests: element.interests.join(', '), // Join interest names into a single string
             author: element.created_by,
-            country: element.country || "Global"
+            country: element.country.join(', '), // Join country names into a single string
         };
         console.log(newElem);
         return newElem;
