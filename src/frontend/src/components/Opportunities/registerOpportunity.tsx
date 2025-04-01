@@ -200,7 +200,7 @@ const RegisterOpportunity: React.FC = () => {
                             validate: (value) => {
                                 const startDate = new Date(getValues('start_date'));
                                 const endDate = new Date(value);
-                                return endDate > startDate || 'La fecha de finalización debe ser mayor que la fecha de inicio';
+                                return endDate >= startDate || 'La fecha de finalización debe ser mayor que la fecha de inicio';
                             }
                         })} 
                         className="w-full px-3 py-2 border rounded-md" 
