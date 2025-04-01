@@ -95,9 +95,11 @@ const RegisterOpportunity: React.FC = () => {
             formData.append('end_date', data.end_date); // End date
             formData.append('content', data.content); // Description
             formData.append('created_by', username); // Send the username as the creator
-            data.type.forEach((typeId: { toString: () => string | Blob; }) => formData.append('type', typeId.toString())); // Append each type ID
-            data.interests.forEach((interestId: { toString: () => string | Blob; }) => formData.append('interests', interestId.toString())); // Append each interest ID
-            data.country.forEach((countryId: { toString: () => string | Blob; }) => formData.append('country', countryId.toString())); // Append each country ID
+            data.type.forEach((typeId) => formData.append('type', typeId.toString())); // Append each type ID
+            data.interests.forEach((interestId) => formData.append('interests', interestId.toString())); // Append each interest ID
+            data.country.forEach((countryId) => formData.append('country', countryId.toString())); // Append each country ID
+
+            // Append the image only if it exists
             if (data.image && data.image.length > 0) {
                 formData.append('image', data.image[0]); // Image file
             }
@@ -218,8 +220,13 @@ const RegisterOpportunity: React.FC = () => {
 
             {/* Image Field */}
             <div>
-                <label className="block text-sm font-medium text-gray-700">Imagen</label>
-                <input type="file" accept="image/*" {...register('image')} className="w-full px-3 py-2 border rounded-md" />
+                <label className="block text-sm font-medium text-gray-700">Imagen (opcional)</label>
+                <input
+                    type="file"
+                    accept="image/*"
+                    {...register('image')} // No validation rules, making it optional
+                    className="w-full px-3 py-2 border rounded-md"
+                />
                 {errors.image && <span className="text-red-500 text-sm">{errors.image.message}</span>}
             </div>
 
