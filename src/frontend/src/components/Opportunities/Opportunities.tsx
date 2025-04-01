@@ -45,7 +45,6 @@ const Opportunities: React.FC = () => {
      * @returns Una opportunity con la info del JSON.
      */
     function organizationParse(element: any) {
-        const baseUrl = "http://localhost:8000/media"; // Base URL for media files
         let newElem = {
             id: element.id,
             organization: "",
@@ -53,8 +52,8 @@ const Opportunities: React.FC = () => {
             published: new Date(element.publication_date),
             beginning: new Date(element.start_date),
             end: new Date(element.end_date),
-            type: "Convocatoria",
-            image: element.image ? `${baseUrl}${element.image}` : "/call-placeholder.png", // Prepend base URL or use placeholder
+            type: element.type,
+            image: element.image || "/call-placeholder.png", // Prepend base URL or use placeholder
             content: element.content,
             interests: element.interests || [],
             author: element.created_by,
