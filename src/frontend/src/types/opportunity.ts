@@ -21,7 +21,7 @@ export interface Opportunity {
      * @param element JSON
      * @returns Una opportunity con la info del JSON.
      */
-export function parseOpportunity(element : any){
+export function parseOpportunity(element: any) {
     const baseUrl = "http://localhost:8000"; // Base URL for media files
     let newElem = {
         id: element.id,
@@ -30,12 +30,12 @@ export function parseOpportunity(element : any){
         published: new Date(element.publication_date),
         beginning: new Date(element.start_date),
         end: new Date(element.end_date),
-        type: element.type,
+        type: element.type.map((t: any) => t.name), // Extract only the names from the type array
         image: element.image ? `${baseUrl}${element.image}` : "/call-placeholder.png", // Prepend base URL or use placeholder
         content: element.content,
-        interests: element.interests || [],
+        interests: element.interests.map((i: any) => i.name), // Extract only the names from the interests array
         author: element.created_by,
-        country: element.country || "Mexico"
+        country: element.country.map((c: any) => c.name), // Extract only the names from the country array
     };
     // console.log(newElem);
     return newElem;
