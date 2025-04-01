@@ -96,9 +96,11 @@ const RegisterOpportunity: React.FC = () => {
             formData.append('end_date', data.end_date); // End date
             formData.append('content', data.content); // Description
             formData.append('created_by', username); // Send the username as the creator
-            data.type.forEach((typeId) => formData.append('type', typeId.toString())); // Append each type ID
-            data.interests.forEach((interestId) => formData.append('interests', interestId.toString())); // Append each interest ID
-            data.country.forEach((countryId) => formData.append('country', countryId.toString())); // Append each country ID
+
+            // Use the correct field names for the backend
+            data.type.forEach((typeId) => formData.append('type_ids', typeId.toString())); // Append each type ID
+            data.interests.forEach((interestId) => formData.append('interest_ids', interestId.toString())); // Append each interest ID
+            data.country.forEach((countryId) => formData.append('country_ids', countryId.toString())); // Append each country ID
 
             // Append the image only if it exists
             if (data.image && data.image.length > 0) {

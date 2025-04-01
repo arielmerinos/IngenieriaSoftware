@@ -63,21 +63,24 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'color']
 
 class ScholarshipSerializer(serializers.ModelSerializer):
-    # Use PrimaryKeyRelatedField for deserialization and nested serializers for serialization
-    type = serializers.PrimaryKeyRelatedField(
+    # Use TypeSerializer for serialization and PrimaryKeyRelatedField for deserialization
+    type = TypeSerializer(many=True, read_only=True)  # Nested serializer for output
+    type_ids = serializers.PrimaryKeyRelatedField(
         queryset=Type.objects.all(),
         many=True,
-        required=False
+        write_only=True  # Only used for input
     )
-    interests = serializers.PrimaryKeyRelatedField(
+    interests = InterestSerializer(many=True, read_only=True)  # Nested serializer for output
+    interest_ids = serializers.PrimaryKeyRelatedField(
         queryset=Interest.objects.all(),
         many=True,
-        required=False
+        write_only=True  # Only used for input
     )
-    country = serializers.PrimaryKeyRelatedField(
+    country = CountrySerializer(many=True, read_only=True)  # Nested serializer for output
+    country_ids = serializers.PrimaryKeyRelatedField(
         queryset=Country.objects.all(),
         many=True,
-        required=False
+        write_only=True  # Only used for input
     )
     organization = serializers.SerializerMethodField()
 
@@ -96,20 +99,23 @@ class ScholarshipSerializer(serializers.ModelSerializer):
             "publication_date",
             "start_date",
             "end_date",
-            "type",
+            "type",  # Nested serializer for output
+            "type_ids",  # PrimaryKeyRelatedField for input
             "image",
             "content",
-            "interests",
+            "interests",  # Nested serializer for output
+            "interest_ids",  # PrimaryKeyRelatedField for input
             "created_by",  # Accept username from the frontend
-            "country",
+            "country",  # Nested serializer for output
+            "country_ids",  # PrimaryKeyRelatedField for input
         ]
         read_only_fields = ["id", "publication_date"]
 
     def create(self, validated_data):
         # Extract Many-to-Many fields
-        type_data = validated_data.pop('type', [])
-        interests_data = validated_data.pop('interests', [])
-        country_data = validated_data.pop('country', [])
+        type_data = validated_data.pop('type_ids', [])
+        interests_data = validated_data.pop('interest_ids', [])
+        country_data = validated_data.pop('country_ids', [])
 
         print("Type Data:", type_data)
         print("Interests Data:", interests_data)
