@@ -42,7 +42,6 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                 if (response.ok) {
                     alert("Oportunidad eliminada con éxito.");
                     popUpContext?.setOpen(false); // Close the pop-up after successful deletion
-                    // Refresh the page or update the state to reflect the deletion
                     window.location.reload(); // Reload the page to see the changes
                 } else if (response.status === 403) {
                     alert("No tienes permiso para eliminar esta oportunidad.");
@@ -123,7 +122,28 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                 />
             </div>
             <p className='text-xs text-right text-gray-500 mt-1'>Publicado: {item.published.toLocaleDateString()}</p>
-            <p className='text-xs text-right text-gray-500 mt-1'>País: {item.country}</p>
+
+            {/* Render each country as a separate <p> element */}
+            <div className='mt-1 flex flex-wrap gap-1'>
+                {item.country.split(',').map((country, index) => (
+                    <p
+                        key={index}
+                        className='
+                            rounded-lg
+                            text-xs
+                            text-gray-500
+                            bg-white
+                            w-fit
+                            px-2
+                            py-px
+                            border
+                            border-gray-500
+                            rounded-full'
+                    >
+                        {country.trim()}
+                    </p>
+                ))}
+            </div>
 
             {/* Show delete button if the current user is the author */}
             {user?.username === item.author && (
