@@ -96,6 +96,7 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Extract Many-to-Many fields
+        print("Validated Data:", validated_data)
         type_data = validated_data.pop('type', [])
         interests_data = validated_data.pop('interests', [])
         country_data = validated_data.pop('country', [])
