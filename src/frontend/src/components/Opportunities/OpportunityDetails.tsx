@@ -48,7 +48,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                         rounded-full'>
                         {item.type}
                     </p>
-                    {item.interests.map( interest => (
+                    {/* {item?.interests.map( interest => (
                         <p
                             className='
                                 rounded-lg
@@ -63,7 +63,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                             >
                                 {interest}
                         </p>
-                    ))}
+                    ))} */}
                 </div>
                 {/* <div className='grid grid grid-cols-[50%_50%]'> */}
                     <div>

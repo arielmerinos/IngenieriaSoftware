@@ -26,6 +26,7 @@ import { useEffect } from "react";
 import OpportunityDetails from "./OpportunityDetails";
 import { usePopUp } from "../../contexts/PopUpContext";
 import { useGrid } from "../../contexts/GridContext";
+import { parseOpportunity } from "../../types/opportunity";
 
 const Opportunities: React.FC = () => {
     const cardsContext = useGrid();
@@ -41,37 +42,13 @@ const Opportunities: React.FC = () => {
     }
 
     /**
-     * @param element JSON
-     * @returns Una opportunity con la info del JSON.
-     */
-    function organizationParse(element: any) {
-        const baseUrl = "http://localhost:8000"; // Base URL for media files
-        let newElem = {
-            id: element.id,
-            organization: "",
-            name: element.name,
-            published: new Date(element.publication_date),
-            beginning: new Date(element.start_date),
-            end: new Date(element.end_date),
-            type: element.type,
-            image: element.image ? `${baseUrl}${element.image}` : "/call-placeholder.png", // Prepend base URL or use placeholder
-            content: element.content,
-            interests: element.interests || [],
-            author: element.created_by,
-            country: element.country || "Mexico"
-        };
-        console.log(newElem);
-        return newElem;
-    }
-
-    /**
      * Carga los datos de la api al abrir el componente.
      */
     useEffect(() =>{
         const url = "http://localhost:8000/scholarships/";
         fetch(url)
             .then(response => response.json())
-            .then(items => cardsContext?.setElems(items.map((item:JSON) => organizationParse(item))))
+            .then(items => cardsContext?.setElems(items.map((item:JSON) => parseOpportunity(item))))
     }, []) // Sin el segundo param [] se va a ejecutar en loop, noc pq
 
     return (

@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { useGrid } from '../../contexts/GridContext';
 import { usePopUp } from '../../contexts/PopUpContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { parseOpportunity } from '../../types/opportunity';
 
 interface FormData {
     name: string;
@@ -123,31 +124,12 @@ const RegisterOpportunity: React.FC = () => {
 
             const result = await response.json();
             console.log('Opportunity created:', result);
-            gridContext?.addElem(opportunityParse(data));
+            gridContext?.addElem(parseOpportunity(data));
             popUpContext.setOpen(false); // Close the form after successful submission
         } catch (error) {
             console.error('Error creating opportunity:', error);
         }
     };
-
-    function opportunityParse(element: any) {
-        let newElem = {
-            id: element.id,
-            organization: "",
-            name: element.name,
-            published: new Date(element.publication_date),
-            beginning: new Date(element.start_date),
-            end: new Date(element.end_date),
-            type: "Convocatoria",
-            image: "placeholder.png",
-            content: element.content,
-            interests: [],
-            author: authContext.user?.username,
-            country: "Mexico"
-        };
-        console.log(newElem);
-        return newElem;
-    }
 
 
     return (
