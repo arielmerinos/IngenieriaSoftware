@@ -44,12 +44,9 @@ function Landing() {
     
     <section className="w-full min-h-screen">
       <Suspense fallback={<Loader />}>
-        <Header />
         <HeroSection />
         <OpportunitiesSection />
         <FAQSection />
-        <Footer />
-      
       </Suspense>
     </section>
   );

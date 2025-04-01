@@ -20,10 +20,24 @@
 
 from django.contrib import admin
 from django.urls import path,include
-from api.views import CreateUserView, UserDetailView, UserTokenView, ScholarshipListView,OrganizationListView, JoinOrganizationView, AcceptMembershipView, OrganizationCreateView, ScholarshipListCreateView, ScholarshipDetailView, TypeListCreateView, TypeDetailView, CountryListCreateView, CountryDetailView, InterestListCreateView, InterestDetailView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
+
+from api.views import (
+    CreateUserView, UserDetailView, UserMembershipsView, UserTokenView,
+    ScholarshipListView, JoinOrganizationView, AcceptMembershipView,
+    ScholarshipListCreateView, ScholarshipDetailView, 
+    TypeListCreateView, TypeDetailView,
+    CountryListCreateView, CountryDetailView,
+    InterestListCreateView, InterestDetailView,
+    OrganizationViewSet  
+)
+
+# Nueva manera de agregar rutas hechas automaticamente
+router = DefaultRouter()
+router.register(r'organizations', OrganizationViewSet, basename='organization')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,16 +51,17 @@ urlpatterns = [
     path("api/", include("api.urls")),
 
     # Organization views
-    path("organizations/all/", OrganizationListView.as_view(), name="organization-list"),
-    path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
+    # path("organizations/all/", OrganizationListView.as_view(), name="organization-list"),
+    # path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
     path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
     path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
+    path('api/', include(router.urls)), # esto nos da CRUD de orgs
     
     path('scholarships/', ScholarshipListView.as_view(), name='scholarship-list'),
     path('scholarships/create/', ScholarshipListCreateView.as_view(), name='scholarship-list-create'),
     path('scholarships/<int:pk>/', ScholarshipDetailView.as_view(), name='scholarship-detail'),
     
-        # Endpoints para Types
+    # Endpoints para Types
     path('types/', TypeListCreateView.as_view(), name='type-list-create'),
     path('types/<int:pk>/', TypeDetailView.as_view(), name='type-detail'),
     
@@ -57,4 +72,7 @@ urlpatterns = [
     # Endpoints para Interests
     path('interests/', InterestListCreateView.as_view(), name='interest-list-create'),
     path('interests/<int:pk>/', InterestDetailView.as_view(), name='interest-detail'),
+
+    # Endpoints utiles 
+    path('user/<int:user_id>/memberships/', UserMembershipsView.as_view(), name='user-memberships'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

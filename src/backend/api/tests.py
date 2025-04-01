@@ -350,13 +350,11 @@ class ScholarshipTests(APITestCase):
 
 class OrganizationSerializerTest(TestCase):
     def setUp(self):
-        # Creamos un usuario que será el que haga la petición (simulando request.user)
         self.user = User.objects.create_user(
             username='testuser',
             password='pass123',
             email='test@example.com'
         )
-        # Contexto para el serializer (simulando que request.user es el que hace la petición)
         self.context = {'request': type('Request', (), {'user': self.user})}
         # Datos válidos para la creación de una organización
         self.valid_data = {
@@ -365,7 +363,7 @@ class OrganizationSerializerTest(TestCase):
             'website': 'https://orgprueba.com',
             'description': 'Descripción de la organización de prueba',
             'phone_number': '123456789',
-            'logo': None  # Suponiendo que puede ser null
+            'logo': None  # Opcional
         }
 
     def test_organization_serializer_valido(self):
@@ -378,7 +376,7 @@ class OrganizationSerializerTest(TestCase):
         # Verificamos que se haya creado la membresía correspondiente y que el usuario sea admin
         membership = Membership.objects.get(organization=organization, user=self.user)
         self.assertTrue(membership.is_admin)
-        self.assertTrue(membership.is_active)  # Dependiendo de la lógica, si se marca activa al crearse
+        self.assertTrue(not membership.is_active)  # Dependiendo de la lógica, si se marca activa al crearse
 
     def test_organization_serializer_datos_invalidos(self):
         # Por ejemplo, si se omite el campo 'name' que es requerido

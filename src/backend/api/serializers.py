@@ -156,7 +156,7 @@ class UserDataSerializer(serializers.ModelSerializer):
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ['name', 'email', 'website', 'description', 'phone_number', 'logo']
+        fields = ['id','name', 'email', 'website', 'description', 'phone_number', 'logo']
         extra_kwargs = {
             'phone_number': {'required': False, 'allow_null': True},
             'logo': {'required': False, 'allow_null': True},
@@ -165,7 +165,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         organization = Organization.objects.create(**validated_data)
-        Membership.objects.create(user=request.user, organization=organization, is_admin=True)
+        Membership.objects.create(user=request.user, organization=organization, is_admin=True, is_active=True)
         return organization
         
         
