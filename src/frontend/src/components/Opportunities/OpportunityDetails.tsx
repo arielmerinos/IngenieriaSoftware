@@ -22,9 +22,11 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 import React from 'react';
 import { Opportunity } from '../../types/opportunity';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePopUp } from '../../contexts/PopUpContext';
 
 const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
     const { user } = useAuth(); // Get the current user from the auth context
+    const popUpContext = usePopUp(); // Get the pop-up context
 
     const handleDelete = async () => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta oportunidad?");
@@ -39,7 +41,15 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
 
                 if (response.ok) {
                     alert("Oportunidad eliminada con éxito.");
-                    // Optionally, redirect or refresh the page
+                    popUpContext?.setOpen(false); // Close the pop-up after successful deletion
+                    // Refresh the page or update the state to reflect the deletion
+                    window.location.reload(); // Reload the page to see the changes
+                } else if (response.status === 403) {
+                    alert("No tienes permiso para eliminar esta oportunidad.");
+                } else if (response.status === 404) {
+                    alert("Oportunidad no encontrada.");
+                } else if (response.status === 500) {
+                    alert("Error interno del servidor. Inténtalo de nuevo más tarde.");
                 } else {
                     alert("No se pudo eliminar la oportunidad.");
                 }
