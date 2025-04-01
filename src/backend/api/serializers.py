@@ -90,29 +90,26 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Extract Many-to-Many fields
-        type_data = validated_data.pop('type', '')
-        interests_data = validated_data.pop('interests', '')
-        country_data = validated_data.pop('country', '')
+        type_data = validated_data.pop('type', [])
+        interests_data = validated_data.pop('interests', [])
+        country_data = validated_data.pop('country', [])
 
         print("Type Data:", type_data)
         print("Interests Data:", interests_data)
         print("Country Data:", country_data)
-        
+
         # Create the Scholarship object
         scholarship = Scholarship.objects.create(**validated_data)
 
         # Handle Many-to-Many fields
         if type_data:
-            type_ids = [int(type_id) for type_id in type_data.split(',')]
-            scholarship.type.set(type_ids)
+            scholarship.type.set(type_data)  # Directly set the list of PKs
 
         if interests_data:
-            interest_ids = [int(interest_id) for interest_id in interests_data.split(',')]
-            scholarship.interests.set(interest_ids)
+            scholarship.interests.set(interests_data)  # Directly set the list of PKs
 
         if country_data:
-            country_ids = [int(country_id) for country_id in country_data.split(',')]
-            scholarship.country.set(country_ids)
+            scholarship.country.set(country_data)  # Directly set the list of PKs
 
         return scholarship
 
