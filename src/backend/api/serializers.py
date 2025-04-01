@@ -64,6 +64,12 @@ class InterestSerializer(serializers.ModelSerializer):
 
 class ScholarshipSerializer(serializers.ModelSerializer):
     
+    # Define SerializerMethodFields for type, interests, and country
+    type = serializers.SerializerMethodField()
+    interests = serializers.SerializerMethodField()
+    country = serializers.SerializerMethodField()
+    organization = serializers.SerializerMethodField()
+    
     created_by = serializers.SlugRelatedField(
         queryset=User.objects.all(),
         slug_field='username',  # Accept the username instead of the pk
