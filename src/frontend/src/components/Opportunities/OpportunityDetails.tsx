@@ -27,27 +27,39 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
         <div className='container mx-auto w-full'>
             <div className=''>
                 <h1 className='font-bold text-2xl mb-1 text-left'>{item.name}</h1>
-                {item.organization != ""
+                {item.organization !== ""
                     ? <p className='text-sm text-blue-500 text-left'>{item.organization}</p>
                     : <p className='text-sm text-gray-500 text-left'>{item.author}</p>
                 }
                 <p className='text-xs text-left text-gray-500 mt-1'>{item.beginning.toLocaleDateString()} - {item.end.toLocaleDateString()}</p>
+                
+                {/* Render each type as a separate <p> element */}
                 <div className='mt-1 flex flex-wrap gap-1'>
-                    <p className='
-                        rounded-lg
-                        text-xs
-                        text-gray-500
-                        bg-white
-                        w-fit
-                        px-2
-                        py-px
-                        border
-                        border-gray-500
-                        rounded-full'>
-                        {item.type}
-                    </p>
-                    {/* {item?.interests.map( interest => (
+                    {item.type.map((type, index) => (
                         <p
+                            key={index}
+                            className='
+                                rounded-lg
+                                text-xs
+                                text-gray-500
+                                bg-white
+                                w-fit
+                                px-2
+                                py-px
+                                border
+                                border-gray-500
+                                rounded-full'
+                        >
+                            {type}
+                        </p>
+                    ))}
+                </div>
+
+                {/* Render each interest as a separate <p> element */}
+                <div className='mt-1 flex flex-wrap gap-1'>
+                    {item.interests.map((interest, index) => (
+                        <p
+                            key={index}
                             className='
                                 rounded-lg
                                 text-xs
@@ -58,26 +70,25 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                                 py-px
                                 border-gray-500
                                 rounded-full'
-                            >
-                                {interest}
+                        >
+                            {interest}
                         </p>
-                    ))} */}
+                    ))}
                 </div>
-                {/* <div className='grid grid grid-cols-[50%_50%]'> */}
-                    <div>
-                        <p className='text-left mt-3 mb-3'>{item.content}</p>
-                    </div>
-                    <img
-                        src={item.image} // Use the image from the item object
-                        alt={item.image}
-                        className="rounded-xl max-w-[50%] mx-auto"
-                    />
-                {/* </div> */}
+
+                <div>
+                    <p className='text-left mt-3 mb-3'>{item.content}</p>
+                </div>
+                <img
+                    src={item.image} // Use the image from the item object
+                    alt={item.image}
+                    className="rounded-xl max-w-[50%] mx-auto"
+                />
             </div>
             <p className='text-xs text-right text-gray-500 mt-1'>Publicado: {item.published.toLocaleDateString()}</p>
             <p className='text-xs text-right text-gray-500 mt-1'>País: {item.country}</p>
         </div>
-    )
-}
+    );
+};
 
 export default OpportunityDetails;
