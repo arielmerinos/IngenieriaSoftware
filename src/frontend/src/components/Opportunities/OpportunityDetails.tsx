@@ -21,8 +21,35 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import React from 'react';
 import { Opportunity } from '../../types/opportunity';
+import { useAuth } from '../../contexts/AuthContext';
 
 const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
+    const { user } = useAuth(); // Get the current user from the auth context
+
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta oportunidad?");
+        if (confirmDelete) {
+            try {
+                const response = await fetch(`http://localhost:8000/scholarships/${item.id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Include the auth token
+                    },
+                });
+
+                if (response.ok) {
+                    alert("Oportunidad eliminada con éxito.");
+                    // Optionally, redirect or refresh the page
+                } else {
+                    alert("No se pudo eliminar la oportunidad.");
+                }
+            } catch (error) {
+                console.error("Error al eliminar la oportunidad:", error);
+                alert("Ocurrió un error al intentar eliminar la oportunidad.");
+            }
+        }
+    };
+
     return (
         <div className='container mx-auto w-full'>
             <div className=''>
@@ -87,6 +114,18 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
             </div>
             <p className='text-xs text-right text-gray-500 mt-1'>Publicado: {item.published.toLocaleDateString()}</p>
             <p className='text-xs text-right text-gray-500 mt-1'>País: {item.country}</p>
+
+            {/* Show delete button if the current user is the author */}
+            {user?.username === item.author && (
+                <div className="mt-4 text-right">
+                    <button
+                        onClick={handleDelete}
+                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                        Eliminar
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
