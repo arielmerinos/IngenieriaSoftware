@@ -45,7 +45,7 @@ const Opportunities: React.FC = () => {
      * @returns Una opportunity con la info del JSON.
      */
     function organizationParse(element: any) {
-        const baseUrl = "http://localhost:8000/media"; // Base URL for media files
+        const baseUrl = "http://localhost:8000/"; // Base URL for media files
         let newElem = {
             id: element.id,
             organization: "",
