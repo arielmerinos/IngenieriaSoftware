@@ -63,22 +63,10 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'color']
 
 class ScholarshipSerializer(serializers.ModelSerializer):
-    # Use PrimaryKeyRelatedField for type, interests, and country
-    type = serializers.PrimaryKeyRelatedField(
-        queryset=Type.objects.all(),
-        many=True,
-        required=False
-    )
-    interests = serializers.PrimaryKeyRelatedField(
-        queryset=Interest.objects.all(),
-        many=True,
-        required=False
-    )
-    country = serializers.PrimaryKeyRelatedField(
-        queryset=Country.objects.all(),
-        many=True,
-        required=False
-    )
+    # Use nested serializers for type, interests, and country
+    type = TypeSerializer(many=True, read_only=True)  # Use the TypeSerializer to include type names
+    interests = InterestSerializer(many=True, read_only=True)  # Use the InterestSerializer to include interest names
+    country = CountrySerializer(many=True, read_only=True)  # Use the CountrySerializer to include country names
     organization = serializers.SerializerMethodField()
 
     created_by = serializers.SlugRelatedField(
