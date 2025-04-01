@@ -48,7 +48,7 @@ const Opportunities: React.FC = () => {
         const baseUrl = "http://localhost:8000"; // Base URL for media files
         let newElem = {
             id: element.id,
-            organization: "",
+            organization: element.organization,
             name: element.name,
             published: new Date(element.publication_date),
             beginning: new Date(element.start_date),
@@ -58,7 +58,7 @@ const Opportunities: React.FC = () => {
             content: element.content,
             interests: element.interests || [],
             author: element.created_by,
-            country: element.country || "Mexico"
+            country: element.country || "Global"
         };
         console.log(newElem);
         return newElem;

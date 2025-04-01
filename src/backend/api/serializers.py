@@ -113,6 +113,15 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 
         return scholarship
 
+    def get_type(self, obj):
+        return [t.name for t in obj.type.all()]  # Return the names of the types
+
+    def get_interests(self, obj):
+        return [i.name for i in obj.interests.all()]  # Return the names of the interests
+
+    def get_country(self, obj):
+        return [c.name for c in obj.country.all()]  # Return the names of the countries
+    
     def update(self, instance, validated_data):
         # Update the fields directly
         for attr, value in validated_data.items():
