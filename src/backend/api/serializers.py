@@ -63,10 +63,7 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'color']
 
 class ScholarshipSerializer(serializers.ModelSerializer):
-    # Override fields to handle them as strings
-    type = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
-    interests = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
-    country = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
+    
     created_by = serializers.SlugRelatedField(
         queryset=User.objects.all(),
         slug_field='username',  # Accept the username instead of the pk
@@ -97,6 +94,10 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         interests_data = validated_data.pop('interests', '')
         country_data = validated_data.pop('country', '')
 
+        print("Type Data:", type_data)
+        print("Interests Data:", interests_data)
+        print("Country Data:", country_data)
+        
         # Create the Scholarship object
         scholarship = Scholarship.objects.create(**validated_data)
 
