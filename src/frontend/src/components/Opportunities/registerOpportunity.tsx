@@ -27,7 +27,7 @@ const countryCodeToEmoji = (countryCode: string): string => {
 };
 
 const RegisterOpportunity: React.FC = () => {
-    const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormData>({ mode: 'onChange' });
+    const { register, handleSubmit, formState: { errors, isValid }, getValues } = useForm<FormData>({ mode: 'onChange' });
     const [opportunityTypes, setOpportunityTypes] = useState<{ id:number, name:string }[]>([]);
     const [countries, setCountries] = useState<{ id: number; name: string, emoji:string }[]>([]);
     const [interests, setInterests] = useState<{ id: number; name: string, color: string}[]>([]);
@@ -195,7 +195,14 @@ const RegisterOpportunity: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700">Fecha de Finalización</label>
                     <input 
                         type="date" 
-                        {...register('end_date', { required: 'La fecha de finalización es obligatoria' })} 
+                        {...register('end_date', { 
+                            required: 'La fecha de finalización es obligatoria',
+                            validate: (value) => {
+                                const startDate = new Date(getValues('start_date'));
+                                const endDate = new Date(value);
+                                return endDate > startDate || 'La fecha de finalización debe ser mayor que la fecha de inicio';
+                            }
+                        })} 
                         className="w-full px-3 py-2 border rounded-md" 
                     />
                     {errors.end_date && <span className="text-red-500 text-sm">{errors.end_date.message}</span>}
