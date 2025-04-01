@@ -170,6 +170,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         
         
 class MembershipSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer(read_only=True)
     class Meta:
         model = Membership
         fields = ["id", "user", "organization", "is_admin", "is_active"]
