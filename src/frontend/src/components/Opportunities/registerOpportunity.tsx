@@ -95,9 +95,9 @@ const RegisterOpportunity: React.FC = () => {
             formData.append('end_date', data.end_date); // End date
             formData.append('content', data.content); // Description
             formData.append('created_by', username); // Send the username as the creator
-            formData.append('type', data.type.join(',')); // Convert array to comma-separated string
-            formData.append('interests', data.interests.join(',')); // Convert array to comma-separated string
-            formData.append('country', data.country.join(',')); // Convert array to comma-separated string
+            formData.append('type', JSON.stringify(data.type.map(Number))); // Convert array to JSON string of integers
+            formData.append('interests', JSON.stringify(data.interests.map(Number))); // Convert array to JSON string of integers
+            formData.append('country', JSON.stringify(data.country.map(Number))); // Convert array to JSON string of integers
             if (data.image && data.image.length > 0) {
                 formData.append('image', data.image[0]); // Image file
             }
