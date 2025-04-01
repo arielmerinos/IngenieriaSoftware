@@ -42,7 +42,6 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                 if (response.ok) {
                     alert("Oportunidad eliminada con éxito.");
                     popUpContext?.setOpen(false); // Close the pop-up after successful deletion
-                    // Refresh the page or update the state to reflect the deletion
                     window.location.reload(); // Reload the page to see the changes
                 } else if (response.status === 403) {
                     alert("No tienes permiso para eliminar esta oportunidad.");
