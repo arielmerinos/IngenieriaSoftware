@@ -405,7 +405,15 @@ class MembershipSerializerTest(TestCase):
         # Datos iniciales para la membresía
         self.membership_data = {
             'user': self.user.id,
-            'organization': self.organization.id,
+            'organization': {
+                'id': self.organization.id,
+                'name': self.organization.name,
+                'email': self.organization.email,
+                'website': self.organization.website,
+                'description': self.organization.description,
+                'phone_number': self.organization.phone_number,
+                'logo': self.organization.logo,
+            },
             'is_admin': True,
             'is_active': True
         }
