@@ -397,7 +397,6 @@ class MembershipSerializerTest(TestCase):
             email='member@example.com'
         )
         self.organization = Organization.objects.create(
-            id = 3,
             name='testorg',
             email='unam@gmail.com',
             website='http://unam.com.mx',
@@ -406,15 +405,12 @@ class MembershipSerializerTest(TestCase):
             logo='/media/logos/IMG_0587.jpeg'
         )
         # Datos iniciales para la membresía
-        self.membership_data = {
-            'id': 10,
-            'user': self.user.id,
-            'organization': self.organization.id,
-            'is_admin': True,
-            'is_active': True
-        }
-        print("Membership Data:", self.membership_data)
-
+        self.membership_data = Membership.objects.create(
+            user=self.user,
+            organization=self.organization,
+            is_admin=True,
+            is_active=True
+        )
     def test_membership_serializer_creacion(self):
         serializer = MembershipSerializer(data=self.membership_data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
