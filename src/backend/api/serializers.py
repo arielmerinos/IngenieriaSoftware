@@ -176,7 +176,7 @@ class MembershipSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)
-
+    
 
     def delete(self, validated_data):
         Membership.objects.filter(**validated_data).delete()

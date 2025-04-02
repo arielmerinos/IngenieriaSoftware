@@ -77,6 +77,8 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
             }
           }
         );
+
+
         console.log('Organización actualizada exitosamente:', response.data);
         onUpdated(response.data);
       } else {
