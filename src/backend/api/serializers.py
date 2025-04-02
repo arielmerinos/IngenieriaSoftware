@@ -170,10 +170,16 @@ class OrganizationSerializer(serializers.ModelSerializer):
         
         
 class MembershipSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer(read_only=True)
+    organization = OrganizationSerializer(read_only=True)  # Nested serializer for output
+    organization_id = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        source='organization',  # Maps to the `organization` field in the model
+        write_only=True  # Only used for input
+    )
+
     class Meta:
         model = Membership
-        fields = ["id", "user", "organization", "is_admin", "is_active"]
+        fields = ['id', 'user', 'organization', 'organization_id', 'is_admin', 'is_active']
 
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)
