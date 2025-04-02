@@ -438,7 +438,7 @@ class MembershipSerializerTest(TestCase):
                 'website': self.organization.website,
                 'description': self.organization.description,
                 'phone_number': self.organization.phone_number,
-                'logo': self.organization.logo,
+                'logo': self.organization.logo.url if self.organization.logo else None,  # Use the URL of the logo
             },
             'is_admin': True,
             'is_active': True
