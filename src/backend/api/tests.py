@@ -396,9 +396,11 @@ class MembershipSerializerTest(TestCase):
             email='member@example.com'
         )
         self.organization = Organization.objects.create(
-            name='Unam',
+            id = 3,
+            name='testorg',
             email='unam@gmail.com',
             website='http://unam.com.mx',
+            description='testorg description',
             phone_number='7774761814',
             logo='/media/logos/IMG_0587.jpeg'
         )
