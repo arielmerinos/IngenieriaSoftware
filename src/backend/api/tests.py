@@ -413,6 +413,7 @@ class MembershipSerializerTest(TestCase):
         }
         
     def test_membership_serializer_creacion(self):
+        print("Membership Data:", self.membership_data)
         serializer = MembershipSerializer(data=self.membership_data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
         membership = serializer.save()
