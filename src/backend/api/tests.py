@@ -396,23 +396,48 @@ class MembershipSerializerTest(TestCase):
             email='member@example.com'
         )
         self.organization = Organization.objects.create(
-            name='Org de Test',
-            email='org@test.com',
-            website='https://orgtest.com'
+            name='Unam',
+            email='unam@gmail.com',
+            website='http://unam.com.mx',
+            phone_number='7774761814',
+            logo='/media/logos/IMG_0587.jpeg'
         )
         # Datos iniciales para la membresía
         self.membership_data = {
             'user': self.user.id,
             'organization': self.organization.id,
-            'is_admin': False,
-            'is_active': False
+            'is_admin': True,
+            'is_active': True
         }
 
     def test_membership_serializer_creacion(self):
         serializer = MembershipSerializer(data=self.membership_data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
         membership = serializer.save()
+
+        # Verificar los datos de la membresía
         self.assertEqual(membership.user, self.user)
         self.assertEqual(membership.organization, self.organization)
-        self.assertFalse(membership.is_admin)
-        self.assertFalse(membership.is_active)
+        self.assertTrue(membership.is_admin)
+        self.assertTrue(membership.is_active)
+
+        # Serializar la membresía creada
+        serialized_membership = MembershipSerializer(membership).data
+
+        # Verificar la salida serializada
+        expected_output = {
+            'id': membership.id,
+            'user': self.user.id,
+            'organization': {
+                'id': self.organization.id,
+                'name': self.organization.name,
+                'email': self.organization.email,
+                'website': self.organization.website,
+                'description': self.organization.description,
+                'phone_number': self.organization.phone_number,
+                'logo': self.organization.logo,
+            },
+            'is_admin': True,
+            'is_active': True
+        }
+        self.assertEqual(serialized_membership, expected_output)
