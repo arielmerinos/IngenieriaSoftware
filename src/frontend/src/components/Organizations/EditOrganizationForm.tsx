@@ -20,7 +20,7 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import axios from 'axios';
+import apiInstance from '../../services/axiosInstance';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
 import { Organization } from '../../models/organization';
@@ -57,8 +57,7 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
         console.error('No se encontró token de autenticación.');
         return;
       }
-      
-      // esto es temporal no se como vamos a hacer imgs aun
+
       if (data.logoFile && data.logoFile.length > 0) {
         const formData = new FormData();
         formData.append('name', data.name);
@@ -68,8 +67,8 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
         formData.append('phone_number', data.phone_number || '');
         formData.append('logo', data.logoFile[0]);
 
-        const response = await axios.put(
-          `http://0.0.0.0:8000/api/organizations/${organizationId}/`,
+        const response = await apiInstance.put(
+          `api/organizations/${organizationId}/`,
           formData,
           {
             headers: {
@@ -81,9 +80,8 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
         console.log('Organización actualizada exitosamente:', response.data);
         onUpdated(response.data);
       } else {
-        // Si no hay archivo, se envía en formato JSON
-        const response = await axios.put(
-          `http://0.0.0.0:8000/api/organizations/${organizationId}/`,
+        const response = await apiInstance.put(
+          `api/organizations/${organizationId}/`,
           data,
           {
             headers: {
