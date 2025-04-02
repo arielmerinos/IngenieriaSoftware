@@ -358,6 +358,7 @@ class OrganizationSerializerTest(TestCase):
         self.context = {'request': type('Request', (), {'user': self.user})}
         # Datos válidos para la creación de una organización
         self.valid_data = {
+            'id': '1',
             'name': 'Organización de Prueba',
             'email': 'contacto@orgprueba.com',
             'website': 'https://orgprueba.com',
