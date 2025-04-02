@@ -412,6 +412,7 @@ class MembershipSerializerTest(TestCase):
             'is_admin': True,
             'is_active': True
         }
+        print("Membership Data:", self.membership_data)
 
     def test_membership_serializer_creacion(self):
         serializer = MembershipSerializer(data=self.membership_data)
