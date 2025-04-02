@@ -396,6 +396,7 @@ class MembershipSerializerTest(TestCase):
             email='member@example.com'
         )
         self.organization = Organization.objects.create(
+            id='6696969',
             name='Org de Test',
             email='org@test.com',
             website='https://orgtest.com'

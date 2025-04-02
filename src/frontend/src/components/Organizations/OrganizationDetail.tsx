@@ -22,11 +22,11 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import PopUpModal from './PopUpModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { Organization } from '../../models/organization';
 import EditOrganizationForm from './EditOrganizationForm';
+import apiInstance from '../../services/axiosInstance';
 
 const OrganizationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,9 +37,9 @@ const OrganizationDetail: React.FC = () => {
 
   useEffect(() => {
     if (id) {
-      axios
-        .get(`http://0.0.0.0:8000/api/organizations/${id}/`)
-        .then((response) => {
+      
+        apiInstance.get(`api/organizations/${id}/`)
+        .then((response: { data: React.SetStateAction<Organization | null>; }) => {
           setOrganization(response.data);
           setLoading(false);
         })
@@ -53,14 +53,14 @@ const OrganizationDetail: React.FC = () => {
   const handleDelete = () => {
     if (window.confirm('¿Estás seguro de eliminar esta organización?')) {
       const token = authContext.authToken;
-      axios
-        .delete(`http://0.0.0.0:8000/api/organizations/${id}/`, {
+      apiInstance
+        .delete(`api/organizations/${id}/`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           }
         })
-        .then((response) => {
+        .then((response: { status: number; }) => {
           if (response.status === 204) {
             window.location.href = '/org';
           } else {

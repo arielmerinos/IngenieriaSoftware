@@ -170,13 +170,13 @@ class OrganizationSerializer(serializers.ModelSerializer):
         
         
 class MembershipSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer(read_only=True)
     class Meta:
         model = Membership
         fields = ["id", "user", "organization", "is_admin", "is_active"]
 
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)
+
 
     def delete(self, validated_data):
         Membership.objects.filter(**validated_data).delete()
