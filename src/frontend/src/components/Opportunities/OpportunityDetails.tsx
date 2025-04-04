@@ -19,14 +19,16 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
-import React from 'react';
+import  { useState } from 'react';
 import { Opportunity } from '../../types/opportunity';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePopUp } from '../../contexts/PopUpContext';
+import EditOpportunityForm from './EditOpportunityForm';
 
 const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
     const { user } = useAuth(); // Get the current user from the auth context
     const popUpContext = usePopUp(); // Get the pop-up context
+    const [isEditing, setIsEditing] = useState(false);
 
     const handleDelete = async () => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta oportunidad?");
@@ -59,6 +61,19 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
         }
     };
 
+    const handleEdit = () => {
+        setIsEditing(true);
+    };
+
+    const handleUpdate = () => {
+        window.location.reload(); // Reload the page to see the updated changes
+    };
+
+    // If in editing mode, show the EditOpportunityForm
+    if (isEditing) {
+        return <EditOpportunityForm opportunity={item} onUpdate={handleUpdate} />;
+    }
+
     return (
         <div className='container mx-auto w-full'>
             <div className=''>
@@ -69,13 +84,13 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                 }
                 <p className='text-xs text-left text-gray-500 mt-1'>{item.beginning.toLocaleDateString()} - {item.end.toLocaleDateString()}</p>
                 
-                {/* Render each type as a separate <p> element */}
+                {/* Render each type non selecte as a separate <p> element */}
                 <div className='mt-1 flex flex-wrap gap-1'>
                     {item.type.map((type, index) => (
                         <p
                             key={index}
                             className='
-                                rounded-lg
+                                rounded-full
                                 text-xs
                                 text-gray-500
                                 bg-white
@@ -84,7 +99,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                                 py-px
                                 border
                                 border-gray-500
-                                rounded-full'
+                                '
                         >
                             {type}
                         </p>
@@ -126,9 +141,15 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                 País: {Array.isArray(item.country) ? item.country.join(', ') : item.country}
             </p>
 
-            {/* Show delete button if the current user is the author */}
+            {/* Show edit and delete buttons if the current user is the author */}
             {user?.username === item.author && (
-                <div className="mt-4 text-right">
+                <div className="mt-4 text-right flex justify-end space-x-2">
+                    <button
+                        onClick={handleEdit}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Editar
+                    </button>
                     <button
                         onClick={handleDelete}
                         className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
