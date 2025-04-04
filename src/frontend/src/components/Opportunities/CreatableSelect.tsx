@@ -1,4 +1,25 @@
-import React, { useState } from 'react';
+/*
+Nombre del programa: Impulsa tu futuro
+Copyright (C) 2025 - Autores:
+Merino Peña Kevin Ariel
+Ortíz Montiel Diego Iain
+Rodríguez Dimayuga Laura Itzel
+Sosa Romo Juan Mario
+Vargas Campos Miguel Angel
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU v3 publicada por
+la Free Software Foundation.
+
+Este programa se distribuye con la esperanza de que sea útil,
+pero SIN NINGUNA GARANTÍA; sin incluso la garantía implícita de
+COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
+Consulte la Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General de GNU
+junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
+*/
+import { useState } from 'react';
 
 interface CreatableSelectProps {
   options: { id: number; name: string }[];
@@ -73,9 +94,11 @@ const CreatableSelect: React.FC<CreatableSelectProps> = ({
 
   return (
     <div className={className}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {label}
-      </label>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {label}
+        </label>
+      )}
       
       <div className="mb-2">
         <select
@@ -88,7 +111,7 @@ const CreatableSelect: React.FC<CreatableSelectProps> = ({
             );
             onChange(selectedValues);
           }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           size={4}
         >
           {options.map(option => (
@@ -97,8 +120,8 @@ const CreatableSelect: React.FC<CreatableSelectProps> = ({
             </option>
           ))}
         </select>
-        {help && <p className="text-xs text-gray-500">{help}</p>}
-        {error && <span className="text-red-500 text-sm">{error}</span>}
+        {help && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{help}</p>}
+        {error && <span className="text-red-500 dark:text-red-400 text-sm mt-1 block">{error}</span>}
       </div>
 
       <div className="flex mt-2">
@@ -111,24 +134,24 @@ const CreatableSelect: React.FC<CreatableSelectProps> = ({
           }}
           onKeyDown={handleKeyDown}
           placeholder="Crear nuevo tipo..."
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           disabled={isCreating}
         />
         <button
           type="button"
           onClick={handleCreateOption}
           disabled={isCreating || !inputValue.trim()}
-          className={`px-4 py-2 rounded-r-md text-white ${
+          className={`px-4 py-2 rounded-r-lg text-white transition-colors ${
             isCreating || !inputValue.trim()
-              ? "bg-gray-400"
-              : "bg-blue-600 hover:bg-blue-700"
+              ? "bg-gray-400 dark:bg-gray-600"
+              : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800"
           }`}
         >
           {isCreating ? "Creando..." : "Crear"}
         </button>
       </div>
       {errorMessage && (
-        <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+        <p className="text-red-500 dark:text-red-400 text-sm mt-1">{errorMessage}</p>
       )}
     </div>
   );
@@ -136,7 +159,7 @@ const CreatableSelect: React.FC<CreatableSelectProps> = ({
 
 export default CreatableSelect;
 
-// Servicio para crear un nuevo tipo
+// Service to create a new type
 export const createTypeService = async (
   name: string,
   token: string | null
@@ -154,7 +177,7 @@ export const createTypeService = async (
       },
       body: JSON.stringify({
         name: name,
-        type_name: name.toLowerCase().replace(/\s+/g, '_') // Convertir espacios a guiones bajos y minúsculas
+        type_name: name.toLowerCase().replace(/\s+/g, '_') // Convert spaces to underscores and lowercase
       })
     });
 

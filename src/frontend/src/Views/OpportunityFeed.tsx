@@ -20,42 +20,41 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import React, { Suspense } from 'react'
-import './Landing.css'
+import React,{ Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { PopUpProvider } from '../contexts/PopUpContext';
 import { GridProvider } from '../contexts/GridContext';
 
-const Header = React.lazy(() => import('../components/Header'));
-const Footer = React.lazy(() => import('../components/Footer'));
 const Opportunities = React.lazy(() => import('../components/Opportunities/Opportunities'));
 const OpportunitiesButton = React.lazy(() => import('../components/Opportunities/OpportunityButton'));
 
 function OpportunityFeed() {
-
   const authContext = useAuth();
 
-  // Loader component can be simple
+  // Enhanced loader with theme support
   const Loader = () => (
-    <div className="flex justify-center items-center h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-blue-600"></div>
+    <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-300">Cargando oportunidades...</p>
+      </div>
     </div>
   );
 
   return (
-    
-    <section className="w-full min-h-screen">
-        <Suspense fallback={<Loader />}>
-        {/* Es muy importante que primero este el grid y luego el Pop Up, sino el pop up no puede ver el grid */}
+    <section className="w-full min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <Suspense fallback={<Loader />}>
+        {/* GridProvider must be before PopUpProvider so PopUp can see the grid */}
         <GridProvider>
-        <PopUpProvider>
-          {authContext.isAuthenticated &&
-            <OpportunitiesButton />
-          }
-          <Opportunities />
-        </PopUpProvider>
+          <PopUpProvider>
+            <div className="container mx-auto px-4 py-6">
+              {/* Only show the create button if authenticated */}
+              {authContext.isAuthenticated && <OpportunitiesButton />}
+              <Opportunities />
+            </div>
+          </PopUpProvider>
         </GridProvider>
-        </Suspense>
+      </Suspense>
     </section>
   );
 }
