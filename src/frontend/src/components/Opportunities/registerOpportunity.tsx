@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { useGrid } from '../../contexts/GridContext';
 import { usePopUp } from '../../contexts/PopUpContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { parseOpportunity } from '../../types/opportunity';
+import CreatableSelect, { createTypeService } from './CreatableSelect';
 
 interface FormData {
     name: string;
@@ -27,10 +28,11 @@ const countryCodeToEmoji = (countryCode: string): string => {
 };
 
 const RegisterOpportunity: React.FC = () => {
-    const { register, handleSubmit, formState: { errors, isValid }, getValues } = useForm<FormData>({ mode: 'onChange' });
+    const { register, handleSubmit, control, formState: { errors, isValid }, getValues, setValue } = useForm<FormData>({ mode: 'onChange' });
     const [opportunityTypes, setOpportunityTypes] = useState<{ id:number, name:string }[]>([]);
     const [countries, setCountries] = useState<{ id: number; name: string, emoji:string }[]>([]);
     const [interests, setInterests] = useState<{ id: number; name: string, color: string}[]>([]);
+    const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
 
     const gridContext = useGrid();
     const popUpContext = usePopUp();
@@ -98,7 +100,7 @@ const RegisterOpportunity: React.FC = () => {
             formData.append('created_by', username); // Send the username as the creator
 
             // Use the correct field names for the backend
-            data.type.forEach((typeId) => formData.append('type_ids', typeId.toString())); // Append each type ID
+            selectedTypes.forEach((typeId) => formData.append('type_ids', typeId.toString())); // Append each type ID
             data.interests.forEach((interestId) => formData.append('interest_ids', interestId.toString())); // Append each interest ID
             data.country.forEach((countryId) => formData.append('country_ids', countryId.toString())); // Append each country ID
 
@@ -128,21 +130,35 @@ const RegisterOpportunity: React.FC = () => {
 
             const result = await response.json();
             console.log('Opportunity created:', result);
-            gridContext?.addElem(parseOpportunity(data));
+            gridContext?.addElem(parseOpportunity(result));
             popUpContext.setOpen(false); // Close the form after successful submission
         } catch (error) {
             console.error('Error creating opportunity:', error);
         }
     };
 
+    // Manejador para crear un nuevo tipo
+    const handleCreateType = async (name: string) => {
+        try {
+            const newType = await createTypeService(name, authContext.authToken);
+            if (newType) {
+                // Actualizar la lista de tipos
+                setOpportunityTypes(prev => [...prev, newType]);
+                return newType;
+            }
+            return null;
+        } catch (error) {
+            console.error('Error creating type:', error);
+            return null;
+        }
+    };
 
     return (
         <form
             onSubmit={(e) => {
-                e.preventDefault(); // Prevent default behavior for debugging
+                e.preventDefault();
                 console.log('Form onSubmit triggered');
-                handleSubmit(submitHandler)(e); // Call react-hook-form's handleSubmit
-
+                handleSubmit(submitHandler)(e);
             }}
             className="space-y-4"
         >
@@ -158,27 +174,18 @@ const RegisterOpportunity: React.FC = () => {
                 {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
             </div>
 
-            {/* Types Field */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Tipos</label>
-                <select
-                    multiple
-                    {...register('type', { required: 'El tipo es obligatorio' })}
-                    className="w-full px-3 py-2 border rounded-md h-24"
-                >
-                    {opportunityTypes.map(option => {
-                        return (
-                            <option key={option.id} value={option.id}>
-                                {option.name || 'Tipo sin nombre'}
-                            </option>
-                        );
-                    })}
-                </select>
-                <p className="text-xs text-gray-500">
-                    Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
-                </p>
-                {errors.type && <span className="text-red-500 text-sm">{errors.type.message}</span>}
-            </div>
+            {/* Types Field with Creatable Select */}
+            <CreatableSelect
+                options={opportunityTypes}
+                value={selectedTypes}
+                onChange={setSelectedTypes}
+                onCreate={handleCreateType}
+                label="Tipos"
+                placeholder="Selecciona o crea tipos"
+                error={errors.type?.message}
+                help="Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones"
+                multiple={true}
+            />
 
             {/* Start and End Dates */}
             <div className="grid grid-cols-2 gap-4">
