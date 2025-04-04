@@ -112,7 +112,6 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                         <p
                             key={index}
                             className='
-                                rounded-lg
                                 text-xs
                                 text-white
                                 bg-gray-500
