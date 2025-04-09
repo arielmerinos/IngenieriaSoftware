@@ -5,22 +5,31 @@ import OpportunityFeed from './Views/OpportunityFeed';
 import OrganizationsFeed from './Views/OrganizationsFeed';
 import OrganizationDetail from './components/Organizations/OrganizationDetail';
 import Loader from './components/Loader';
+import { useTheme } from './contexts/ThemeContext'; // Importamos useTheme para verificación
 
 const Header = React.lazy(() => import('./components/Header'));
 const Footer = React.lazy(() => import('./components/Footer'));
 
 function App() {
+  // Usamos useTheme para verificar que el contexto está disponible
+  const { theme } = useTheme();
+  console.log('Current theme in App:', theme);
+  
   return (
-    <Suspense fallback={<Loader />}>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/feed" element={<OpportunityFeed />} />
-        <Route path="/org" element={<OrganizationsFeed />} />
-        <Route path="/org/:id" element={<OrganizationDetail />} />
-      </Routes>
-      <Footer />
-    </Suspense>
+    <div className="min-h-screen transition-colors duration-200 ">
+      <Suspense fallback={<Loader />}>
+        <Header />
+        <main className="text-black ">
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/feed" element={<OpportunityFeed />} />
+            <Route path="/org" element={<OrganizationsFeed />} />
+            <Route path="/org/:id" element={<OrganizationDetail />} />
+          </Routes>
+        </main>
+        <Footer />
+      </Suspense>
+    </div>
   );
 }
 
