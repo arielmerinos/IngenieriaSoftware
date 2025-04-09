@@ -19,26 +19,24 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
+import React from 'react';
+const Header = React.lazy(() => import('../components/Header'));
+const Footer = React.lazy(() => import('../components/Footer'));
 
-import React, { Suspense } from "react";
-import "./Landing.css";
-import Loader from "../components/Loader";
-import { GridProvider } from "../contexts/GridContext";
-import { PopUpProvider } from "../contexts/PopUpContext";
-import Organizations from "../components/Organizations/Organizations";
-
-function OrganizationsFeed() {
-    return (
-        <section className="w-full min-h-screen">
-            <Suspense fallback={<Loader />}>
-                <GridProvider>
-                    <PopUpProvider>
-                        <Organizations />
-                    </PopUpProvider>
-                </GridProvider>
-            </Suspense>
-        </section>
-    );
+interface LayoutProps {
+  children: React.ReactNode;
 }
 
-export default OrganizationsFeed;
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen bg-white">
+        {children}
+      </main>
+      <Footer />
+    </>
+  );
+};
+
+export default Layout;

@@ -25,6 +25,7 @@ import OrganizationCard from "../Organizations/OrganizationCard";
 import { useGrid } from "../../contexts/GridContext";
 import { AddOrganizationButton } from "./AddOrganizationButton"; 
 import { Organization } from "../../models/organization";
+import apiInstance from "../../services/axiosInstance";
 
 const Organizations: React.FC = () => {
   const gridContext = useGrid();
@@ -35,9 +36,8 @@ const Organizations: React.FC = () => {
 
   const refreshOrganizations = async () => {
     try {
-      const response = await fetch("http://0.0.0.0:8000/api/organizations/");
-      const items: Organization[] = await response.json();
-      gridContext.setElems(items);
+      const response = await apiInstance.get<Organization[]>("api/organizations/");
+      gridContext.setElems(response.data);
     } catch (error) {
       console.error("Error al recargar organizaciones:", error);
     }
@@ -50,7 +50,6 @@ const Organizations: React.FC = () => {
         refreshOrganizations(); 
       }} />
 
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 mb-10">
         {gridContext.elems.map(org => (
           <OrganizationCard key={org.id} item={org} />
@@ -61,3 +60,4 @@ const Organizations: React.FC = () => {
 };
 
 export default Organizations;
+

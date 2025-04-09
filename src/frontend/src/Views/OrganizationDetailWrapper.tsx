@@ -25,15 +25,15 @@ import "./Landing.css";
 import Loader from "../components/Loader";
 import { GridProvider } from "../contexts/GridContext";
 import { PopUpProvider } from "../contexts/PopUpContext";
-import Organizations from "../components/Organizations/Organizations";
+import OrganizationDetail from "../components/Organizations/OrganizationDetail";
 
-function OrganizationsFeed() {
+function OrganizationDetailWrapper() {
     return (
-        <section className="w-full min-h-screen">
+        <section >
             <Suspense fallback={<Loader />}>
                 <GridProvider>
                     <PopUpProvider>
-                        <Organizations />
+                        <OrganizationDetail />
                     </PopUpProvider>
                 </GridProvider>
             </Suspense>
@@ -41,4 +41,5 @@ function OrganizationsFeed() {
     );
 }
 
-export default OrganizationsFeed;
+export default OrganizationDetailWrapper;
+

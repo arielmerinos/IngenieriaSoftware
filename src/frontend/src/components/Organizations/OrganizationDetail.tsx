@@ -37,9 +37,9 @@ const OrganizationDetail: React.FC = () => {
 
   useEffect(() => {
     if (id) {
-      
-        apiInstance.get(`api/organizations/${id}/`)
-        .then((response: { data: React.SetStateAction<Organization | null>; }) => {
+      apiInstance
+        .get(`api/organizations/${id}/`)
+        .then((response: { data: Organization | null }) => {
           setOrganization(response.data);
           setLoading(false);
         })
@@ -60,7 +60,7 @@ const OrganizationDetail: React.FC = () => {
             'Authorization': `Bearer ${token}`
           }
         })
-        .then((response: { status: number; }) => {
+        .then((response: { status: number }) => {
           if (response.status === 204) {
             window.location.href = '/org';
           } else {
@@ -80,8 +80,10 @@ const OrganizationDetail: React.FC = () => {
     setEditOpen(false);
   };
 
-  if (loading) return <div className="text-center py-10">Cargando...</div>;
-  if (!organization) return <div className="text-center py-10">No se encontró la organización.</div>;
+  if (loading)
+    return <div className="text-center py-10">Cargando...</div>;
+  if (!organization)
+    return <div className="text-center py-10">No se encontró la organización.</div>;
 
   return (
     <div className="max-w-5xl mx-auto bg-gray-50 shadow rounded-lg overflow-hidden">
@@ -149,7 +151,9 @@ const OrganizationDetail: React.FC = () => {
         {/* Sección de Publicaciones (Placeholder) */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold text-gray-800 text-center">Publicaciones</h2>
-          <p className="text-gray-500 mt-3 text-center">Próximamente se mostrarán las publicaciones de la organización.</p>
+          <p className="text-gray-500 mt-3 text-center">
+            Próximamente se mostrarán las publicaciones de la organización.
+          </p>
         </div>
       </div>
   
@@ -174,3 +178,4 @@ const OrganizationDetail: React.FC = () => {
 };
 
 export default OrganizationDetail;
+
