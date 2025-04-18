@@ -24,11 +24,12 @@ import React, { useState } from 'react';
 
 interface FAQItem {
   question: string;
-  answer: string;
+  answer: string | React.ReactNode;
   isOpen: boolean;
 }
 
 const FAQSection: React.FC = () => {
+  const [showAll, setShowAll] = useState(false);
   const [faqItems, setFaqItems] = useState<FAQItem[]>([
     {
       question: "¿Qué tipo de oportunidades puedo encontrar en la plataforma?",
@@ -57,6 +58,9 @@ const FAQSection: React.FC = () => {
     }
   ]);
 
+  // Muestra solo los primeros 3 elementos o todos dependiendo del estado
+  const visibleFAQs = showAll ? faqItems : faqItems.slice(0, 3);
+
   const toggleFAQ = (index: number) => {
     setFaqItems(prevItems => 
       prevItems.map((item, i) => 
@@ -67,56 +71,84 @@ const FAQSection: React.FC = () => {
     );
   };
 
+  // Animación suave para el acordeón
+  const transitionStyle = "transition-all duration-300 ease-in-out";
+
   return (
-    <section className="container mx-auto px-4 py-16">
-      <h2 className="text-3xl font-bold mb-4 text-center text-gray-800 dark:text-white">
-        Resolvemos tus dudas
-      </h2>
-      <p className="text-center text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
-        Aquí encontrarás respuestas a las preguntas más frecuentes sobre nuestra plataforma
-        y cómo aprovechar al máximo las oportunidades disponibles.
+    <section className="bg-gray-50 dark:bg-gray-900 py-16">
+      <div className="container mx-auto px-4 max-w-4xl">
+      <h2 className="text-3xl font-bold mb-2 text-center text-blue-700 dark:text-white">Resolvemos tus dudas</h2>
+      <p className="text-center text-gray-600 dark:text-gray-300 mb-10">
+        Encuentra respuestas a las preguntas más frecuentes sobre nuestra plataforma
       </p>
-      
-      <div className="max-w-3xl mx-auto space-y-4">
-        {faqItems.map((item, index) => (
-          <div 
-            key={index} 
-            className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-white dark:bg-gray-800 transition-all duration-300"
+
+      <div className="space-y-4">
+      {visibleFAQs.map((item, index) => (
+        <div
+          key={index}
+          className={`border rounded-lg overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow ${transitionStyle}`}
+        >
+          <div
+            className="flex items-center justify-between p-5 cursor-pointer"
+            onClick={() => toggleFAQ(index)}
           >
-            <button 
-              className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-              onClick={() => toggleFAQ(index)}
-              aria-expanded={item.isOpen}
+            <h3 className="font-medium text-gray-800 dark:text-white">{item.question}</h3>
+            <button
+              className={`text-blue-600 dark:text-blue-400 transform ${item.isOpen ? 'rotate-180' : 'rotate-0'} ${transitionStyle}`}
+              aria-label={item.isOpen ? "Cerrar respuesta" : "Ver respuesta"}
             >
-              <h3 className="font-semibold text-lg text-gray-800 dark:text-white">
-                {item.question}
-              </h3>
-              <span className={`text-blue-600 dark:text-blue-400 transition-transform duration-300 ${item.isOpen ? 'rotate-180' : ''}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </button>
-            {item.isOpen && (
-              <div className="px-6 pb-5 pt-0">
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {item.answer}
-                </p>
-              </div>
-            )}
           </div>
-        ))}
-      </div>
-      
-      <div className="text-center mt-12">
-        <button className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-medium px-6 py-3 rounded-full border border-blue-600 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition">
-          Ver más preguntas
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+
+          <div
+            className={`px-5 overflow-hidden ${transitionStyle} ${
+              item.isOpen ? 'max-h-96 pb-5 opacity-100' : 'max-h-0 pb-0 opacity-0'
+            }`}
+          >
+            <div className="border-t dark:border-gray-700 pt-3 text-gray-600 dark:text-gray-300">
+              {item.answer}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {faqItems.length > 3 && (
+      <div className="text-center mt-8">
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="text-blue-600 dark:text-blue-400 font-medium px-6 py-2 rounded-full border border-blue-600 dark:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition flex items-center mx-auto"
+        >
+          {showAll ? 'Ver menos preguntas' : 'Ver más preguntas'}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-4 w-4 ml-2 transform ${showAll ? 'rotate-180' : 'rotate-0'} ${transitionStyle}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
       </div>
-    </section>
+    )}
+
+    <div className="mt-12 p-6 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-100 dark:border-blue-700 text-center">
+      <h3 className="font-bold text-lg mb-2 text-blue-800 dark:text-white">¿No encuentras lo que buscas?</h3>
+      <p className="text-gray-700 dark:text-gray-300 mb-4">Consulta nuestro foro.</p>
+      <a
+        href="/foro"
+        className="inline-block bg-blue-600 text-white font-medium px-6 py-2 rounded-full hover:bg-blue-700 dark:hover:bg-blue-500 transition"
+      >
+        Foro
+      </a>
+    </div>
+  </div>
+</section>
+
   );
 };
 
