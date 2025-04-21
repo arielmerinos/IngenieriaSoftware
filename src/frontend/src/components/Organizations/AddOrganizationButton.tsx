@@ -19,41 +19,47 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
-
+import { PlusIcon } from '@heroicons/react/outline';
 import { usePopUp } from "../../contexts/PopUpContext";
 import RegisterOrganizationForm from "./RegisterOrganization";
 import { Organization } from "../../models/organization";
-import { useAuth } from "../../contexts/AuthContext";
 
-interface AddOrganizationButtonProps {
-  onUpdate: (newOrg: Organization) => void;
+interface OrganizationButtonProps {
+  onUpdate?: (newOrg: Organization) => void;
 }
 
-export function AddOrganizationButton({ onUpdate }: AddOrganizationButtonProps) {
+const OrganizationButton: React.FC<OrganizationButtonProps> = ({ onUpdate }) => {
   const popUpContext = usePopUp();
-  const { isAuthenticated } = useAuth();
 
+  /**
+   * Abre el Pop Up para agregar una organización.
+   */
   function openPopUp() {
     popUpContext?.setContent(<RegisterOrganizationForm onUpdate={onUpdate} />);
     popUpContext?.setOpen(true);
   }
 
   return (
-    <div className="text-center mt-10 mb-16">
+    <div className="flex justify-center mt-8 mb-12">
       <button
-        onClick={() => {
-          if (isAuthenticated) {
-            openPopUp();
-          }
-        }}
-        disabled={!isAuthenticated}
-        className={`text-blue-600 font-medium px-6 py-2 rounded-full border border-blue-600 hover:bg-blue-50 transition ${
-          !isAuthenticated ? "cursor-not-allowed opacity-50" : ""
-        }`}
+        onClick={() => openPopUp()}
+        className="
+          flex items-center justify-center
+          bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800
+          text-white
+          px-6 py-3
+          rounded-full
+          font-medium
+          shadow-md hover:shadow-lg
+          transform transition duration-200 hover:-translate-y-1
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+        "
       >
+        <PlusIcon className="h-5 w-5 mr-2" />
         Crear Organización
       </button>
     </div>
   );
-}
+};
 
+export default OrganizationButton;

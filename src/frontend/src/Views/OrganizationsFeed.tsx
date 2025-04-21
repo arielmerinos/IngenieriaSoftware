@@ -20,25 +20,44 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import React, { Suspense } from "react";
-import "./Landing.css";
-import Loader from "../components/Loader";
-import { GridProvider } from "../contexts/GridContext";
-import { PopUpProvider } from "../contexts/PopUpContext";
-import Organizations from "../components/Organizations/Organizations";
+import React, { Suspense } from 'react';
+import './Landing.css';
+import { useAuth } from '../contexts/AuthContext';
+import { PopUpProvider } from '../contexts/PopUpContext';
+import { GridProvider } from '../contexts/GridContext';
+
+const Organizations = React.lazy(() => import('../components/Organizations/Organizations'));
+const OrganizationButton = React.lazy(() => import('../components/Organizations/AddOrganizationButton'));
 
 function OrganizationsFeed() {
-    return (
-        <section className="w-full min-h-screen">
-            <Suspense fallback={<Loader />}>
-                <GridProvider>
-                    <PopUpProvider>
-                        <Organizations />
-                    </PopUpProvider>
-                </GridProvider>
-            </Suspense>
-        </section>
-    );
+  const authContext = useAuth();
+  
+  // Enhanced loader with theme support
+  const Loader = () => (
+    <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-300">Cargando organizaciones...</p>
+      </div>
+    </div>
+  );
+  
+  return (
+    <section className="w-full min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <Suspense fallback={<Loader />}>
+        {/* GridProvider must be before PopUpProvider so PopUp can see the grid */}
+        <GridProvider>
+          <PopUpProvider>
+            <div className="container mx-auto px-4 py-6">
+              {/* Only show the create button if authenticated */}
+              {authContext.isAuthenticated && <OrganizationButton />}
+              <Organizations />
+            </div>
+          </PopUpProvider>
+        </GridProvider>
+      </Suspense>
+    </section>
+  );
 }
 
 export default OrganizationsFeed;
