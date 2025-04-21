@@ -118,9 +118,10 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         interests_data = validated_data.pop('interest_ids', [])
         country_data = validated_data.pop('country_ids', [])
 
-        print("Type Data:", type_data)
-        print("Interests Data:", interests_data)
-        print("Country Data:", country_data)
+        logger = logging.getLogger(__name__)
+        logger.debug("Type Data: %s", type_data)
+        logger.debug("Interests Data: %s", interests_data)
+        logger.debug("Country Data: %s", country_data)
 
         # Create the Scholarship object
         scholarship = Scholarship.objects.create(**validated_data)
