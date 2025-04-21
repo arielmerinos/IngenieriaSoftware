@@ -103,7 +103,7 @@ const OpportunitiesSection: React.FC = () => {
 
       <div className="text-center mt-12">
         <a
-          href="/oportunidades"
+          href="/feed"
           className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded-full font-medium transition-colors duration-300"
         >
           Ver todas las oportunidades
