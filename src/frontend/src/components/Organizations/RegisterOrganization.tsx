@@ -82,10 +82,15 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
   };
   
   return (
-    <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
-      <h2 className="text-lg font-bold mb-4">Registro de Organización</h2>
+    <form onSubmit={handleSubmit(submitHandler)} className="space-y-6 bg-white dark:bg-gray-800 rounded-xl p-6">
+      {/* Header */}
+      <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Registro de Organización</h2>
+      </div>
+
+      {/* Name Field */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Nombre de la Organización
         </label>
         <input
@@ -95,13 +100,14 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
           {...register('name', {
             required: 'El nombre de la organización es obligatorio.'
           })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+        {errors.name && <span className="text-red-500 dark:text-red-200 text-sm mt-1 block">{errors.name.message}</span>}
       </div>
   
+      {/* Email Field */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Correo de Contacto
         </label>
         <input
@@ -111,59 +117,71 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
           {...register('email', {
             required: 'El correo es obligatorio.',
             pattern: {
-              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/, 
               message: 'Ingresa un correo válido'
             }
           })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
+        {errors.email && <span className="text-red-500 dark:text-red-200 text-sm mt-1 block">{errors.email.message}</span>}
       </div>
   
+      {/* Website Field */}
       <div>
-        <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="website" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Sitio Web
         </label>
         <input
-          type="url"
+          // type="url"
           id="website"
-          placeholder="https/www.miempresa.com"
+          placeholder="https://www.miempresa.com"
           {...register('website', {
             required: 'El sitio web de la organización es obligatorio.',
             pattern: {
-              value: /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$/,
+              value: /^((https?|ftp|smtp):\/\/)?(www\.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$/,
               message: 'Ingresa una URL válida'
             }
           })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.website && <span className="text-red-500 text-sm">{errors.website.message}</span>}
+        {errors.website && <span className="text-red-500 dark:text-red-200 text-sm mt-1 block">{errors.website.message}</span>}
       </div>
   
+      {/* Description Field */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Descripción (opcional)
         </label>
         <textarea
           id="description"
           placeholder="Describe brevemente la organización"
           {...register('description')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           rows={3}
         />
       </div>
   
+      {/* Submit Button */}
+      <div className="flex justify-end pt-4">
       <button
-        type="submit"
-        disabled={!isValid}
-        className={`w-full text-white py-2 rounded-full transition duration-300 ${
-          isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'
-        }`}
-      >
-        Registrar Organización
-      </button>
+                    type="submit"
+                    disabled={!isValid }
+                    className={`
+                        inline-flex items-center px-6 py-3 
+                        border border-transparent text-base font-medium rounded-full 
+                        shadow-sm text-white 
+                        ${isValid
+                            ? 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800' 
+                            : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'}
+                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                        transition-colors duration-200
+                    `}
+                >
+                    {'Publicar Organización'}
+                </button>
+      </div>
     </form>
   );
-};
-  
+}
+
 export default RegisterOrganizationForm;

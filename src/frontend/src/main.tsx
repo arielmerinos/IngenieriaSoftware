@@ -36,7 +36,6 @@ createRoot(rootElement).render(
   <StrictMode>
       <AuthProvider>
     <ThemeProvider>
-
         <BrowserRouter>
           <App />
         </BrowserRouter>
