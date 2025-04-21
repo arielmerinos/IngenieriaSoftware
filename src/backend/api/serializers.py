@@ -19,6 +19,7 @@
 # junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 from django.contrib.auth.models import User
+from django.core.validators import URLValidator, ValidationError
 from rest_framework import serializers
 from .models.scholarship import Scholarship
 from .models.user_data import UserData
@@ -154,6 +155,8 @@ class UserDataSerializer(serializers.ModelSerializer):
         extra_kwargs = {"user": {"read_only": True}}
         
 class OrganizationSerializer(serializers.ModelSerializer):
+    website = serializers.CharField(allow_blank=True, required=False)
+
     class Meta:
         model = Organization
         fields = ['id','name', 'email', 'website', 'description', 'phone_number', 'logo']
@@ -161,11 +164,30 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'phone_number': {'required': False, 'allow_null': True},
             'logo': {'required': False, 'allow_null': True},
         }
-    
+
+    def validate_website(self, value: str) -> str:
+        if not value:
+            return value
+        if not value.startswith(('http://', 'https://')):
+            value = 'https://' + value
+        validator = URLValidator()
+        try:
+            validator(value)
+        except ValidationError:
+            raise serializers.ValidationError(
+                'Ingresa una URL válida, p.ej. permisos.com o https://permisos.com'
+            )
+        return value
+
     def create(self, validated_data):
         request = self.context.get('request')
         organization = Organization.objects.create(**validated_data)
-        Membership.objects.create(user=request.user, organization=organization, is_admin=True, is_active=True)
+        Membership.objects.create(
+            user=request.user,
+            organization=organization,
+            is_admin=True,
+            is_active=True
+        )
         return organization
         
         

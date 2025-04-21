@@ -1,4 +1,26 @@
-import React from 'react';
+/*
+Nombre del programa: Impulsa tu futuro
+Copyright (C) 2025 - Autores:
+Merino Peña Kevin Ariel
+Ortíz Montiel Diego Iain
+Rodríguez Dimayuga Laura Itzel
+Sosa Romo Juan Mario
+Vargas Campos Miguel Angel
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU v3 publicada por
+la Free Software Foundation.
+
+Este programa se distribuye con la esperanza de que sea útil,
+pero SIN NINGUNA GARANTÍA; sin incluso la garantía implícita de
+COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
+Consulte la Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General de GNU
+junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
+*/
+
+import React, { useEffect, useRef } from 'react';
 
 interface PopUpModalProps {
   onClose: () => void;
@@ -6,11 +28,82 @@ interface PopUpModalProps {
 }
 
 const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Prevent scroll on body when modal is open
+  useEffect(() => {
+    // Save original overflow style
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    // Prevent scrolling on the background
+    document.body.style.overflow = 'hidden';
+    
+    // Restore original overflow style when component unmounts
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose]);
+
+  // Close modal on escape key
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [onClose]);
+
+  // Prevent wheel events from propagating beyond the modal when at boundaries
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const container = modalRef.current;
+    if (!container) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    
+    // If we're at the top and trying to scroll up, or at the bottom and trying to scroll down
+    if (
+      (scrollTop === 0 && e.deltaY < 0) ||
+      (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0)
+    ) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-lg p-6 z-10">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-600">X</button>
+      {/* Backdrop overlay with animation */}
+      <div 
+        ref={overlayRef}
+        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+        onClick={onClose}
+      />
+      
+      {/* Modal container with proper light/dark mode support */}
+      <div 
+        ref={modalRef}
+        onWheel={handleWheel}
+        className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg shadow-xl bg-gray-50 dark:bg-gray-800 transition-colors duration-200 scroll-smooth"
+      >
+        {/* Children content will be placed directly without padding to allow forms to control their own padding */}
         {children}
       </div>
     </div>

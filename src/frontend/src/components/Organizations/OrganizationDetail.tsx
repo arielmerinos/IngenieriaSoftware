@@ -81,23 +81,28 @@ const OrganizationDetail: React.FC = () => {
   };
 
   if (loading)
-    return <div className="text-center py-10">Cargando...</div>;
+    return <div className="text-center py-10 text-gray-700 dark:text-gray-300">Cargando...</div>;
   if (!organization)
-    return <div className="text-center py-10">No se encontró la organización.</div>;
+    return <div className="text-center py-10 text-gray-700 dark:text-gray-300">No se encontró la organización.</div>;
 
   return (
-    <div className="max-w-5xl mx-auto bg-gray-50 shadow rounded-lg overflow-hidden">
+    <div className="
+        max-w-5xl mx-auto
+        bg-gray-50 dark:bg-gray-800
+        shadow rounded-lg overflow-hidden
+        transition-colors duration-200
+      ">
       {/* Encabezado con banner */}
       <div className="relative">
-        <div className="h-40 bg-blue-600"></div>
+        <div className="h-40 bg-blue-600 dark:bg-blue-800"></div>
         <div className="absolute left-1/2 transform -translate-x-1/2 top-24">
           <img 
             src={organization.logo || '/default-logo.svg'} 
             alt={organization.name} 
             onError={(e) => { 
-              e.currentTarget.src = "/default-logo.svg"; // Ruta a la imagen por defecto
+              e.currentTarget.src = "/default-logo.svg";
             }}
-            className="w-80 h-48 object-cover rounded-md border-4 border-white shadow-md" 
+            className="w-80 h-48 object-cover rounded-md border-4 border-white dark:border-gray-700 shadow-md" 
           />
         </div>
       </div>
@@ -105,27 +110,41 @@ const OrganizationDetail: React.FC = () => {
       {/* Contenido del perfil */}
       <div className="pt-32 pb-8 px-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800">{organization.name}</h1>
-          <p className="mt-3 text-gray-700 max-w-3xl mx-auto">{organization.description}</p>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+            {organization.name}
+          </h1>
+          <p className="mt-3 max-w-3xl mx-auto text-gray-700 dark:text-gray-300">
+            {organization.description}
+          </p>
         </div>
 
         {/* Información detallada */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t pt-6">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-gray-200 dark:border-gray-700 pt-6">
           <div>
-            <span className="block text-sm font-medium text-gray-600">Correo</span>
-            <p className="text-gray-800">{organization.email}</p>
+            <span className="block text-sm font-medium text-gray-600 dark:text-gray-400">
+              Correo
+            </span>
+            <p className="text-gray-800 dark:text-gray-200">
+              {organization.email}
+            </p>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-600">Teléfono</span>
-            <p className="text-gray-800">{organization.phone_number || 'No especificado'}</p>
+            <span className="block text-sm font-medium text-gray-600 dark:text-gray-400">
+              Teléfono
+            </span>
+            <p className="text-gray-800 dark:text-gray-200">
+              {organization.phone_number || 'No especificado'}
+            </p>
           </div>
           <div>
-            <span className="block text-sm font-medium text-gray-600">Sitio Web</span>
+            <span className="block text-sm font-medium text-gray-600 dark:text-gray-400">
+              Sitio Web
+            </span>
             <a 
               href={organization.website} 
               target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-blue-600 hover:underline"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
             >
               {organization.website}
             </a>
@@ -136,13 +155,25 @@ const OrganizationDetail: React.FC = () => {
         <div className="flex justify-center space-x-6 mt-8">
           <button
             onClick={() => setEditOpen(true)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-full shadow hover:bg-blue-700 transition duration-200"
+            className="
+              px-6 py-2 rounded-full shadow
+              bg-blue-600 dark:bg-blue-700
+              text-white
+              hover:bg-blue-700 dark:hover:bg-blue-800
+              transition-colors duration-200
+            "
           >
             Editar
           </button>
           <button
             onClick={handleDelete}
-            className="px-6 py-2 bg-red-600 text-white rounded-full shadow hover:bg-red-700 transition duration-200"
+            className="
+              px-6 py-2 rounded-full shadow
+              bg-red-600 dark:bg-red-700
+              text-white
+              hover:bg-red-700 dark:hover:bg-red-800
+              transition-colors duration-200
+            "
           >
             Eliminar
           </button>
@@ -150,8 +181,10 @@ const OrganizationDetail: React.FC = () => {
 
         {/* Sección de Publicaciones (Placeholder) */}
         <div className="mt-10">
-          <h2 className="text-2xl font-semibold text-gray-800 text-center">Publicaciones</h2>
-          <p className="text-gray-500 mt-3 text-center">
+          <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-center">
+            Publicaciones
+          </h2>
+          <p className="mt-3 text-gray-500 dark:text-gray-400 text-center">
             Próximamente se mostrarán las publicaciones de la organización.
           </p>
         </div>
@@ -178,4 +211,3 @@ const OrganizationDetail: React.FC = () => {
 };
 
 export default OrganizationDetail;
-

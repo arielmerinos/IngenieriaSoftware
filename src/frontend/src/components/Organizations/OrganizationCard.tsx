@@ -33,21 +33,46 @@ interface Organization2 {
 const OrganizationCard: React.FC<Organization2> = ({ item }) => {
   return (
     <Link to={`/org/${item.id}`} className="no-underline">
-      <div className="bg-white rounded-lg overflow-hidden shadow flex w-full max-w-lg cursor-pointer">
+      <div
+        className="
+          bg-white dark:bg-gray-800
+          text-gray-900 dark:text-gray-100
+          rounded-lg overflow-hidden shadow
+          flex w-full max-w-lg cursor-pointer
+          transition-colors duration-200
+        "
+      >
         <div className="w-1/3">
           <img
-            src={ item.logo ? item.logo : penrose}
+            src={item.logo || penrose}
             alt={`Imagen de ${item.name}`}
             className="w-full h-full object-cover"
             role="img"
           />
         </div>
         <div className="w-2/3 p-4 text-left">
-          <h1 className="font-bold text-lg mb-1">{item.name}</h1>
-          <p className="rounded-lg text-xs text-gray-500 bg-gray-200 w-fit px-2 py-px border-gray-500">
+          <h1 className="font-bold text-lg mb-1">
+            {item.name}
+          </h1>
+
+          {/* Etiqueta del sitio */}
+          <p
+            className="
+              inline-block
+              text-xs font-medium
+              bg-gray-200 text-gray-600 border
+              border-gray-300
+              dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600
+              rounded-full
+              px-2 py-0.5
+            "
+          >
             {item.website}
           </p>
-          <p className="mt-2">{item.description}</p>
+
+          <p className="mt-2">
+            {item.description}
+          </p>
         </div>
       </div>
     </Link>
@@ -55,3 +80,4 @@ const OrganizationCard: React.FC<Organization2> = ({ item }) => {
 };
 
 export default OrganizationCard;
+

@@ -23,7 +23,7 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 import axios from 'axios';
 
 const apiInstance = axios.create({
-  baseURL: 'http://0.0.0.0:8000/', // Asegúrate de que la URL base sea la correcta
+  baseURL: 'http://0.0.0.0:8000/', 
 });
 
 export default apiInstance;
