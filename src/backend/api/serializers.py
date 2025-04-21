@@ -19,6 +19,7 @@
 # junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 from django.contrib.auth.models import User
+from django.core.validators import URLValidator, ValidationError
 from rest_framework import serializers
 from .models.scholarship import Scholarship
 from .models.user_data import UserData
@@ -63,10 +64,27 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'color']
 
 class ScholarshipSerializer(serializers.ModelSerializer):
-    # Override fields to handle them as strings
-    type = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
-    interests = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
-    country = serializers.CharField(required=False, allow_blank=True)  # Optional, comma-separated string
+    # Use TypeSerializer for serialization and PrimaryKeyRelatedField for deserialization
+    type = TypeSerializer(many=True, read_only=True)  # Nested serializer for output
+    type_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Type.objects.all(),
+        many=True,
+        write_only=True  # Only used for input
+    )
+    interests = InterestSerializer(many=True, read_only=True)  # Nested serializer for output
+    interest_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Interest.objects.all(),
+        many=True,
+        write_only=True  # Only used for input
+    )
+    country = CountrySerializer(many=True, read_only=True)  # Nested serializer for output
+    country_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Country.objects.all(),
+        many=True,
+        write_only=True  # Only used for input
+    )
+    organization = serializers.SerializerMethodField()
+
     created_by = serializers.SlugRelatedField(
         queryset=User.objects.all(),
         slug_field='username',  # Accept the username instead of the pk
@@ -82,19 +100,47 @@ class ScholarshipSerializer(serializers.ModelSerializer):
             "publication_date",
             "start_date",
             "end_date",
-            "type",
+            "type",  # Nested serializer for output
+            "type_ids",  # PrimaryKeyRelatedField for input
             "image",
             "content",
-            "interests",
+            "interests",  # Nested serializer for output
+            "interest_ids",  # PrimaryKeyRelatedField for input
             "created_by",  # Accept username from the frontend
-            "country",
+            "country",  # Nested serializer for output
+            "country_ids",  # PrimaryKeyRelatedField for input
         ]
         read_only_fields = ["id", "publication_date"]
 
     def create(self, validated_data):
-        # Create the scholarship object with all provided data
-        return Scholarship.objects.create(**validated_data)
+        # Extract Many-to-Many fields
+        type_data = validated_data.pop('type_ids', [])
+        interests_data = validated_data.pop('interest_ids', [])
+        country_data = validated_data.pop('country_ids', [])
 
+        logger = logging.getLogger(__name__)
+        logger.debug("Type Data: %s", type_data)
+        logger.debug("Interests Data: %s", interests_data)
+        logger.debug("Country Data: %s", country_data)
+
+        # Create the Scholarship object
+        scholarship = Scholarship.objects.create(**validated_data)
+
+        # Handle Many-to-Many fields
+        if type_data:
+            scholarship.type.set(type_data)  # Directly set the list of PKs
+
+        if interests_data:
+            scholarship.interests.set(interests_data)  # Directly set the list of PKs
+
+        if country_data:
+            scholarship.country.set(country_data)  # Directly set the list of PKs
+
+        return scholarship
+
+    def get_organization(self, obj):
+        return obj.organization.name if obj.organization else None  # Return the name of the organization
+    
     def update(self, instance, validated_data):
         # Update the fields directly
         for attr, value in validated_data.items():
@@ -110,28 +156,57 @@ class UserDataSerializer(serializers.ModelSerializer):
         extra_kwargs = {"user": {"read_only": True}}
         
 class OrganizationSerializer(serializers.ModelSerializer):
+    website = serializers.CharField(allow_blank=True, required=False)
+
     class Meta:
         model = Organization
-        fields = ['name', 'email', 'website', 'description', 'phone_number', 'logo']
+        fields = ['id','name', 'email', 'website', 'description', 'phone_number', 'logo']
         extra_kwargs = {
             'phone_number': {'required': False, 'allow_null': True},
             'logo': {'required': False, 'allow_null': True},
         }
-    
+
+    def validate_website(self, value: str) -> str:
+        if not value:
+            return value
+        if not value.startswith(('http://', 'https://')):
+            value = 'https://' + value
+        validator = URLValidator()
+        try:
+            validator(value)
+        except ValidationError:
+            raise serializers.ValidationError(
+                'Ingresa una URL válida, p.ej. permisos.com o https://permisos.com'
+            )
+        return value
+
     def create(self, validated_data):
         request = self.context.get('request')
         organization = Organization.objects.create(**validated_data)
-        Membership.objects.create(user=request.user, organization=organization, is_admin=True)
+        Membership.objects.create(
+            user=request.user,
+            organization=organization,
+            is_admin=True,
+            is_active=True
+        )
         return organization
         
         
 class MembershipSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer(read_only=True)  # Nested serializer for output
+    organization_id = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        source='organization',  # Maps to the `organization` field in the model
+        write_only=True  # Only used for input
+    )
+
     class Meta:
         model = Membership
-        fields = ["id", "user", "organization", "is_admin", "is_active"]
+        fields = ['id', 'user', 'organization', 'organization_id', 'is_admin', 'is_active']
 
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)
+    
 
     def delete(self, validated_data):
         Membership.objects.filter(**validated_data).delete()
@@ -154,10 +229,10 @@ class TypeSerializer(serializers.ModelSerializer):
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-    fields = ["id", "name", "emoji"]
+        fields = ["id", "name", "emoji"]
     
 class InterestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interest
-    fields = ["id", "name","color"]
+        fields = ["id", "name","color"]
 

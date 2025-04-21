@@ -1,9 +1,30 @@
+/*
+Nombre del programa: Impulsa tu futuro
+Copyright (C) 2025 - Autores:
+Merino Peña Kevin Ariel
+Ortíz Montiel Diego Iain
+Rodríguez Dimayuga Laura Itzel
+Sosa Romo Juan Mario
+Vargas Campos Miguel Angel
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU v3 publicada por
+la Free Software Foundation.
+
+Este programa se distribuye con la esperanza de que sea útil,
+pero SIN NINGUNA GARANTÍA; sin incluso la garantía implícita de
+COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
+Consulte la Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General de GNU
+junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
+*/
+
 import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { useGrid } from '../../contexts/GridContext';
-import { usePopUp } from '../../contexts/PopUpContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { parseOpportunity } from '../../types/opportunity';
+import { usePopUp } from '../../contexts/PopUpContext';
+import { OpportunityContent } from '../../types/opportunity';
 import CreatableSelect, { createTypeService } from './CreatableSelect';
 import { 
     CalendarIcon, 
@@ -15,184 +36,145 @@ import {
     XIcon
 } from '@heroicons/react/outline';
 
-interface FormData {
-    name: string;
-    type: string[];
-    start_date: string;
-    end_date: string;
-    image: FileList;
-    content: string;
-    interests: number[];
-    created_by: number;
-    country: number[];
+interface EditOpportunityFormProps {
+    opportunity: OpportunityContent;
+    onUpdate: () => void;
 }
 
-const RegisterOpportunity: React.FC = () => {
-    const { register, handleSubmit, control, formState: { errors, isValid }, getValues, setValue, watch } = 
-        useForm<FormData>({ mode: 'onChange' });
-    
-    const [opportunityTypes, setOpportunityTypes] = useState<{ id: number, name: string }[]>([]);
-    const [countries, setCountries] = useState<{ id: number; name: string, emoji: string }[]>([]);
-    const [interests, setInterests] = useState<{ id: number; name: string, color: string }[]>([]);
+interface FormData {
+    name: string;
+    start_date: string;
+    end_date: string;
+    image?: FileList;
+    content: string;
+    type_ids: number[];
+    interest_ids: number[];
+    country_ids: number[];
+}
+
+const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, onUpdate }) => {
+    const [opportunityTypes, setOpportunityTypes] = useState<{ id: number; name: string }[]>([]);
+    const [countries, setCountries] = useState<{ id: number; name: string; emoji: string }[]>([]);
+    const [interests, setInterests] = useState<{ id: number; name: string; color: string }[]>([]);
     const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [selectedInterests, setSelectedInterests] = useState<number[]>([]);
+    const [selectedCountries, setSelectedCountries] = useState<number[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [serverError, setServerError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    
-    const watchImageField = watch("image");
-    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    const gridContext = useGrid();
+    const { authToken, user } = useAuth();
     const popUpContext = usePopUp();
-    const authContext = useAuth();
 
-    // Create image previews when file is selected
-    useEffect(() => {
-        if (watchImageField && watchImageField.length > 0) {
-            const newPreviews: string[] = [];
-            Array.from(watchImageField).forEach(file => {
-                const fileReader = new FileReader();
-                fileReader.onload = () => {
-                    if (fileReader.result) {
-                        newPreviews.push(fileReader.result as string);
-                        if (newPreviews.length === watchImageField.length) {
-                            setImagePreviews(newPreviews);
-                        }
-                    }
-                };
-                fileReader.readAsDataURL(file);
-            });
-        } else {
-            setImagePreviews([]);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isValid, isDirty },
+        setValue,
+        getValues,
+        watch
+    } = useForm<FormData>({
+        mode: 'onChange',
+        defaultValues: {
+            name: opportunity.name,
+            content: opportunity.content,
+            start_date: new Date(opportunity.beginning).toISOString().split('T')[0],
+            end_date: new Date(opportunity.end).toISOString().split('T')[0]
         }
-    }, [watchImageField]);
+    });
 
-    // Fetch data from the backend
+    const watchImage = watch('image');
+
+    // Handle image preview
+    useEffect(() => {
+        if (watchImage && watchImage[0]) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(watchImage[0]);
+        }
+    }, [watchImage]);
+
+    // Fetch all necessary data
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                
-                const token = authContext.authToken;
-                if (!token) {
-                    setError('No se ha iniciado sesión');
-                    return;
-                }
+            if (!authToken) {
+                setServerError('Usuario no autenticado');
+                return;
+            }
 
+            try {
+                setIsLoading(true);
                 const headers = {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
                 };
 
-                // Using Promise.all to parallelize the requests
-                const [typesResponse, countriesResponse, interestsResponse] = await Promise.all([
+                // Fetch types, countries, and interests
+                const [typesResponse, countriesResponse, interestsResponse, opportunityResponse] = await Promise.all([
                     fetch('http://localhost:8000/types/', { headers }),
                     fetch('http://localhost:8000/countries/', { headers }),
                     fetch('http://localhost:8000/interests/', { headers }),
+                    fetch(`http://localhost:8000/scholarships/${opportunity.id}/`, { headers })
                 ]);
 
-                // Check if all requests were successful
-                if (!typesResponse.ok || !countriesResponse.ok || !interestsResponse.ok) {
+                if (!typesResponse.ok || !countriesResponse.ok || !interestsResponse.ok || !opportunityResponse.ok) {
                     throw new Error('Error al obtener datos del servidor');
                 }
 
-                // Parse the responses
-                const typesData = await typesResponse.json();
-                const countriesData = await countriesResponse.json();
-                const interestsData = await interestsResponse.json();
+                const [typesData, countriesData, interestsData, opportunityData] = await Promise.all([
+                    typesResponse.json(),
+                    countriesResponse.json(),
+                    interestsResponse.json(),
+                    opportunityResponse.json()
+                ]);
 
-                // Set the data in state
+                // Set data for dropdowns
                 setOpportunityTypes(typesData);
                 setCountries(countriesData);
                 setInterests(interestsData);
 
+                // Initialize the image preview if there's an existing image
+                if (opportunity.image) {
+                    setImagePreview(opportunity.image);
+                }
+
+                // Map the current opportunity's types to their IDs
+                const typeIds = opportunityData.type.map((t: any) => t.id);
+                const interestIds = opportunityData.interests.map((i: any) => i.id);
+                const countryIds = opportunityData.country.map((c: any) => c.id);
+
+                setSelectedTypes(typeIds);
+                setSelectedInterests(interestIds);
+                setSelectedCountries(countryIds);
+
+                // Set form values
+                setValue('name', opportunityData.name);
+                setValue('content', opportunityData.content);
+                setValue('start_date', new Date(opportunityData.start_date).toISOString().split('T')[0]);
+                setValue('end_date', new Date(opportunityData.end_date).toISOString().split('T')[0]);
+                setValue('type_ids', typeIds);
+                setValue('interest_ids', interestIds);
+                setValue('country_ids', countryIds);
+
             } catch (error) {
                 console.error('Error fetching data:', error);
-                setError('Error al cargar los datos del formulario');
+                setServerError('Error al cargar los datos. Por favor, intenta de nuevo más tarde.');
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
 
         fetchData();
-    }, [authContext.authToken]);
+    }, [authToken, opportunity.id, setValue, opportunity.image]);
 
-    const submitHandler: SubmitHandler<FormData> = async (data) => {
-        try {
-            setLoading(true);
-            setError(null);
-            
-            const token = authContext.authToken;
-            const username = authContext.user?.username;
-            
-            if (!token || !username) {
-                setError('Usuario no autenticado');
-                return;
-            }
-
-            const formData = new FormData();
-            
-            // Add basic fields
-            formData.append('name', data.name);
-            formData.append('start_date', data.start_date);
-            formData.append('end_date', data.end_date);
-            formData.append('content', data.content);
-            formData.append('created_by', username);
-
-            // Add selected types, interests, and countries
-            selectedTypes.forEach((typeId) => formData.append('type_ids', typeId.toString()));
-            data.interests.forEach((interestId) => formData.append('interest_ids', interestId.toString()));
-            data.country.forEach((countryId) => formData.append('country_ids', countryId.toString()));
-
-            // Add image if selected
-            if (data.image && data.image.length > 0) {
-                formData.append('image', data.image[0]);
-            }
-
-            // Send request to server
-            const response = await fetch('http://localhost:8000/scholarships/create/', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Backend validation errors:', errorData);
-                throw new Error('Error al crear la oportunidad');
-            }
-
-            const result = await response.json();
-            console.log('Opportunity created:', result);
-            
-            // Update the grid with the new opportunity
-            gridContext?.addElem(parseOpportunity(result));
-            
-            // Show success message
-            setSuccess(true);
-            
-            // Close the form after a delay
-            setTimeout(() => {
-                popUpContext.setOpen(false);
-            }, 1500);
-            
-        } catch (error) {
-            console.error('Error creating opportunity:', error);
-            setError('Error al crear la oportunidad. Por favor, inténtalo de nuevo.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Handler for creating a new type
+    // Handle creation of new types
     const handleCreateType = async (name: string) => {
         try {
-            const newType = await createTypeService(name, authContext.authToken);
+            const newType = await createTypeService(name, authToken);
             if (newType) {
-                // Update the list of types
                 setOpportunityTypes(prev => [...prev, newType]);
                 return newType;
             }
@@ -203,10 +185,69 @@ const RegisterOpportunity: React.FC = () => {
         }
     };
 
-    if (loading && !success) {
+    // Handle form submission
+    const submitHandler: SubmitHandler<FormData> = async (data) => {
+        if (!authToken || !user) {
+            setServerError('Usuario no autenticado');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            setServerError(null);
+            
+            const formData = new FormData();
+            
+            formData.append('name', data.name);
+            formData.append('start_date', data.start_date);
+            formData.append('end_date', data.end_date);
+            formData.append('content', data.content);
+            formData.append('created_by', user.username);
+            
+            // Append selected types, interests, and countries
+            selectedTypes.forEach(typeId => formData.append('type_ids', typeId.toString()));
+            selectedInterests.forEach(interestId => formData.append('interest_ids', interestId.toString()));
+            selectedCountries.forEach(countryId => formData.append('country_ids', countryId.toString()));
+            
+            // Append image if it exists
+            if (data.image && data.image.length > 0) {
+                formData.append('image', data.image[0]);
+            }
+            
+            const response = await fetch(`http://localhost:8000/scholarships/${opportunity.id}/`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                },
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error de validación del servidor:', errorData);
+                throw new Error('Error al actualizar la oportunidad');
+            }
+            
+            setSuccess(true);
+            
+            // Close form after a delay
+            setTimeout(() => {
+                onUpdate();
+                popUpContext.setOpen(false);
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error updating opportunity:', error);
+            setServerError('Error al actualizar la convocatoria. Por favor, intenta de nuevo.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (isLoading && !success) {
         return (
-            <div className="flex flex-col items-center justify-center p-8 h-96">
-                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+            <div className="flex flex-col items-center justify-center p-8 h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
                 <p className="text-gray-700 dark:text-gray-300 text-center">Cargando...</p>
             </div>
         );
@@ -214,33 +255,39 @@ const RegisterOpportunity: React.FC = () => {
     
     if (success) {
         return (
-            <div className="flex flex-col items-center justify-center p-8 h-96">
+            <div className="flex flex-col items-center justify-center p-8 h-64">
                 <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full p-4 mb-4">
                     <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">¡Convocatoria creada!</h3>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">¡Cambios guardados!</h3>
                 <p className="text-gray-600 dark:text-gray-400 text-center">
-                    Tu convocatoria ha sido creada exitosamente.
+                    La convocatoria ha sido actualizada exitosamente.
                 </p>
             </div>
         );
     }
 
     return (
-        <form
-            onSubmit={handleSubmit(submitHandler)}
+        <form 
+            onSubmit={handleSubmit(submitHandler)} 
             className="space-y-6 bg-white dark:bg-gray-800 rounded-xl p-6"
         >
             <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Crear Nueva Convocatoria</h2>
-
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Editar Convocatoria</h2>
+                <button 
+                    type="button" 
+                    onClick={() => popUpContext.setOpen(false)}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                    <XIcon className="h-5 w-5" />
+                </button>
             </div>
             
-            {error && (
+            {serverError && (
                 <div className="bg-red-100 dark:bg-red-900 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4 rounded">
-                    <p>{error}</p>
+                    <p>{serverError}</p>
                 </div>
             )}
 
@@ -254,7 +301,6 @@ const RegisterOpportunity: React.FC = () => {
                         type="text"
                         {...register('name', { required: 'El nombre es obligatorio' })}
                         className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        placeholder="Ej: Beca de Investigación 2025"
                     />
                     <DocumentTextIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
@@ -271,11 +317,14 @@ const RegisterOpportunity: React.FC = () => {
                     <CreatableSelect
                         options={opportunityTypes}
                         value={selectedTypes}
-                        onChange={setSelectedTypes}
+                        onChange={(values) => {
+                            setSelectedTypes(values);
+                            setValue('type_ids', values);
+                        }}
                         onCreate={handleCreateType}
                         label=""
                         placeholder="Selecciona o crea tipos"
-                        error={errors.type?.message}
+                        error={errors.type_ids?.message}
                         help="Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones"
                         multiple={true}
                         className="pl-10"
@@ -325,14 +374,14 @@ const RegisterOpportunity: React.FC = () => {
             {/* Image Field */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Imagen de la Convocatoria
+                    Imagen de la Convocatoria (opcional)
                 </label>
                 <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
                     <div className="space-y-1 text-center">
-                        {imagePreviews.length > 0 ? (
+                        {imagePreview ? (
                             <div className="flex flex-col items-center">
                                 <img 
-                                    src={imagePreviews[0]} 
+                                    src={imagePreview} 
                                     alt="Preview" 
                                     className="h-40 object-cover rounded-lg shadow-md mb-3" 
                                 />
@@ -340,11 +389,14 @@ const RegisterOpportunity: React.FC = () => {
                                     type="button" 
                                     onClick={() => {
                                         setValue('image', undefined as any);
-                                        setImagePreviews([]);
+                                        // Only reset preview if it's from a new upload, not the existing image
+                                        if (watchImage) {
+                                            setImagePreview(opportunity.image);
+                                        }
                                     }}
                                     className="text-sm text-red-600 dark:text-red-400 hover:underline"
                                 >
-                                    Eliminar imagen
+                                    {watchImage ? 'Cancelar cambio' : 'Usar otra imagen'}
                                 </button>
                             </div>
                         ) : (
@@ -352,7 +404,7 @@ const RegisterOpportunity: React.FC = () => {
                                 <PhotographIcon className="mx-auto h-12 w-12 text-gray-400" />
                                 <div className="flex text-sm text-gray-600 dark:text-gray-400">
                                     <label className="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 focus-within:outline-none">
-                                        <span>Subir imagen</span>
+                                        <span>Subir nueva imagen</span>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -369,9 +421,9 @@ const RegisterOpportunity: React.FC = () => {
                         )}
                     </div>
                 </div>
-                {errors.image && (
-                    <span className="text-red-500 text-sm mt-1 block">{errors.image.message}</span>
-                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Si no seleccionas una nueva imagen, se mantendrá la imagen actual.
+                </p>
             </div>
 
             {/* Content Field */}
@@ -389,7 +441,6 @@ const RegisterOpportunity: React.FC = () => {
                     })} 
                     rows={5} 
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    placeholder="Escribe una descripción detallada de la convocatoria..."
                 ></textarea>
                 {errors.content ? (
                     <span className="text-red-500 text-sm mt-1 block">{errors.content.message}</span>
@@ -409,8 +460,13 @@ const RegisterOpportunity: React.FC = () => {
                     <HeartIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <select 
                         multiple 
-                        {...register('interests', { required: 'Selecciona al menos un interés' })} 
                         className="w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 h-24"
+                        value={selectedInterests.map(String)}
+                        onChange={(e) => {
+                            const values = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+                            setSelectedInterests(values);
+                            setValue('interest_ids', values);
+                        }}
                     >
                         {interests.map(interest => (
                             <option key={interest.id} value={interest.id}>{interest.name}</option>
@@ -420,7 +476,6 @@ const RegisterOpportunity: React.FC = () => {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
                 </p>
-                {errors.interests && <span className="text-red-500 text-sm block">{errors.interests.message}</span>}
             </div>
 
             {/* Countries Field */}
@@ -432,8 +487,13 @@ const RegisterOpportunity: React.FC = () => {
                     <GlobeAltIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <select
                         multiple
-                        {...register('country', { required: 'Selecciona al menos un país' })}
                         className="w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 h-24"
+                        value={selectedCountries.map(String)}
+                        onChange={(e) => {
+                            const values = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+                            setSelectedCountries(values);
+                            setValue('country_ids', values);
+                        }}
                     >
                         {countries.map(country => (
                             <option key={country.id} value={country.id}>
@@ -445,30 +505,33 @@ const RegisterOpportunity: React.FC = () => {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
                 </p>
-                {errors.country && <span className="text-red-500 text-sm block">{errors.country.message}</span>}
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end pt-4">
-                <button
-                    type="submit"
-                    disabled={!isValid || loading}
+            {/* Submit and Cancel Buttons */}
+            <div className="flex justify-end space-x-4 pt-4">
+                <button 
+                    type="button" 
+                    onClick={() => popUpContext.setOpen(false)} 
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                    Cancelar
+                </button>
+                <button 
+                    type="submit" 
+                    disabled={!isValid || isLoading} 
                     className={`
-                        inline-flex items-center px-6 py-3 
-                        border border-transparent text-base font-medium rounded-full 
-                        shadow-sm text-white 
-                        ${isValid && !loading 
+                        px-6 py-2 rounded-lg text-white
+                        ${isValid && !isLoading 
                             ? 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800' 
                             : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'}
-                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
-                        transition-colors duration-200
+                        transition-colors
                     `}
                 >
-                    {loading ? 'Creando...' : 'Publicar Convocatoria'}
+                    {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
             </div>
         </form>
     );
 };
 
-export default RegisterOpportunity;
+export default EditOpportunityForm;

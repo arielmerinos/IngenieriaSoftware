@@ -20,26 +20,10 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App';
-import { AuthProvider } from './contexts/AuthContext';
-import { BrowserRouter } from 'react-router';
-import { ThemeProvider } from './contexts/ThemeContext';
+import axios from 'axios';
 
-// Nos aseguramos de que el elemento root exista
-const rootElement = document.getElementById('root');
-if (!rootElement) throw new Error('No se encontró el elemento root');
+const apiInstance = axios.create({
+  baseURL: 'http://0.0.0.0:8000/', 
+});
 
-createRoot(rootElement).render(
-  <StrictMode>
-      <AuthProvider>
-    <ThemeProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-    </ThemeProvider>
-      </AuthProvider>
-  </StrictMode>
-);
+export default apiInstance;

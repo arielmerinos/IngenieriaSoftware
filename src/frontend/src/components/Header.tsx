@@ -22,39 +22,40 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 // src/components/Header.tsx
 import React from 'react';
-import LoginModal from './auth/LoginModal'; // Ruta actualizada
+import LoginModal from './auth/LoginModal';
 import { useAuth } from "../contexts/AuthContext";
 import UserMenu from './UserMenu';
-
+import ThemeToggleButton from './ThemeToggleButton';
 
 const Header: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  
   return (
-    <header className="w-full bg-white shadow-sm">
+    <header className="w-full bg-white dark:bg-gray-800 shadow-sm transition-colors duration-200">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center">
-          <div className="text-blue-600 font-bold text-2xl mr-2">Impulsa</div>
-          <span className="text-gray-700">| Tu Futuro</span>
+          <div className="text-blue-600 dark:text-blue-400 font-bold text-2xl mr-2">Impulsa</div>
+          <span className="text-gray-700 dark:text-gray-300">| Tu Futuro</span>
         </div>
         
         <nav className="hidden md:flex space-x-6">
-          <a href="/" className="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="/feed" className="text-gray-700 hover:text-blue-600">Oportunidades</a>
-          <a href="#" className="text-gray-700 hover:text-blue-600">Quiénes somos</a>
-          <a href="org" className="text-gray-700 hover:text-blue-600">Organizaciones</a>
-          <a href="#" className="text-gray-700 hover:text-blue-600">Ayuda</a>
+          <a href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+          <a href="/feed" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Oportunidades</a>
+          <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Quiénes somos</a>
+          <a href="/org" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Organizaciones</a>
+          <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Ayuda</a>
         </nav>
         
         <div className="flex items-center space-x-4">
-          <button>...</button>
-          {
-            isAuthenticated ? (
-              <UserMenu />
-            ) : (
-              <LoginModal />
-            )
-          }
-          <button>...</button>
+          {/* Botón de cambio de tema */}
+          <ThemeToggleButton />
+          
+          {/* Menú de usuario o modal de login */}
+          {isAuthenticated ? (
+            <UserMenu />
+          ) : (
+            <LoginModal />
+          )}
         </div>
       </div>
     </header>

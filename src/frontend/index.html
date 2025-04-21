@@ -3,8 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <link rel="stylesheet" href="src/index.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Script para evitar el parpadeo de tema (flash of incorrect theme) -->
+    <script>
+      // Verifica el tema guardado o detecta la preferencia del sistema
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      
+      // Aplica la clase dark al elemento HTML si corresponde
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+    
+    <link rel="stylesheet" href="src/index.css">
     <title>Impulsa tu futuro</title>
   </head>
   <body>

@@ -19,27 +19,24 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
+import React from 'react';
+const Header = React.lazy(() => import('../components/Header'));
+const Footer = React.lazy(() => import('../components/Footer'));
 
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App';
-import { AuthProvider } from './contexts/AuthContext';
-import { BrowserRouter } from 'react-router';
-import { ThemeProvider } from './contexts/ThemeContext';
+interface LayoutProps {
+  children: React.ReactNode;
+}
 
-// Nos aseguramos de que el elemento root exista
-const rootElement = document.getElementById('root');
-if (!rootElement) throw new Error('No se encontró el elemento root');
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen bg-white">
+        {children}
+      </main>
+      <Footer />
+    </>
+  );
+};
 
-createRoot(rootElement).render(
-  <StrictMode>
-      <AuthProvider>
-    <ThemeProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-    </ThemeProvider>
-      </AuthProvider>
-  </StrictMode>
-);
+export default Layout;

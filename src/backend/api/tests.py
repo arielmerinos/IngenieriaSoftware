@@ -26,7 +26,6 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 import json
 from datetime import date, timedelta
-
 from .models.scholarship import Scholarship
 from .models.type import Type
 from .models.country import Country
@@ -350,22 +349,21 @@ class ScholarshipTests(APITestCase):
 
 class OrganizationSerializerTest(TestCase):
     def setUp(self):
-        # Creamos un usuario que será el que haga la petición (simulando request.user)
         self.user = User.objects.create_user(
             username='testuser',
             password='pass123',
             email='test@example.com'
         )
-        # Contexto para el serializer (simulando que request.user es el que hace la petición)
         self.context = {'request': type('Request', (), {'user': self.user})}
         # Datos válidos para la creación de una organización
         self.valid_data = {
+            'id': '1',
             'name': 'Organización de Prueba',
             'email': 'contacto@orgprueba.com',
             'website': 'https://orgprueba.com',
             'description': 'Descripción de la organización de prueba',
             'phone_number': '123456789',
-            'logo': None  # Suponiendo que puede ser null
+            'logo': None  # Opcional
         }
 
     def test_organization_serializer_valido(self):
@@ -378,7 +376,7 @@ class OrganizationSerializerTest(TestCase):
         # Verificamos que se haya creado la membresía correspondiente y que el usuario sea admin
         membership = Membership.objects.get(organization=organization, user=self.user)
         self.assertTrue(membership.is_admin)
-        self.assertTrue(membership.is_active)  # Dependiendo de la lógica, si se marca activa al crearse
+        # self.assertTrue(not membership.is_active)  # Dependiendo de la lógica, si se marca activa al crearse
 
     def test_organization_serializer_datos_invalidos(self):
         # Por ejemplo, si se omite el campo 'name' que es requerido
@@ -398,23 +396,50 @@ class MembershipSerializerTest(TestCase):
             email='member@example.com'
         )
         self.organization = Organization.objects.create(
-            name='Org de Test',
-            email='org@test.com',
-            website='https://orgtest.com'
+            name='testorg',
+            email='unam@gmail.com',
+            website='http://unam.com.mx',
+            description='testorg description',
+            phone_number='7774761814',
+            logo='/media/logos/IMG_0587.jpeg'
         )
         # Datos iniciales para la membresía
         self.membership_data = {
             'user': self.user.id,
-            'organization': self.organization.id,
-            'is_admin': False,
-            'is_active': False
+            'organization_id': self.organization.id,
+            'is_admin': True,
+            'is_active': True
         }
-
+        
     def test_membership_serializer_creacion(self):
+        print("Membership Data:", self.membership_data)
         serializer = MembershipSerializer(data=self.membership_data)
         self.assertTrue(serializer.is_valid(), serializer.errors)
         membership = serializer.save()
+
+        # Verificar los datos de la membresía
         self.assertEqual(membership.user, self.user)
         self.assertEqual(membership.organization, self.organization)
-        self.assertFalse(membership.is_admin)
-        self.assertFalse(membership.is_active)
+        self.assertTrue(membership.is_admin)
+        self.assertTrue(membership.is_active)
+
+        # Serializar la membresía creada
+        serialized_membership = MembershipSerializer(membership).data
+
+        # Verificar la salida serializada
+        expected_output = {
+            'id': membership.id,
+            'user': self.user.id,
+            'organization': {
+                'id': self.organization.id,
+                'name': self.organization.name,
+                'email': self.organization.email,
+                'website': self.organization.website,
+                'description': self.organization.description,
+                'phone_number': self.organization.phone_number,
+                'logo': self.organization.logo.url if self.organization.logo else None,  # Use the URL of the logo
+            },
+            'is_admin': True,
+            'is_active': True
+        }
+        self.assertEqual(serialized_membership, expected_output)

@@ -28,7 +28,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 
 # Imports de Django REST Framework
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -532,21 +532,37 @@ class UserDataListView(APIView):
         serializer = UserDataSerializer(user_data, many=True)
         return Response(serializer.data)
     
-class OrganizationListView(APIView):
 
-    permission_classes = [AllowAny]
+## Vistas de Organización ##
 
-    def get(self, request):
-        organizations = Organization.objects.all()
-        serializer = OrganizationSerializer(organizations, many=True)
-        return Response(serializer.data)
 
-class OrganizationCreateView(generics.CreateAPIView): # Por alguna razon el post solo funciona si uso generics y no APIView
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = Organization.objects.all()
-    serializer_class = OrganizationSerializer
+class OrganizationViewSet(viewsets.ModelViewSet): # Ala verga esto se hace todo el crud, el parametro nos da el crud
+    """
+    ViewSet para gestionar el CRUD completo de Organizaciones.
+    Las operaciones disponibles serán:
+      - list: Listar todas las organizaciones
+      - create: Crear una nueva organización
+      - retrieve: Obtener el detalle de una organización
+      - update: Actualizar completamente una organización
+      - partial_update: Actualizar parcialmente una organización
+      - destroy: Eliminar una organización
+    """
+    queryset = Organization.objects.all() # Queryset para listar todas las organizaciones
+    serializer_class = OrganizationSerializer # Este es el serializer que escribimos nosotros
+
+    def get_permissions(self): # esta parte es para poder listar sin estar auth
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
 class JoinOrganizationView(APIView):
+    """
+    Vista para solicitar unirse a una organización.
+    
+    POST: Solicitar unirse a una organización
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, format=None):
@@ -572,6 +588,11 @@ class JoinOrganizationView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
         
 class AcceptMembershipView(APIView):
+    """
+    Vista para aceptar una solicitud de membresía.
+    
+    POST: Aceptar una solicitud de membresía
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, format=None):
@@ -597,6 +618,24 @@ class AcceptMembershipView(APIView):
         serializer = MembershipSerializer(membership)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+class UserMembershipsView(APIView):
+    """
+    Vista para obtener las memberships de un usuario dado su id.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "El usuario no existe."},
+                            status=status.HTTP_404_NOT_FOUND)
+        
+        # Obtener las memberships donde el usuario es el propietario (foreign key en Membership)
+        memberships = Membership.objects.filter(user=user)
+        serializer = MembershipSerializer(memberships, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
 class MembershipListView(APIView):
     def get(self, request):
         memberships = Membership.objects.all()
@@ -613,16 +652,4 @@ class TypeListView(APIView):
     def get(self, request):
         types = Type.objects.all()
         serializer = TypeSerializer(types, many=True)
-        return Response(serializer.data)
-
-class CountryListView(APIView):
-    def get(self, request):
-        countries = Country.objects.all()
-        serializer = CountrySerializer(countries, many=True)
-        return Response(serializer.data)
-
-class InterestListView(APIView):
-    def get(self, request):
-        interests = Interest.objects.all()
-        serializer = InterestSerializer(interests, many=True)
         return Response(serializer.data)

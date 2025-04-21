@@ -1,60 +1,62 @@
-import React, { useState } from "react";
+
+/*
+Nombre del programa: Impulsa tu futuro
+Copyright (C) 2025 - Autores:
+Merino Peña Kevin Ariel
+Ortíz Montiel Diego Iain
+Rodríguez Dimayuga Laura Itzel
+Sosa Romo Juan Mario
+Vargas Campos Miguel Angel
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU v3 publicada por
+la Free Software Foundation.
+
+Este programa se distribuye con la esperanza de que sea útil,
+pero SIN NINGUNA GARANTÍA; sin incluso la garantía implícita de
+COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
+Consulte la Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General de GNU
+junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
+*/
+
+import { PlusIcon } from '@heroicons/react/outline';
 import RegisterOpportunity from "./registerOpportunity";
+import { usePopUp } from "../../contexts/PopUpContext";
 
-function OpportunitiesButton() {
-    const [isOpen, setIsOpen] = useState(false);
+const OpportunitiesButton: React.FC = () => {
+    const popUpContext = usePopUp();
 
-    const handleCreateOpportunity = async (data: FormData) => {
-        try {
-            const token = localStorage.getItem('authToken'); // Retrieve the token from localStorage
-            if (!token) {
-                throw new Error("User is not authenticated");
-            }
-
-            const response = await fetch('http://localhost:8000/scholarships/create/', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`, // Include the token in the Authorization header
-                },
-                body: data,
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create opportunity');
-            }
-
-            const result = await response.json();
-            console.log('Opportunity created:', result);
-            setIsOpen(false);
-        } catch (error) {
-            console.error('Error creating opportunity:', error);
-        }
-    };
+    /**
+     * Abre el Pop Up para agregar una oportunidad.
+     */
+    function openPopUp() {
+        popUpContext?.setContent(<RegisterOpportunity />);
+        popUpContext?.setOpen(true);
+    }
 
     return (
-        <>
-            <div className="text-center mt-10 mb-16">
-                <button
-                    onClick={() => setIsOpen(true)}
-                    className="text-blue-600 font-medium px-6 py-2 rounded-full border border-blue-600 hover:bg-blue-50 transition"
-                >
-                    Crear Convocatoria
-                </button>
-            </div>
-
-            {isOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-                        <h2 className="text-lg font-bold mb-4">Registro de Convocatoria</h2>
-                        <RegisterOpportunity
-                            onSubmit={handleCreateOpportunity}
-                            onClose={() => setIsOpen(false)}
-                        />
-                    </div>
-                </div>
-            )}
-        </>
+        <div className="flex justify-center mt-8 mb-12">
+            <button
+                onClick={() => openPopUp()}
+                className="
+                    flex items-center justify-center
+                    bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800
+                    text-white
+                    px-6 py-3
+                    rounded-full
+                    font-medium
+                    shadow-md hover:shadow-lg
+                    transform transition duration-200 hover:-translate-y-1
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+                "
+            >
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Crear Convocatoria
+            </button>
+        </div>
     );
-}
+};
 
 export default OpportunitiesButton;

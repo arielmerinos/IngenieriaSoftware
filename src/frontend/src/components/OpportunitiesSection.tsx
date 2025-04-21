@@ -20,78 +20,101 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-// src/components/OpportunitiesSection.tsx
-import React, { useState } from 'react';
-import CourseCard from './CourseCard';
+import { useEffect, useState } from "react";
+import { OpportunityContent, parseOpportunity } from "../types/opportunity";
+import OpportunityCard from "./Opportunities/OpportunityCard";
+import OpportunityDetails from "./Opportunities/OpportunityDetails";
+import { usePopUp } from "../contexts/PopUpContext";
 
-// Temporary constant, you might want to move this to a constants file
-const featuredItems = [
-  {
-    title: "Excel - de básico a Intermedio",
-    provider: "Impulsa Academy",
-    category: "Herramientas",
-    date: "Abierto hasta Mar 31, 25",
-    image: "/excel-course.jpg"
-  },
-  {
-    title: "Business English: Listening and Speaking",
-    provider: "Global Learning",
-    category: "Idiomas",
-    date: "Abierto hasta Mar 31, 25",
-    image: "/english-course.jpg"
-  },
-  {
-    title: "Inteligencia Artificial y Productividad",
-    provider: "Tech Solutions",
-    category: "Herramientas",
-    date: "Abierto hasta Mar 31, 25",
-    image: "/ai-course.jpg"
-  },
-  {
-    title: "Marketing Digital",
-    provider: "Digital University",
-    category: "Habilidades",
-    date: "Abierto hasta Mar 31, 25",
-    image: "/marketing-course.jpg"
-  }
-];
+function getRandomItems<T>(array: T[], count: number): T[] {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
 
 const OpportunitiesSection: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('oportunidades');
+  const [opportunities, setOpportunities] = useState<OpportunityContent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const popUpContext = usePopUp();
+
+  useEffect(() => {
+    fetch("http://localhost:8000/scholarships/")
+      .then((res) => {
+        if (!res.ok) throw new Error("No se pudieron cargar las oportunidades");
+        return res.json();
+      })
+      .then((data) => {
+        const parsed = data.map((item: any) => parseOpportunity(item));
+        setOpportunities(parsed);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Error al cargar oportunidades.");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const randomItems = getRandomItems(opportunities,4); 
+
+  const openPopUp = (op: OpportunityContent) => {
+    popUpContext.setContent(<OpportunityDetails item={op} />);
+    popUpContext.setOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-8">
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <section className="bg-gray-50 py-12">
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold mb-2 text-center text-gray-900">Lorem ipsum dolor sit amet, consectetur adipiscing elit</h2>
-        <p className="text-center text-gray-600 mb-8">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt<br />
-          ut labore et dolore magna aliqua.
+    <section className="container mx-auto px-4 py-16">
+      <div className="text-center max-w-3xl mx-auto mb-12">
+        <h2 className="text-3xl font-bold mb-4 text-gray-800 dark:text-white">
+          Oportunidades destacadas para tu desarrollo
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300">
+          Explora nuestra selección de cursos, becas y programas que te ayudarán a
+          desarrollar nuevas habilidades y avanzar en tu carrera profesional.
         </p>
+      </div>
 
-        {/* Tabs */}
-        <div className="max-w-md mx-auto mb-8 bg-white rounded-lg overflow-hidden border">
-          <div className="flex">
-            <button 
-              className={`flex-1 py-3 ${activeTab === 'top10' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-              onClick={() => setActiveTab('top10')}
-            >
-              Top 10
-            </button>
-            <button 
-              className={`flex-1 py-3 ${activeTab === 'novedades' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-              onClick={() => setActiveTab('novedades')}
-            >
-              Novedades
-            </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {randomItems.map((item, index) => (
+          <div
+            key={item.id || index}
+            onClick={() => openPopUp(item)}
+            className="cursor-pointer"
+          >
+            <OpportunityCard item={item} />
           </div>
-        </div>
+        ))}
+      </div>
 
-        {/* Course Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredItems.map((item, index) => (
-            <CourseCard key={index} item={item} />
-          ))}
-        </div>
+      <div className="text-center mt-12">
+        <a
+          href="/feed"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded-full font-medium transition-colors duration-300"
+        >
+          Ver todas las oportunidades
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fillRule="evenodd"
+              d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </a>
       </div>
     </section>
   );

@@ -18,7 +18,9 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
     "react-router": "^7.3.0",
-    "start": "^5.1.0"
+    "react-router-dom": "^7.4.1",
+    "start": "^5.1.0",
+    "@heroicons/react": "^1.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

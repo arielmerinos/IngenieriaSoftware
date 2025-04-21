@@ -20,7 +20,6 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-// src/contexts/AuthContext.tsx
 import React, {
     createContext,
     useState,
@@ -30,12 +29,17 @@ import React, {
 } from "react";
 
 // Define la estructura de la información del usuario
+// interface User {
+//     id: number;
+//     username: string;
+//     name: string;
+//     access: string;
+//     refresh: string;
+// }
+
 interface User {
     id: number;
     username: string;
-    name: string;
-    access: string;
-    refresh: string;
 }
 
 // Define la interfaz para el contexto de autenticación
@@ -82,7 +86,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
             if (response.ok) {
                 const userData = await response.json();
-                setUser(userData);
+                console.log(userData);
+                // setUser(userData);
+                setUser({ id: userData.id, username: userData.username });
             } else {
                 console.error("Error al obtener datos del usuario:", await response.json());
                 setUser(null);
@@ -124,7 +130,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("refreshToken", data.refresh);
                 setAuthToken(data.access);
                 // Actualizamos la información del usuario (puedes ajustar el id u otros campos según la respuesta)
-                setUser({ id: data.user_id || 1, username, name: "", access: data.access, refresh: data.refresh });
+                // setUser({ id: data.user_id || 1, username, name: "", access: data.access, refresh: data.refresh });
+                setUser({ id: data.id, username: data.username });
                 localStorage.setItem("username", username);
                 console.log("Login exitoso, token almacenado:", data.access);
                 return true;
@@ -161,7 +168,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("authToken", data.token);
                 setAuthToken(data.token);
                 localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
-                setUser({ id: data.id, username, name, access: data.access, refresh: data.refresh });
+                // setUser({ id: data.id, username, name, access: data.access, refresh: data.refresh });
+                setUser({ id: data.id, username: data.username });
                 setAuthToken(data.access);
                 localStorage.setItem("authToken", data.access);
                 console.log("Usuario registrado:", user);
@@ -180,6 +188,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Función para cerrar sesión
     const logout = () => {
         localStorage.removeItem("authToken");
+        localStorage.removeItem("username");
+        localStorage.removeItem("refreshToken")
         setAuthToken(null);
         setUser(null);
     };
