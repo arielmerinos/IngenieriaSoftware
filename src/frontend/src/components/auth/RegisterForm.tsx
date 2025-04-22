@@ -19,7 +19,6 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
-
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Credentials, AuthFormProps } from './types';
@@ -56,7 +55,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     return (
         <form onSubmit={handleSubmit(submitHandler)} className="space-y-4">
             <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Nombre Completo
                 </label>
                 <input
@@ -70,13 +69,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                             message: 'El nombre no debe contener números'
                         }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
-                {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
+                {errors.name && <span className="text-red-500 dark:text-red-400 text-sm">{errors.name.message}</span>}
             </div>
 
             <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Correo Electrónico
                 </label>
                 <input
@@ -90,13 +89,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                             message: 'Ingresa un correo válido'
                         }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
-                {errors.username && <span className="text-red-500 text-sm">{errors.username.message}</span>}
+                {errors.username && <span className="text-red-500 dark:text-red-400 text-sm">{errors.username.message}</span>}
             </div>
 
             <div className="relative">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Contraseña
                 </label>
                 <div className="relative">
@@ -111,29 +110,29 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                                 message: 'La contraseña debe tener al menos 8 caracteres'
                             }
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                     <PasswordToggleButton
                         showPassword={showPassword}
                         togglePassword={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10 flex items-center justify-center focus:outline-none hover:border-transparent"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 z-10 flex items-center justify-center focus:outline-none hover:border-transparent"
                     />
                 </div>
-                {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
+                {errors.password && <span className="text-red-500 dark:text-red-400 text-sm">{errors.password.message}</span>}
             </div>
 
             <button
                 type="submit"
                 disabled={!isValid}
-                className={`w-full text-white py-2 rounded-full transition duration-300 ${isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                className={`w-full text-white py-2 rounded-full transition duration-300 ${isValid ? 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'}`}
             >
                 Registrarse
             </button>
 
             <div className="flex items-center my-4">
-                <div className="flex-grow border-t border-gray-300"></div>
-                <span className="mx-4 text-gray-500 text-sm">o</span>
-                <div className="flex-grow border-t border-gray-300"></div>
+                <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+                <span className="mx-4 text-gray-500 dark:text-gray-400 text-sm">o</span>
+                <div className="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
             </div>
 
             <div className="flex justify-center">
@@ -144,7 +143,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                 <button
                     type="button"
                     onClick={onSwitchMode}
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                 >
                     ¿Ya tienes una cuenta? Inicia sesión
                 </button>
