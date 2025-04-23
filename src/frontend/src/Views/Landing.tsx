@@ -21,6 +21,7 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
 import { Suspense, lazy } from 'react';
+import { Link } from 'react-router-dom';
 import './Landing.css';
 import { PopUpProvider } from '../contexts/PopUpContext'; // Asegúrate de que el path sea correcto
 
@@ -38,9 +39,9 @@ const heroProps = {
   ],
   ctaText: "Comienza a explorar",
   highlights: [
-    "Educación",
-    "Contenidos",
-    "Becas"
+    "Becas",
+    "Hackatones",
+    "Internships"
   ]
 };
 
@@ -77,9 +78,11 @@ function Landing() {
                 <p className="text-lg mb-8 max-w-2xl mx-auto">
                   Únete a nuestra comunidad y descubre todas las oportunidades que tenemos para ti.
                 </p>
-                <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-full font-semibold text-lg shadow-md transition duration-300">
-                  Comenzar ahora
-                </button>
+                <Link to="/feed">
+                  <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-full font-semibold text-lg shadow-md transition duration-300">
+                    Comenzar ahora
+                  </button>
+                </Link>
               </div>
             </div>
           </Suspense>

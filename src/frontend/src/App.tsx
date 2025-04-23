@@ -6,6 +6,7 @@ import OrganizationsFeed from './Views/OrganizationsFeed';
 import OrganizationDetail from './components/Organizations/OrganizationDetail';
 import Loader from './components/Loader';
 import { useTheme } from './contexts/ThemeContext'; // Importamos useTheme para verificación
+import OrganizationDetailWrapper from './Views/OrganizationDetailWrapper';
 
 const Header = React.lazy(() => import('./components/Header'));
 const Footer = React.lazy(() => import('./components/Footer'));
@@ -24,7 +25,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/feed" element={<OpportunityFeed />} />
             <Route path="/org" element={<OrganizationsFeed />} />
-            <Route path="/org/:id" element={<OrganizationDetail />} />
+            <Route path="/org/:id" element={<OrganizationDetailWrapper />} />
           </Routes>
         </main>
         <Footer />

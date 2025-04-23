@@ -138,7 +138,7 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
           {...register('website', {
             required: 'El sitio web de la organización es obligatorio.',
             pattern: {
-              value: /^((https?|ftp|smtp):\/\/)?(www\.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$/,
+              value: /^((https?|ftp):\/\/)?([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})(\/[\w\-./?%&=]*)?$/,
               message: 'Ingresa una URL válida'
             }
           })}
