@@ -31,20 +31,15 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Prevent scroll on body when modal is open
   useEffect(() => {
-    // Save original overflow style
     const originalStyle = window.getComputedStyle(document.body).overflow;
-    // Prevent scrolling on the background
     document.body.style.overflow = 'hidden';
     
-    // Restore original overflow style when component unmounts
     return () => {
       document.body.style.overflow = originalStyle;
     };
   }, []);
 
-  // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -58,7 +53,6 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
     };
   }, [onClose]);
 
-  // Close modal on escape key
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -72,14 +66,12 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
     };
   }, [onClose]);
 
-  // Prevent wheel events from propagating beyond the modal when at boundaries
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     const container = modalRef.current;
     if (!container) return;
     
     const { scrollTop, scrollHeight, clientHeight } = container;
     
-    // If we're at the top and trying to scroll up, or at the bottom and trying to scroll down
     if (
       (scrollTop === 0 && e.deltaY < 0) ||
       (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0)
@@ -90,20 +82,17 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Backdrop overlay with animation */}
       <div 
         ref={overlayRef}
         className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
         onClick={onClose}
       />
       
-      {/* Modal container with proper light/dark mode support */}
       <div 
         ref={modalRef}
         onWheel={handleWheel}
         className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg shadow-xl bg-gray-50 dark:bg-gray-800 transition-colors duration-200 scroll-smooth"
       >
-        {/* Children content will be placed directly without padding to allow forms to control their own padding */}
         {children}
       </div>
     </div>

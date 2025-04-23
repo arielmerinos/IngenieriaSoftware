@@ -29,7 +29,7 @@ import OrganizationDetail from "../components/Organizations/OrganizationDetail";
 
 function OrganizationDetailWrapper() {
     return (
-        <section >
+        <section  className="py-8" >
             <Suspense fallback={<Loader />}>
                 <GridProvider>
                     <PopUpProvider>

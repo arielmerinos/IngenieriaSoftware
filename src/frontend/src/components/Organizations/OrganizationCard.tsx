@@ -40,7 +40,7 @@ const OrganizationCard: React.FC<Organization2> = ({ item }) => {
 
   return (
     <Link to={`/org/${item.id}`} className="no-underline block h-full">
-      <div className='
+      <div className="
         h-full
         bg-white dark:bg-gray-800
         rounded-xl
@@ -51,23 +51,27 @@ const OrganizationCard: React.FC<Organization2> = ({ item }) => {
         hover:-translate-y-1 hover:scale-102
         cursor-pointer
         border border-gray-100 dark:border-gray-700
-      '>
+      ">
         <div className='flex flex-col h-full'>
-          {/* Image section */}
+          {/* Sección de imagen */}
           <div className='h-48 relative overflow-hidden'>
             <img
               src={item.logo || defaultLogo}
               alt={`Imagen de ${item.name}`}
-              className="w-full h-full object-cover"
               role="img"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.onerror = null; 
                 target.src = defaultLogo;
               }}
+              className="
+                w-full h-full
+                object-contain
+                object-center
+              "
             />
             
-            {/* Website tag overlaid on the image */}
+            {/* Etiqueta de sitio web sobre la imagen */}
             {item.website && (
               <div className="absolute top-2 right-2">
                 <span className='
@@ -83,16 +87,12 @@ const OrganizationCard: React.FC<Organization2> = ({ item }) => {
             )}
           </div>
           
-          {/* Content section */}
+          {/* Sección de contenido */}
           <div className='p-5 flex flex-col flex-grow text-left'>
-            {/* Organization name */}
             <h2 className="font-bold text-lg mb-3 text-gray-800 dark:text-white">
               {item.name}
             </h2>
-            
-            {/* Bottom metadata */}
             <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
-              {/* Description */}
               <p className='text-gray-600 dark:text-gray-300 text-sm mb-3'>
                 {truncateContent(item.description || '', 120)}
               </p>
@@ -105,3 +105,4 @@ const OrganizationCard: React.FC<Organization2> = ({ item }) => {
 };
 
 export default OrganizationCard;
+  

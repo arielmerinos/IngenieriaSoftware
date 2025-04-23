@@ -22,7 +22,6 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 import { useEffect, useState } from "react";
 import OrganizationCard from "../Organizations/OrganizationCard";
-import OrganizationDetails from "./OrganizationDetail";
 import { useGrid } from "../../contexts/GridContext";
 import { usePopUp } from "../../contexts/PopUpContext";
 import { Organization } from "../../models/organization";
@@ -40,8 +39,7 @@ const Organizations: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const openPopUp = (organization: Organization) => {
-    popUpContext.setContent(<OrganizationDetails item={organization} />);
+  const openPopUp = () => {
     popUpContext.setOpen(true);
   };
 
@@ -62,7 +60,6 @@ const Organizations: React.FC = () => {
     refreshOrganizations();
   }, []);
 
-  // Filter organizations based on search term
   const filteredOrganizations = gridContext.elems.filter((org: Organization) => {
     if (searchTerm === "") return true;
     
@@ -80,7 +77,6 @@ const Organizations: React.FC = () => {
   const totalFilteredItems = filteredOrganizations.length;
   const totalPages = Math.ceil(totalFilteredItems / ITEMS_PER_PAGE);
   
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
@@ -146,7 +142,7 @@ const Organizations: React.FC = () => {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 mb-10">
             {paginatedItems.map((org) => (
-              <div key={org.id} onClick={() => openPopUp(org)}>
+              <div key={org.id} onClick={() => openPopUp()}>
                 <OrganizationCard item={org} />
               </div>
             ))}
