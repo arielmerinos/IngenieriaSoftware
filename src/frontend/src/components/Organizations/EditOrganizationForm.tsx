@@ -61,7 +61,6 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
 
   const watchLogoFile = watch('logoFile');
 
-  // Handle image preview
   useEffect(() => {
     if (watchLogoFile && watchLogoFile.length > 0) {
       const reader = new FileReader();
@@ -108,10 +107,9 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
       console.log('Organización actualizada exitosamente:', response.data);
       setSuccess(true);
       
-      // Delay before closing
       setTimeout(() => {
         onUpdated(response.data);
-      }, 1500);
+      }, 1000);
       
     } catch (error) {
       console.error('Error al actualizar la organización:', error);
@@ -146,7 +144,7 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Editar Organización</h2>
         <button 
           type="button" 
-          onClick={() => onUpdated(initialData)} // Close without saving
+          onClick={() => onUpdated(initialData)} 
           className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
         >
           <XIcon className="h-5 w-5" />
@@ -201,7 +199,6 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
           Sitio Web
         </label>
         <input
-          // type="url"
           id="website"
           placeholder="https://www.miempresa.com"
           {...register('website', {
@@ -231,7 +228,6 @@ const EditOrganizationForm: React.FC<EditOrganizationFormProps> = ({
                   type="button" 
                   onClick={() => {
                     setValue('logoFile', undefined as any);
-                    // Only reset preview if it's from a new upload, not the existing image
                     if (watchLogoFile) {
                       setImagePreview(initialData.logo || null);
                     }
