@@ -87,34 +87,42 @@ const OrganizationDetail: React.FC = () => {
 
   return (
     <div className="
-        max-w-5xl mx-auto
-        bg-gray-50 dark:bg-gray-800
-        shadow rounded-lg overflow-hidden
-        transition-colors duration-200
-      ">
+      max-w-5xl mx-auto
+      bg-gray-50 dark:bg-gray-800
+      shadow rounded-lg overflow-hidden
+      transition-colors duration-200
+    ">
       {/* Encabezado con banner */}
       <div className="relative">
         <div className="h-40 bg-blue-600 dark:bg-blue-800"></div>
-        <div className="absolute left-1/2 transform -translate-x-1/2 top-24">
-          <img 
-            src={organization.logo || '/default-logo.svg'} 
-            alt={organization.name} 
-            onError={(e) => { 
-              e.currentTarget.src = "/default-logo.svg";
-            }}
+        {/* Contenedor del logo */}
+        <div
+          className="
+            absolute left-1/2 top-20
+            md:top-3 lg:top-3
+            w-full max-w-[250px] sm:max-w-xs md:max-w-sm
+            aspect-[4/3]
+            flex items-center justify-center
+            overflow-hidden
+            transform -translate-x-1/2
+          "
+        >
+          <img
+            src={organization.logo || '/default-logo.svg'}
+            alt={organization.name}
+            onError={(e) => { e.currentTarget.src = "/default-logo.svg"; }}
             className="
-                w-full
-                max-w-80       /* ancho máximo: 20rem = 320px */ :contentReference[oaicite:4]{index=4}
-                max-h-64       /* alto máximo: 16rem = 256px */ :contentReference[oaicite:5]{index=5}
-                h-auto
-                object-contain object-center
-                rounded-md border-4 border-white dark:border-gray-700 shadow-md"
+              w-full h-full
+              object-contain
+              object-center
+              rounded-md border-none shadow-md
+            "
           />
         </div>
       </div>
 
       {/* Contenido del perfil */}
-      <div className="pt-32 pb-8 px-8">
+      <div className="pt-40 pb-8 px-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
             {organization.name}
@@ -146,9 +154,9 @@ const OrganizationDetail: React.FC = () => {
             <span className="block text-sm font-medium text-gray-600 dark:text-gray-400">
               Sitio Web
             </span>
-            <a 
-              href={organization.website} 
-              target="_blank" 
+            <a
+              href={organization.website}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:underline"
             >
@@ -195,7 +203,7 @@ const OrganizationDetail: React.FC = () => {
           </p>
         </div>
       </div>
-  
+
       {/* Modal para editar */}
       {editOpen && organization.id !== undefined && (
         <PopUpModal onClose={() => setEditOpen(false)}>
