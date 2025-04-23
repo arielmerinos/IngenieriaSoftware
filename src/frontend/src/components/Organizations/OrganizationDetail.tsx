@@ -102,7 +102,13 @@ const OrganizationDetail: React.FC = () => {
             onError={(e) => { 
               e.currentTarget.src = "/default-logo.svg";
             }}
-            className="w-80 h-48 object-cover rounded-md border-4 border-white dark:border-gray-700 shadow-md" 
+            className="
+                w-full
+                max-w-80       /* ancho máximo: 20rem = 320px */ :contentReference[oaicite:4]{index=4}
+                max-h-64       /* alto máximo: 16rem = 256px */ :contentReference[oaicite:5]{index=5}
+                h-auto
+                object-contain object-center
+                rounded-md border-4 border-white dark:border-gray-700 shadow-md"
           />
         </div>
       </div>

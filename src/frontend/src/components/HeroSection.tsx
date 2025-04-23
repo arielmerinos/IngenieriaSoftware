@@ -70,7 +70,7 @@ const HeroSection: FC<HeroSectionProps> = ({
         {/* CTA Link */}
         <Link
           to="/feed"
-          className="w-1/3 mt-6 inline-block bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-8 py-4 text-lg font-semibold rounded-full flex items-center gap-2 shadow-lg transform transition duration-300 hover:-translate-y-1 w-auto"
+          className="w-1/2 mt-6 inline-block bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-8 py-4 text-lg font-semibold rounded-full flex items-center gap-2 shadow-lg transform transition duration-300 hover:-translate-y-1 w-auto"
         >
           {ctaText}
           {ctaIcon || (
@@ -85,7 +85,7 @@ const HeroSection: FC<HeroSectionProps> = ({
       <div className="md:w-1/2 lg:w-2/5">
         <div className="grid grid-cols-2 gap-5">
           <Link
-            to="/ruta1"
+            to="/feed"
             className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg p-6 border border-gray-100 dark:border-gray-700 transition-all duration-300"
           >
             <div className="flex flex-col items-center text-center">
@@ -113,7 +113,7 @@ const HeroSection: FC<HeroSectionProps> = ({
                 </svg>
               </div>
               <span className="font-medium text-lg text-gray-900 dark:text-gray-100">
-                Texto 2
+                dfdfas
               </span>
             </div>
           </Link>
