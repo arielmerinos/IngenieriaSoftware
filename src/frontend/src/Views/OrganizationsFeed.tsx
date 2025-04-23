@@ -24,15 +24,16 @@ import React, { Suspense } from 'react';
 import './Landing.css';
 import { useAuth } from '../contexts/AuthContext';
 import { PopUpProvider } from '../contexts/PopUpContext';
-import { GridProvider } from '../contexts/GridContext';
+import { GridProvider, useGrid } from '../contexts/GridContext';
+import { Organization } from '../models/organization';
 
 const Organizations = React.lazy(() => import('../components/Organizations/Organizations'));
 const OrganizationButton = React.lazy(() => import('../components/Organizations/AddOrganizationButton'));
 
 function OrganizationsFeed() {
   const authContext = useAuth();
-  
-  // Enhanced loader with theme support
+
+  // Spinner de carga
   const Loader = () => (
     <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">
       <div className="flex flex-col items-center">
@@ -41,22 +42,41 @@ function OrganizationsFeed() {
       </div>
     </div>
   );
-  
+
   return (
     <section className="w-full min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <Suspense fallback={<Loader />}>
-        {/* GridProvider must be before PopUpProvider so PopUp can see the grid */}
         <GridProvider>
           <PopUpProvider>
-            <div className="container mx-auto px-4 py-6">
-              {/* Only show the create button if authenticated */}
-              {authContext.isAuthenticated && <OrganizationButton />}
-              <Organizations />
-            </div>
+            <FeedContent authContext={authContext} />
           </PopUpProvider>
         </GridProvider>
       </Suspense>
     </section>
+  );
+}
+
+interface FeedContentProps {
+  authContext: ReturnType<typeof useAuth>;
+}
+
+function FeedContent({ authContext }: FeedContentProps) {
+  // Ahora sí podemos usar el contexto de la grilla
+  const { addElem } = useGrid();
+
+  // Callback que se ejecuta al crear una nueva organización
+  const handleNewOrganization = (newOrg: Organization) => {
+    console.log('Nueva organización añadida:', newOrg);
+    addElem(newOrg);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      {authContext.isAuthenticated && (
+        <OrganizationButton onUpdate={handleNewOrganization} />
+      )}
+      <Organizations />
+    </div>
   );
 }
 

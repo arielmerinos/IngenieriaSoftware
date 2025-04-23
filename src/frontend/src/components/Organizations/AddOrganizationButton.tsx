@@ -19,13 +19,14 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
+
 import { PlusIcon } from '@heroicons/react/outline';
 import { usePopUp } from "../../contexts/PopUpContext";
 import RegisterOrganizationForm from "./RegisterOrganization";
 import { Organization } from "../../models/organization";
 
 interface OrganizationButtonProps {
-  onUpdate?: (newOrg: Organization) => void;
+  onUpdate: (newOrg: Organization) => void;
 }
 
 const OrganizationButton: React.FC<OrganizationButtonProps> = ({ onUpdate }) => {
