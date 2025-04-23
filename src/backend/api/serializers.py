@@ -18,6 +18,7 @@
 # Debería haber recibido una copia de la Licencia Pública General de GNU
 # junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
+import logging
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator, ValidationError
 from rest_framework import serializers
