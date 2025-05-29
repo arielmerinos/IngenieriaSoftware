@@ -182,7 +182,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
 
                 // Set organization if present
                 if (opportunityData.organization_id) {
-                    setValue('organization', opportunityData.organization_id);
+                    setValue('organization_id', opportunityData.organization_id);
                 }
 
             } catch (error) {
