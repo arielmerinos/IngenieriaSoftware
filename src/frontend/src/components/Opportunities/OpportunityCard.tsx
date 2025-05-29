@@ -82,9 +82,6 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                 <div className='p-5 flex flex-col flex-grow text-left'>
                     {/* Organization or author */}
                     <div className='flex items-center mb-2'>
-                        <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" />
-                        <p className='text-sm text-gray-600 dark:text-gray-400 mr-2'>{item.author}</p>
-                        <span className="text-gray-400 dark:text-gray-500 mx-1">•</span>
                         {item.organization ? (
                             <>
                                 <GlobeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 mr-1" />
@@ -92,8 +89,8 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                             </>
                         ) : (
                             <>
-                                <GlobeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
-                                <p className='text-sm text-gray-500 dark:text-gray-400 italic'>Sin Organización</p>
+                                <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" />
+                                <p className='text-sm text-gray-600 dark:text-gray-400'>{item.author}</p>
                             </>
                         )}
                     </div>
