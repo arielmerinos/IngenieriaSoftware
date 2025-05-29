@@ -32,7 +32,7 @@ interface FormData {
 const RegisterOpportunity: React.FC = () => {
     const { register, handleSubmit, control, formState: { errors, isValid }, getValues, setValue, watch } = 
         useForm<FormData>({ mode: 'onChange' });
-    
+
     const [opportunityTypes, setOpportunityTypes] = useState<{ id: number, name: string }[]>([]);
     const [countries, setCountries] = useState<{ id: number; name: string, emoji: string }[]>([]);
     const [interests, setInterests] = useState<{ id: number; name: string, color: string }[]>([]);
@@ -40,9 +40,11 @@ const RegisterOpportunity: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    
     const watchImageField = watch("image");
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+    // 👉 Add memberships state here:
+    const [memberships, setMemberships] = useState<{ id: number, organization: { id: number, name: string } }[]>([]);
 
     const gridContext = useGrid();
     const popUpContext = usePopUp();
