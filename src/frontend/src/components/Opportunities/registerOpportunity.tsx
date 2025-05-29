@@ -9,7 +9,7 @@ import {
     CalendarIcon, 
     DocumentTextIcon, 
     PhotographIcon,
-    Tmake agIcon,
+    TagIcon,
     GlobeAltIcon,
     HeartIcon,
     XIcon,
