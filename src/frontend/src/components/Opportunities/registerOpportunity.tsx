@@ -167,7 +167,7 @@ const RegisterOpportunity: React.FC = () => {
 
             // Add organization if selected
             if (data.organization) {
-                formData.append('organization', data.organization.toString());
+                formData.append('organization_id', data.organization.toString());
             }
 
             // Send request to server
