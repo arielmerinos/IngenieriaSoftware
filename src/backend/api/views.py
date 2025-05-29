@@ -557,6 +557,11 @@ class OrganizationViewSet(viewsets.ModelViewSet): # Ala verga esto se hace todo 
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # <-- This line ensures request is available in serializer
+        return context
+
 class JoinOrganizationView(APIView):
     """
     Vista para solicitar unirse a una organización.
