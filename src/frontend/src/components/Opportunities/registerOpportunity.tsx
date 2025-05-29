@@ -9,7 +9,7 @@ import {
     CalendarIcon, 
     DocumentTextIcon, 
     PhotographIcon,
-    TagIcon,
+    Tmake agIcon,
     GlobeAltIcon,
     HeartIcon,
     XIcon,
@@ -471,12 +471,12 @@ const RegisterOpportunity: React.FC = () => {
             {/* Organization Field */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Organización
+                    Organización <span className="text-gray-400 text-xs">(opcional)</span>
                 </label>
                 <div className="relative">
                     <OfficeBuildingIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <select
-                        {...register('organization', { required: 'Selecciona una organización' })}
+                        {...register('organization')}
                         className="w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     >
                         <option value="">Selecciona una organización</option>
@@ -487,7 +487,7 @@ const RegisterOpportunity: React.FC = () => {
                         ))}
                     </select>
                 </div>
-                {errors.organization && <span className="text-red-500 text-sm block">{errors.organization.message}</span>}
+                {/* No required error message since it's optional */}
             </div>
 
             {/* Submit Button */}
