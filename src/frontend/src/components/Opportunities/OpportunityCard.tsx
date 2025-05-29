@@ -81,17 +81,22 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                 {/* Content section */}
                 <div className='p-5 flex flex-col flex-grow text-left'>
                     {/* Organization or author */}
-                    {item.organization ? (
-                        <div className='flex items-center mb-2'>
-                            <GlobeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 mr-1" />
-                            <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{item.organization}</p>
-                        </div>
-                    ) : (
-                        <div className='flex items-center mb-2'>
-                            <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" />
-                            <p className='text-sm text-gray-600 dark:text-gray-400'>{item.author}</p>
-                        </div>
-                    )}
+                    <div className='flex items-center mb-2'>
+                        <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" />
+                        <p className='text-sm text-gray-600 dark:text-gray-400 mr-2'>{item.author}</p>
+                        <span className="text-gray-400 dark:text-gray-500 mx-1">•</span>
+                        {item.organization ? (
+                            <>
+                                <GlobeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 mr-1" />
+                                <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{item.organization}</p>
+                            </>
+                        ) : (
+                            <>
+                                <GlobeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                                <p className='text-sm text-gray-500 dark:text-gray-400 italic'>Sin Organización</p>
+                            </>
+                        )}
+                    </div>
                     
                     {/* Title */}
                     <h2 className="font-bold text-lg mb-3 text-gray-800 dark:text-white">

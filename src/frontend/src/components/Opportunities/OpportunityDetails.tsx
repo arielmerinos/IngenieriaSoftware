@@ -102,18 +102,23 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
             <div className='mb-6'>
                 <h1 className='font-bold text-2xl mb-2 text-gray-800 dark:text-white'>{item.name}</h1>
                 <div className='flex flex-wrap items-center gap-2 mb-3'>
-                    {item.organization ? (
-                        <div className='flex items-center'>
-                            <GlobeIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-1" />
-                            <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{item.organization}</p>
-                        </div>
-                    ) : (
-                        <div className='flex items-center'>
-                            <UserIcon className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-1" />
-                            <p className='text-sm text-gray-600 dark:text-gray-400'>{item.author}</p>
-                        </div>
+                    {/* Author */}
+                    <div className='flex items-center'>
+                        <UserIcon className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-1" />
+                        <p className='text-sm text-gray-600 dark:text-gray-400'>{item.author}</p>
+                    </div>
+                    {/* Organization (if exists) */}
+                    {item.organization && (
+                        <>
+                            <span className="text-gray-400 dark:text-gray-500">•</span>
+                            <div className='flex items-center'>
+                                <GlobeIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-1" />
+                                <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{item.organization}</p>
+                            </div>
+                        </>
                     )}
                     <span className="text-gray-400 dark:text-gray-500">•</span>
+                    {/* Date range */}
                     <div className='flex items-center'>
                         <CalendarIcon className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-1" />
                         <p className='text-sm text-gray-600 dark:text-gray-400'>
