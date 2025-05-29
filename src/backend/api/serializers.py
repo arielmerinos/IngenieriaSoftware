@@ -59,29 +59,36 @@ class InterestSerializer(serializers.ModelSerializer):
 
 class ScholarshipSerializer(serializers.ModelSerializer):
     # Use TypeSerializer for serialization and PrimaryKeyRelatedField for deserialization
-    type = TypeSerializer(many=True, read_only=True)  # Nested serializer for output
+    type = TypeSerializer(many=True, read_only=True)
     type_ids = serializers.PrimaryKeyRelatedField(
         queryset=Type.objects.all(),
         many=True,
-        write_only=True  # Only used for input
+        write_only=True
     )
-    interests = InterestSerializer(many=True, read_only=True)  # Nested serializer for output
+    interests = InterestSerializer(many=True, read_only=True)
     interest_ids = serializers.PrimaryKeyRelatedField(
         queryset=Interest.objects.all(),
         many=True,
-        write_only=True  # Only used for input
+        write_only=True
     )
-    country = CountrySerializer(many=True, read_only=True)  # Nested serializer for output
+    country = CountrySerializer(many=True, read_only=True)
     country_ids = serializers.PrimaryKeyRelatedField(
         queryset=Country.objects.all(),
         many=True,
-        write_only=True  # Only used for input
+        write_only=True
     )
+    # Change: Use SlugRelatedField for organization (for input) and show name (for output)
     organization = serializers.SerializerMethodField()
+    organization_id = serializers.PrimaryKeyRelatedField(
+        queryset=Organization.objects.all(),
+        source='organization',
+        write_only=True,
+        required=False
+    )
 
     created_by = serializers.SlugRelatedField(
         queryset=User.objects.all(),
-        slug_field='username',  # Accept the username instead of the pk
+        slug_field='username',
         required=True
     )
 
@@ -89,54 +96,42 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         model = Scholarship
         fields = [
             "id",
-            "organization",
+            "organization",      # Output: organization name
+            "organization_id",   # Input: organization id
             "name",
             "publication_date",
             "start_date",
             "end_date",
-            "type",  # Nested serializer for output
-            "type_ids",  # PrimaryKeyRelatedField for input
+            "type",
+            "type_ids",
             "image",
             "content",
-            "interests",  # Nested serializer for output
-            "interest_ids",  # PrimaryKeyRelatedField for input
-            "created_by",  # Accept username from the frontend
-            "country",  # Nested serializer for output
-            "country_ids",  # PrimaryKeyRelatedField for input
+            "interests",
+            "interest_ids",
+            "created_by",
+            "country",
+            "country_ids",
         ]
         read_only_fields = ["id", "publication_date"]
 
     def create(self, validated_data):
-        # Extract Many-to-Many fields
         type_data = validated_data.pop('type_ids', [])
         interests_data = validated_data.pop('interest_ids', [])
         country_data = validated_data.pop('country_ids', [])
-
-        logger = logging.getLogger(__name__)
-        logger.debug("Type Data: %s", type_data)
-        logger.debug("Interests Data: %s", interests_data)
-        logger.debug("Country Data: %s", country_data)
-
-        # Create the Scholarship object
+        # organization is handled by organization_id/source='organization'
         scholarship = Scholarship.objects.create(**validated_data)
-
-        # Handle Many-to-Many fields
         if type_data:
-            scholarship.type.set(type_data)  # Directly set the list of PKs
-
+            scholarship.type.set(type_data)
         if interests_data:
-            scholarship.interests.set(interests_data)  # Directly set the list of PKs
-
+            scholarship.interests.set(interests_data)
         if country_data:
-            scholarship.country.set(country_data)  # Directly set the list of PKs
-
+            scholarship.country.set(country_data)
         return scholarship
 
     def get_organization(self, obj):
-        return obj.organization.name if obj.organization else None  # Return the name of the organization
-    
+        return obj.organization.name if obj.organization else None
+
     def update(self, instance, validated_data):
-        # Update the fields directly
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
