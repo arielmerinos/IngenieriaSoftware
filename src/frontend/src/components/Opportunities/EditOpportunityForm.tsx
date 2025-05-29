@@ -33,7 +33,8 @@ import {
     TagIcon,
     GlobeAltIcon,
     HeartIcon,
-    XIcon
+    XIcon,
+    OfficeBuildingIcon
 } from '@heroicons/react/outline';
 
 interface EditOpportunityFormProps {
@@ -50,6 +51,7 @@ interface FormData {
     type_ids: number[];
     interest_ids: number[];
     country_ids: number[];
+    organization?: number;
 }
 
 const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, onUpdate }) => {
@@ -63,6 +65,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
     const [serverError, setServerError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [memberships, setMemberships] = useState<{ id: number, organization: { id: number, name: string } }[]>([]);
 
     const { authToken, user } = useAuth();
     const popUpContext = usePopUp();
@@ -97,7 +100,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
         }
     }, [watchImage]);
 
-    // Fetch all necessary data
+    // Fetch all necessary data (including memberships)
     useEffect(() => {
         const fetchData = async () => {
             if (!authToken) {
@@ -112,36 +115,55 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                     'Content-Type': 'application/json'
                 };
 
-                // Fetch types, countries, and interests
-                const [typesResponse, countriesResponse, interestsResponse, opportunityResponse] = await Promise.all([
+                // Fetch types, countries, interests, opportunity, and memberships
+                const [
+                    typesResponse,
+                    countriesResponse,
+                    interestsResponse,
+                    opportunityResponse,
+                    membershipsResponse
+                ] = await Promise.all([
                     fetch('http://localhost:8000/types/', { headers }),
                     fetch('http://localhost:8000/countries/', { headers }),
                     fetch('http://localhost:8000/interests/', { headers }),
-                    fetch(`http://localhost:8000/scholarships/${opportunity.id}/`, { headers })
+                    fetch(`http://localhost:8000/scholarships/${opportunity.id}/`, { headers }),
+                    user ? fetch(`http://localhost:8000/user/${user.id}/memberships/`, { headers }) : Promise.resolve({ ok: false })
                 ]);
 
-                if (!typesResponse.ok || !countriesResponse.ok || !interestsResponse.ok || !opportunityResponse.ok) {
+                if (
+                    !typesResponse.ok ||
+                    !countriesResponse.ok ||
+                    !interestsResponse.ok ||
+                    !opportunityResponse.ok ||
+                    (user && !membershipsResponse.ok)
+                ) {
                     throw new Error('Error al obtener datos del servidor');
                 }
 
-                const [typesData, countriesData, interestsData, opportunityData] = await Promise.all([
+                const [
+                    typesData,
+                    countriesData,
+                    interestsData,
+                    opportunityData,
+                    membershipsData
+                ] = await Promise.all([
                     typesResponse.json(),
                     countriesResponse.json(),
                     interestsResponse.json(),
-                    opportunityResponse.json()
+                    opportunityResponse.json(),
+                    user ? membershipsResponse.json() : Promise.resolve([])
                 ]);
 
                 // Set data for dropdowns
                 setOpportunityTypes(typesData);
                 setCountries(countriesData);
                 setInterests(interestsData);
+                setMemberships(membershipsData);
 
                 // Initialize the image preview if there's an existing image
                 if (opportunity.image) {
                     setImagePreview(opportunity.image);
                 }
-
-                // Map the current opportunity's types to their IDs
                 const typeIds = opportunityData.type.map((t: any) => t.id);
                 const interestIds = opportunityData.interests.map((i: any) => i.id);
                 const countryIds = opportunityData.country.map((c: any) => c.id);
@@ -150,7 +172,6 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                 setSelectedInterests(interestIds);
                 setSelectedCountries(countryIds);
 
-                // Set form values
                 setValue('name', opportunityData.name);
                 setValue('content', opportunityData.content);
                 setValue('start_date', new Date(opportunityData.start_date).toISOString().split('T')[0]);
@@ -158,6 +179,11 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                 setValue('type_ids', typeIds);
                 setValue('interest_ids', interestIds);
                 setValue('country_ids', countryIds);
+
+                // Set organization if present
+                if (opportunityData.organization_id) {
+                    setValue('organization', opportunityData.organization_id);
+                }
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -168,7 +194,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
         };
 
         fetchData();
-    }, [authToken, opportunity.id, setValue, opportunity.image]);
+    }, [authToken, opportunity.id, setValue, opportunity.image, user]);
 
     // Handle creation of new types
     const handleCreateType = async (name: string) => {
@@ -505,6 +531,29 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
                 </p>
+            </div>
+
+            {/* Organization Field */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Organización
+                </label>
+                <div className="relative">
+                    <OfficeBuildingIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <select
+                        {...register('organization', { required: 'Selecciona una organización' })}
+                        className="w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                        defaultValue={opportunity.organization_id || ''}
+                    >
+                        <option value="">Selecciona una organización</option>
+                        {memberships.map(m => (
+                            <option key={m.organization.id} value={m.organization.id}>
+                                {m.organization.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                {errors.organization && <span className="text-red-500 text-sm block">{errors.organization.message}</span>}
             </div>
 
             {/* Submit and Cancel Buttons */}
