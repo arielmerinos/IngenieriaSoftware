@@ -241,10 +241,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
             }
             
             // Append organization if it exists
-            if (data.organization_id) {
-                if (data.organization_id === "0") {
-                    formData.append('organization_id', null as any); // Use null if no organization is selected
-                }
+            if (data.organization_id && data.organization_id !== "0") {
                 formData.append('organization_id', data.organization_id.toString());
             }
 
