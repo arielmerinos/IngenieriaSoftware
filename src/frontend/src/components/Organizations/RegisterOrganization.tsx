@@ -25,7 +25,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { usePopUp } from '../../contexts/PopUpContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Organization } from '../../models/organization';
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { PhotographIcon, XIcon } from '@heroicons/react/outline';
 
 export interface RegisterOrganizationFormProps {
   onUpdate: (org: Organization) => void;
@@ -36,6 +37,8 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
   const popUpContext = usePopUp();
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Add state for logo preview
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -52,6 +55,20 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
       logo: undefined as any,
     }
   });
+
+  const watchLogo = watch('logo');
+
+  // Generate preview when logo changes
+  useEffect(() => {
+    if (watchLogo && watchLogo.length > 0) {
+      const file = watchLogo[0];
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setLogoPreview(null);
+    }
+  }, [watchLogo]);
 
   const handleRegisterOrganization = async (data: Organization) => {
     try {
@@ -180,17 +197,54 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
         <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Logo de la organización (opcional)
         </label>
-        <input
-          type="file"
-          id="logo"
-          accept="image/*"
-          {...register('logo')}
-          ref={e => {
-            register('logo').ref(e);
-            logoInputRef.current = e;
-          }}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+          <div className="space-y-1 text-center w-full">
+            {logoPreview ? (
+              <div className="flex flex-col items-center">
+                <img
+                  src={logoPreview}
+                  alt="Logo Preview"
+                  className="h-40 object-cover rounded-lg shadow-md mb-3"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue('logo', undefined as any);
+                    setLogoPreview(null);
+                    if (logoInputRef.current) logoInputRef.current.value = '';
+                  }}
+                  className="text-sm text-red-600 dark:text-red-400 hover:underline flex items-center gap-1"
+                >
+                  <XIcon className="h-4 w-4" /> Eliminar logo
+                </button>
+              </div>
+            ) : (
+              <>
+                <PhotographIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
+                  <label className="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 focus-within:outline-none">
+                    <span>Subir logo</span>
+                    <input
+                      type="file"
+                      id="logo"
+                      accept="image/*"
+                      {...register('logo')}
+                      ref={e => {
+                        register('logo').ref(e);
+                        logoInputRef.current = e;
+                      }}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="pl-1">o arrastra y suelta</p>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  PNG, JPG, GIF hasta 10MB
+                </p>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Submit Button */}
