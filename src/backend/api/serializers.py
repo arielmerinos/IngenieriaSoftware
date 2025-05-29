@@ -42,13 +42,6 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
-# class ScholarshipSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Scholarship
-#         fields = ["id", "organization", "name", "publication_date", "start_date", "end_date", "type", "image", "content", "categories","created_by","country"]
-#         read_only_fields = ["publication_date", "created_by","id","organization"]
-#         extra_kwargs = {"organization": {"read_only": True}}
-
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Type
@@ -191,7 +184,6 @@ class OrganizationSerializer(serializers.ModelSerializer):
             is_active=True
         )
         return organization
-        
         
 class MembershipSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(read_only=True)  # Nested serializer for output

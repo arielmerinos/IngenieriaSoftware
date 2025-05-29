@@ -27,7 +27,7 @@ class Organization(models.Model):
     email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     website = models.URLField(max_length=200, null=True)
-    logo = models.ImageField(upload_to='logos/', null=True)
+    logo = models.ImageField(upload_to='logos', null=True, blank=True, help_text="Logo of the organization")
     description = models.TextField(blank=True)
     members = models.ManyToManyField(User, through='Membership', related_name='members')
 
