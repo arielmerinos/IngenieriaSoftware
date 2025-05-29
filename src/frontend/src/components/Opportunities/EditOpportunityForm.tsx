@@ -551,10 +551,10 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                         defaultValue={opportunity.organization_id || ''}
                         onChange={e => {
                             const value = e.target.value;
-                            setValue('organization_id', value === "" ? null : parseInt(value));
+                            setValue('organization_id', value === "0" ? null : parseInt(value));
                         }}
                     >
-                        <option value="">Selecciona una organización</option>
+                        <option value="0">Selecciona una organización</option>
                         {memberships.map(m => (
                             <option key={m.organization.id} value={m.organization.id}>
                                 {m.organization.name}
