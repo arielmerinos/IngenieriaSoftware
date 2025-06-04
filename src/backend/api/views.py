@@ -42,8 +42,12 @@ from .models import (
 from .serializers import (
     UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
     MembershipSerializer, CategorySerializer, UserDataSerializer, 
-    TypeSerializer, CountrySerializer, InterestSerializer
+    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer
 )
+
+# Imports de Notifiaciones
+from actstream import action
+from actstream.models import target_stream # Metodo que devuelve las notificaciones del target
 
 class TypeListCreateView(APIView):
     """
@@ -355,6 +359,12 @@ class CreateUserView(generics.CreateAPIView):
         response.data["access"] = access_token
         response.data["refresh"] = refresh_token
 
+        # Enviar notificación de bienvenida
+        action.send(
+            sender=user,
+            verb='createdAccount',
+            target=user)
+        
         return response
 
 class UserDetailView(APIView):
@@ -365,6 +375,37 @@ class UserDetailView(APIView):
         print(user)
         serializer = UserSerializer(user)
         return Response(serializer.data)
+    
+class UserNotificationView(APIView):
+    """
+    Vista para obtener las notificaciones del usuario autenticado.
+    """
+    permission_classes = [IsAuthenticated]
+
+    # def get(self, request):
+    #     user = request.user
+    #     notifications = actor_stream(user)
+    #     notifications = [{
+    #         'actor': str(notification.actor),
+    #         'verb': notification.verb,
+    #         'action_object': str(notification.action_object) if notification.action_object else None,
+    #         'target': str(notification.target) if notification.target else None,
+    #         'timestamp': notification.timestamp.isoformat()
+    #     } for notification in notifications]
+    #     return JsonResponse(notifications, safe=False)
+
+    serializer_class = UserDataSerializer
+
+    def get(self, request):
+        user = request.user
+        # Obtener las notificaciones del usuario
+        notifications = target_stream(user)
+        
+        # Serializar las notificaciones
+        serializer = ActivitySerializer(notifications, many=True)
+        
+        # Retornar las notificaciones serializadas
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 @method_decorator(login_required, name='dispatch')
 class UserTokenView(View):
