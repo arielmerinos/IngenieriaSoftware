@@ -394,8 +394,6 @@ class UserNotificationView(APIView):
     #     } for notification in notifications]
     #     return JsonResponse(notifications, safe=False)
 
-    serializer_class = UserDataSerializer
-
     def get(self, request):
         user = request.user
         # Obtener las notificaciones del usuario
