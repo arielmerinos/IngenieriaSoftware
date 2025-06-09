@@ -72,7 +72,7 @@ export function NotificationsButton() {
         //         console.log("Cargando notificaciones...");
         //         fetchData();
         //     }, 10000); // Cada 10 segundos
-        // }, []);
+        }, []);
 
     return (
         <div ref={ menuRef }>
