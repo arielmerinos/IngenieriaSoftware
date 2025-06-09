@@ -54,7 +54,8 @@ urlpatterns = [
     path('api/', include(router.urls), name='organization-crud'),
     path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
     path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
-    
+
+    # Scholarship views
     path('scholarships/', ScholarshipListView.as_view(), name='scholarship-list'),
     path('scholarships/create/', ScholarshipListCreateView.as_view(), name='scholarship-list-create'),
     path('scholarships/<int:pk>/', ScholarshipDetailView.as_view(), name='scholarship-detail'),

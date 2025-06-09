@@ -42,20 +42,35 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
+# class TypeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Type
+#         fields = ['id', 'name', 'type_name']
+        
+# class CountrySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Country
+#         fields = ['id', 'name', 'emoji']
+    
+# class InterestSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Interest
+#         fields = ['id', 'name', 'color']
+
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Type
-        fields = ['id', 'name', 'type_name']
+        fields = ["id", "name"]
         
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Country
-        fields = ['id', 'name', 'emoji']
+        fields = ["id", "name", "emoji"]
     
 class InterestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interest
-        fields = ['id', 'name', 'color']
+        fields = ["id", "name","color"]
 
 class ScholarshipSerializer(serializers.ModelSerializer):
     # Use TypeSerializer for serialization and PrimaryKeyRelatedField for deserialization
@@ -208,18 +223,5 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ["id", "name"]
 
-class TypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Type
-        fields = ["id", "name"]
-        
-class CountrySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Country
-        fields = ["id", "name", "emoji"]
-    
-class InterestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Interest
-        fields = ["id", "name","color"]
+
 
