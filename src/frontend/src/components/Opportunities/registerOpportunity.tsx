@@ -100,7 +100,7 @@ const RegisterOpportunity: React.FC = () => {
                     fetch('http://localhost:8000/types/', { headers }),
                     fetch('http://localhost:8000/countries/', { headers }),
                     fetch('http://localhost:8000/interests/', { headers }),
-                    fetch(`http://localhost:8000/user/${userId}/memberships/`, { headers }),
+                    fetch(`http://localhost:8000/user/memberships/`, { headers }),
                 ]);
 
                 if (

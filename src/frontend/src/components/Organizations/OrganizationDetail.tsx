@@ -33,10 +33,40 @@ const OrganizationDetail: React.FC = () => {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [adminMembershipsLoading, setAdminMembershipsLoading] = useState<boolean>(true);
   const authContext = useAuth();
+
+  // Función para verificar si el usuario es admin de la organización
+  const checkAdminMembership = async () => {
+    try {
+      const token = authContext.authToken;
+      const response = await apiInstance.get('api/user/admin-memberships/', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      // Verificar si la organización actual está en la lista de memberships admin
+      const adminOrganizations = response.data;
+      const isUserAdmin = adminOrganizations.some((membership: any) => 
+        membership.organization.id === parseInt(id || '0')
+      );
+
+      console.log(adminOrganizations);
+      
+      setIsAdmin(isUserAdmin);
+    } catch (error) {
+      console.error('Error al verificar memberships de admin:', error);
+      setIsAdmin(false);
+    } finally {
+      setAdminMembershipsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
+      // Cargar datos de la organización
       apiInstance
         .get(`api/organizations/${id}/`)
         .then((response: { data: Organization | null }) => {
@@ -47,8 +77,15 @@ const OrganizationDetail: React.FC = () => {
           console.error('Error al obtener la organización:', error);
           setLoading(false);
         });
+
+      // Verificar si el usuario es admin (solo si está autenticado)
+      if (authContext.authToken) {
+        checkAdminMembership();
+      } else {
+        setAdminMembershipsLoading(false);
+      }
     }
-  }, [id]);
+  }, [id, authContext.authToken]);
 
   const handleDelete = () => {
     if (window.confirm('¿Estás seguro de eliminar esta organización?')) {
@@ -80,7 +117,7 @@ const OrganizationDetail: React.FC = () => {
     setEditOpen(false);
   };
 
-  if (loading)
+  if (loading || adminMembershipsLoading)
     return <div className="text-center py-10 text-gray-700 dark:text-gray-300">Cargando...</div>;
   if (!organization)
     return <div className="text-center py-10 text-gray-700 dark:text-gray-300">No se encontró la organización.</div>;
@@ -165,33 +202,35 @@ const OrganizationDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Botones de acción */}
-        <div className="flex justify-center space-x-6 mt-8">
-          <button
-            onClick={() => setEditOpen(true)}
-            className="
-              px-6 py-2 rounded-full shadow
-              bg-blue-600 dark:bg-blue-700
-              text-white
-              hover:bg-blue-700 dark:hover:bg-blue-800
-              transition-colors duration-200
-            "
-          >
-            Editar
-          </button>
-          <button
-            onClick={handleDelete}
-            className="
-              px-6 py-2 rounded-full shadow
-              bg-red-600 dark:bg-red-700
-              text-white
-              hover:bg-red-700 dark:hover:bg-red-800
-              transition-colors duration-200
-            "
-          >
-            Eliminar
-          </button>
-        </div>
+        {/* Botones de acción - Solo mostrar si es admin */}
+        {isAdmin && (
+          <div className="flex justify-center space-x-6 mt-8">
+            <button
+              onClick={() => setEditOpen(true)}
+              className="
+                px-6 py-2 rounded-full shadow
+                bg-blue-600 dark:bg-blue-700
+                text-white
+                hover:bg-blue-700 dark:hover:bg-blue-800
+                transition-colors duration-200
+              "
+            >
+              Editar
+            </button>
+            <button
+              onClick={handleDelete}
+              className="
+                px-6 py-2 rounded-full shadow
+                bg-red-600 dark:bg-red-700
+                text-white
+                hover:bg-red-700 dark:hover:bg-red-800
+                transition-colors duration-200
+              "
+            >
+              Eliminar
+            </button>
+          </div>
+        )}
 
         {/* Sección de Publicaciones (Placeholder) */}
         <div className="mt-10">
@@ -204,8 +243,8 @@ const OrganizationDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal para editar */}
-      {editOpen && organization.id !== undefined && (
+      {/* Modal para editar - Solo mostrar si es admin */}
+      {isAdmin && editOpen && organization.id !== undefined && (
         <PopUpModal onClose={() => setEditOpen(false)}>
           <EditOrganizationForm
             organizationId={organization.id}

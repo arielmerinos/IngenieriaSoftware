@@ -181,11 +181,11 @@ class OrganizationSerializer(serializers.ModelSerializer):
         return organization
         
 class MembershipSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer(read_only=True)  # Nested serializer for output
+    organization = OrganizationSerializer(read_only=True) 
     organization_id = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
-        source='organization',  # Maps to the `organization` field in the model
-        write_only=True  # Only used for input
+        source='organization',  
+        write_only=True  
     )
 
     class Meta:
@@ -194,7 +194,6 @@ class MembershipSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Membership.objects.create(**validated_data)
-    
 
     def delete(self, validated_data):
         Membership.objects.filter(**validated_data).delete()

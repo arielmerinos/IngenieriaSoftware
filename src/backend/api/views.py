@@ -33,6 +33,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.exceptions import PermissionDenied
 
 # Imports nuestros
 from .models import (
@@ -536,21 +537,22 @@ class UserDataListView(APIView):
 ## Vistas de Organización ##
 
 
-class OrganizationViewSet(viewsets.ModelViewSet): # Ala verga esto se hace todo el crud, el parametro nos da el crud
+class OrganizationViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar el CRUD completo de Organizaciones.
     Las operaciones disponibles serán:
       - list: Listar todas las organizaciones
       - create: Crear una nueva organización
       - retrieve: Obtener el detalle de una organización
-      - update: Actualizar completamente una organización
-      - partial_update: Actualizar parcialmente una organización
-      - destroy: Eliminar una organización
+      - update: Actualizar completamente una organización (solo admins)
+      - partial_update: Actualizar parcialmente una organización (solo admins)
+      - destroy: Eliminar una organización (solo admins)
     """
-    queryset = Organization.objects.all() # Queryset para listar todas las organizaciones
-    serializer_class = OrganizationSerializer # Este es el serializer que escribimos nosotros
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
 
-    def get_permissions(self): # esta parte es para poder listar sin estar auth
+    def get_permissions(self):
+        """Definir permisos según la acción"""
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
         else:
@@ -558,9 +560,46 @@ class OrganizationViewSet(viewsets.ModelViewSet): # Ala verga esto se hace todo 
         return [permission() for permission in permission_classes]
 
     def get_serializer_context(self):
+        """Agregar contexto al serializer"""
         context = super().get_serializer_context()
-        context['request'] = self.request  # <-- This line ensures request is available in serializer
+        context['request'] = self.request           
         return context
+
+    def check_admin_permission(self, organization):
+        """
+        Verificar si el usuario actual es admin de la organización
+        """
+        if not self.request.user.is_authenticated:
+            raise PermissionDenied("Debes estar autenticado para realizar esta acción.")
+        
+        # Verificar si el usuario es admin de esta organización
+        is_admin = Membership.objects.filter(
+            user=self.request.user,
+            organization=organization,
+            is_admin=True,
+            is_active=True
+        ).exists()
+        
+        if not is_admin:
+            raise PermissionDenied("No tienes permisos de administrador para esta organización.")
+
+    def update(self, request, *args, **kwargs):
+        """Actualizar completamente una organización (solo admins)"""
+        organization = self.get_object()
+        self.check_admin_permission(organization)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Actualizar parcialmente una organización (solo admins)"""
+        organization = self.get_object()
+        self.check_admin_permission(organization)
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """Eliminar una organización (solo admins)"""
+        organization = self.get_object()
+        self.check_admin_permission(organization)
+        return super().destroy(request, *args, **kwargs)
 
 class JoinOrganizationView(APIView):
     """
@@ -629,15 +668,19 @@ class UserMembershipsView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, user_id):
-        try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response({"error": "El usuario no existe."},
-                            status=status.HTTP_404_NOT_FOUND)
-        
-        # Obtener las memberships donde el usuario es el propietario (foreign key en Membership)
-        memberships = Membership.objects.filter(user=user)
+    def get(self, request):
+        memberships = Membership.objects.filter(user=request.user, is_active=True)
+        serializer = MembershipSerializer(memberships, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UserMembershipAdminView(APIView):
+    """
+    Vista para obtener las memberships de un usuario dado su id, donde es admin.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        memberships = Membership.objects.filter(user=request.user, is_active=True, is_admin=True)
         serializer = MembershipSerializer(memberships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
