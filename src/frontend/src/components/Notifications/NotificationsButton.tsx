@@ -65,12 +65,14 @@ export function NotificationsButton() {
 
             fetchData(); // Primera carga de notificaciones
 
-            // Polling notificaciones
-            setInterval(() => {
-                console.log("Cargando notificaciones...");
-                fetchData();
-            }, 10000); // Cada 10 segundos
-        }, []);
+        // Polling desactivado para la paz mental del autor.
+
+        //     // Polling notificaciones
+        //     setInterval(() => {
+        //         console.log("Cargando notificaciones...");
+        //         fetchData();
+        //     }, 10000); // Cada 10 segundos
+        // }, []);
 
     return (
         <div ref={ menuRef }>
