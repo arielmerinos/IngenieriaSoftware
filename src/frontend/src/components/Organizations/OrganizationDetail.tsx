@@ -27,16 +27,124 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Organization } from '../../models/organization';
 import EditOrganizationForm from './EditOrganizationForm';
 import apiInstance from '../../services/axiosInstance';
+import OpportunityCard from '../Opportunities/OpportunityCard';
+import OpportunityDetails from '../Opportunities/OpportunityDetails';
+import { usePopUp } from '../../contexts/PopUpContext';
+import { OpportunityContent } from '../../types/opportunity';
+import { parseOpportunity } from '../../types/opportunity';
+import { SearchIcon, FilterIcon } from "@heroicons/react/outline";
+
+// Interfaz para los objetos que devuelve la API
+interface ApiObject {
+  id: number;
+  name: string;
+  color?: string;
+}
+
+// Interfaz para las scholarships (basada en tu serializer)
+interface Scholarship {
+  id: number;
+  name: string;
+  content: string;
+  organization: string; // nombre de la organización
+  organization_id: number;
+  publication_date: string;
+  start_date: string;
+  end_date: string;
+  type: (string | ApiObject)[];
+  image?: string;
+  interests: (string | ApiObject)[];
+  created_by: string;
+  country: (string | ApiObject)[];
+}
 
 const OrganizationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [organization, setOrganization] = useState<Organization | null>(null);
+  const [scholarships, setScholarships] = useState<OpportunityContent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [scholarshipsLoading, setScholarshipsLoading] = useState<boolean>(true);
   const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [adminMembershipsLoading, setAdminMembershipsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string>("");
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
+  
   const authContext = useAuth();
+  const popUpContext = usePopUp();
+
+  /**
+   * Abre el Pop Up de la oportunidad que le hace click
+   * @param OpportunityContent de la oportunidad que le hace click
+   */
+  function openPopUp(opportunity: OpportunityContent) {
+    popUpContext?.setContent(<OpportunityDetails item={opportunity} />);
+    popUpContext?.setOpen(true);
+  }
+
+  // Función para verificar si el usuario es admin de la organización
+  const checkAdminMembership = async () => {
+    try {
+      const token = authContext.authToken;
+      const response = await apiInstance.get('api/user/admin-memberships/', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      // Verificar si la organización actual está en la lista de memberships admin
+      const adminOrganizations = response.data;
+      const isUserAdmin = adminOrganizations.some((membership: any) => 
+        membership.organization.id === parseInt(id || '0')
+      );
+      
+      setIsAdmin(isUserAdmin);
+    } catch (error) {
+      console.error('Error al verificar memberships de admin:', error);
+      setIsAdmin(false);
+    } finally {
+      setAdminMembershipsLoading(false);
+    }
+  };
+
+  // Función para cargar las scholarships de la organización
+  const loadScholarships = async () => {
+    try {
+      setScholarshipsLoading(true);
+      setError(null);
+      // Hacer la petición al endpoint correcto con el filtro de organización
+      const response = await apiInstance.get(`scholarships/?organization=${id}`);
+      const rawScholarships = response.data || [];
+      
+      // Convertir las scholarships al formato OpportunityContent usando parseOpportunity
+      const opportunities = rawScholarships.map((item: any) => parseOpportunity(item));
+      setScholarships(opportunities);
+      
+      // Extract all types from opportunities for filtering
+      const types = new Set<string>();
+      opportunities.forEach((opportunity: OpportunityContent) => {
+        if (Array.isArray(opportunity.type)) {
+          opportunity.type.forEach(type => types.add(type));
+        } else if (typeof opportunity.type === 'string') {
+          types.add(opportunity.type);
+        }
+      });
+      setAvailableTypes(Array.from(types));
+      
+    } catch (error) {
+      console.error('Error al cargar las scholarships:', error);
+      setError('No se pudieron cargar las oportunidades. Inténtalo de nuevo más tarde.');
+      setScholarships([]);
+    } finally {
+      setScholarshipsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
+      // Cargar datos de la organización
       apiInstance
         .get(`api/organizations/${id}/`)
         .then((response: { data: Organization | null }) => {
@@ -47,8 +155,18 @@ const OrganizationDetail: React.FC = () => {
           console.error('Error al obtener la organización:', error);
           setLoading(false);
         });
+
+      // Cargar scholarships de la organización
+      loadScholarships();
+
+      // Verificar si el usuario es admin (solo si está autenticado)
+      if (authContext.authToken) {
+        checkAdminMembership();
+      } else {
+        setAdminMembershipsLoading(false);
+      }
     }
-  }, [id]);
+  }, [id, authContext.authToken]);
 
   const handleDelete = () => {
     if (window.confirm('¿Estás seguro de eliminar esta organización?')) {
@@ -80,132 +198,252 @@ const OrganizationDetail: React.FC = () => {
     setEditOpen(false);
   };
 
-  if (loading)
+  // Filter opportunities based on search term and filter type
+  const filteredScholarships = scholarships.filter((opportunity) => {
+    const matchesSearch = searchTerm === "" || 
+      opportunity.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      opportunity.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      opportunity.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      opportunity.author.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesType = filterType === "" || 
+      (Array.isArray(opportunity.type) && opportunity.type.some(type => type.toLowerCase() === filterType.toLowerCase()));
+    
+    return matchesSearch && matchesType;
+  });
+
+  if (loading || adminMembershipsLoading)
     return <div className="text-center py-10 text-gray-700 dark:text-gray-300">Cargando...</div>;
   if (!organization)
     return <div className="text-center py-10 text-gray-700 dark:text-gray-300">No se encontró la organización.</div>;
 
   return (
-    <div className="
-      max-w-5xl mx-auto
-      bg-gray-50 dark:bg-gray-800
-      shadow rounded-lg overflow-hidden
-      transition-colors duration-200
-    ">
-      {/* Encabezado con banner */}
-      <div className="relative">
-        <div className="h-40 bg-blue-600 dark:bg-blue-800"></div>
-        {/* Contenedor del logo */}
-        <div
-          className="
-            absolute left-1/2 top-20
-            md:top-3 lg:top-3
-            w-full max-w-[250px] sm:max-w-xs md:max-w-sm
-            aspect-[4/3]
-            flex items-center justify-center
-            overflow-hidden
-            transform -translate-x-1/2
-          "
-        >
-          <img
-            src={organization.logo || '/default-logo.svg'}
-            alt={organization.name}
-            onError={(e) => { e.currentTarget.src = "/default-logo.svg"; }}
-            className="
-              w-full h-full
-              object-contain
-              object-center
-              rounded-md border-none shadow-md
-            "
-          />
+    <div className="container mx-auto px-4 py-8">
+      {/* Encabezado de la organización - Modificado */}
+      <div className="mb-8">
+        <div className="
+          bg-white dark:bg-gray-800
+          shadow-sm rounded-lg border border-gray-200 dark:border-gray-700
+          overflow-hidden
+          transition-colors duration-200
+        ">
+          {/* Banner superior más sutil */}
+          <div className="relative">
+            <div className="h-32 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700"></div>
+            {/* Logo - Ahora el doble de grande (48x48 -> 96x96) */}
+            <div className="absolute left-8 top-8 w-48 h-48 bg-white dark:bg-gray-800 rounded-lg border-4 border-white dark:border-gray-800 shadow-md overflow-hidden">
+              <img
+                src={organization.logo || '/default-logo.svg'}
+                alt={organization.name}
+                onError={(e) => { e.currentTarget.src = "/default-logo.svg"; }}
+                className="w-full h-full object-contain p-2"
+              />
+            </div>
+          </div>
+
+          {/* Contenido principal - Ajustado para la imagen más grande */}
+          <div className="pt-32 pb-8 px-8">
+            <div className="flex flex-col gap-6">
+              {/* Información básica */}
+              <div className="flex-grow">
+                <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-3">
+                  {organization.name}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-6">
+                  {organization.description}
+                </p>
+
+                {/* Información de contacto en grid horizontal */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div>
+                    <span className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Correo electrónico
+                    </span>
+                    <a 
+                      href={`mailto:${organization.email}`}
+                      className="text-blue-600 dark:text-blue-400 hover:underline"
+                    >
+                      {organization.email}
+                    </a>
+                  </div>
+                  <div>
+                    <span className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Teléfono
+                    </span>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {organization.phone_number || 'No especificado'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                      Sitio Web
+                    </span>
+                    {organization.website ? (
+                      <a
+                        href={organization.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        Visitar sitio web
+                      </a>
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400">No especificado</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Botones de acción - Ahora debajo de los medios de contacto, en la esquina derecha */}
+                {isAdmin && (
+                  <div className="flex justify-end">
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setEditOpen(true)}
+                        className="
+                          px-6 py-2 rounded-lg
+                          bg-blue-600 dark:bg-blue-700
+                          text-white font-medium
+                          hover:bg-blue-700 dark:hover:bg-blue-800
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                          transition-colors duration-200
+                          border border-transparent
+                        "
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={handleDelete}
+                        className="
+                          px-6 py-2 rounded-lg
+                          bg-red-600 dark:bg-red-700
+                          text-white font-medium
+                          hover:bg-red-700 dark:hover:bg-red-800
+                          focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+                          transition-colors duration-200
+                          border border-transparent
+                        "
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Contenido del perfil */}
-      <div className="pt-40 pb-8 px-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
-            {organization.name}
-          </h1>
-          <p className="mt-3 max-w-3xl mx-auto text-gray-700 dark:text-gray-300">
-            {organization.description}
-          </p>
-        </div>
-
-        {/* Información detallada */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-gray-200 dark:border-gray-700 pt-6">
+      {/* Sección de Oportunidades */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <span className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-              Correo
-            </span>
-            <p className="text-gray-800 dark:text-gray-200">
-              {organization.email}
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Oportunidades de {organization.name}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              {scholarships.length} {scholarships.length === 1 ? 'oportunidad disponible' : 'oportunidades disponibles'}
             </p>
           </div>
-          <div>
-            <span className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-              Teléfono
-            </span>
-            <p className="text-gray-800 dark:text-gray-200">
-              {organization.phone_number || 'No especificado'}
-            </p>
+        </div>
+        
+        {/* Search and filter section - Solo mostrar si hay oportunidades */}
+        {scholarships.length > 0 && (
+          <div className="flex flex-col md:flex-row gap-4 mb-8">
+            {/* Search bar */}
+            <div className="relative flex-grow">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <SearchIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Buscar oportunidades..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            {/* Type filter */}
+            {availableTypes.length > 0 && (
+              <div className="relative w-full md:w-64">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FilterIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <select
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                >
+                  <option value="">Todos los tipos</option>
+                  {availableTypes.map((type, index) => (
+                    <option key={index} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
-          <div>
-            <span className="block text-sm font-medium text-gray-600 dark:text-gray-400">
-              Sitio Web
-            </span>
-            <a
-              href={organization.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              {organization.website}
-            </a>
-          </div>
-        </div>
-
-        {/* Botones de acción */}
-        <div className="flex justify-center space-x-6 mt-8">
-          <button
-            onClick={() => setEditOpen(true)}
-            className="
-              px-6 py-2 rounded-full shadow
-              bg-blue-600 dark:bg-blue-700
-              text-white
-              hover:bg-blue-700 dark:hover:bg-blue-800
-              transition-colors duration-200
-            "
-          >
-            Editar
-          </button>
-          <button
-            onClick={handleDelete}
-            className="
-              px-6 py-2 rounded-full shadow
-              bg-red-600 dark:bg-red-700
-              text-white
-              hover:bg-red-700 dark:hover:bg-red-800
-              transition-colors duration-200
-            "
-          >
-            Eliminar
-          </button>
-        </div>
-
-        {/* Sección de Publicaciones (Placeholder) */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 text-center">
-            Publicaciones
-          </h2>
-          <p className="mt-3 text-gray-500 dark:text-gray-400 text-center">
-            Próximamente se mostrarán las publicaciones de la organización.
-          </p>
-        </div>
+        )}
       </div>
 
-      {/* Modal para editar */}
-      {editOpen && organization.id !== undefined && (
+      {/* Loading state */}
+      {scholarshipsLoading && (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && (
+        <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg mb-6">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {/* No results state */}
+      {!scholarshipsLoading && !error && scholarships.length === 0 && (
+        <div className="text-center py-12 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <div className="text-gray-400 mb-4">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
+            No hay oportunidades disponibles
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            Esta organización aún no tiene oportunidades publicadas.
+          </p>
+        </div>
+      )}
+
+      {/* Filtered no results state */}
+      {!scholarshipsLoading && !error && scholarships.length > 0 && filteredScholarships.length === 0 && (
+        <div className="text-center py-12">
+          <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
+            No se encontraron oportunidades
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            Intenta con otros términos de búsqueda o quita los filtros.
+          </p>
+        </div>
+      )}
+
+      {/* Opportunities grid */}
+      {!scholarshipsLoading && !error && filteredScholarships.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+          {filteredScholarships.map((opportunity, index) => (
+            <div onClick={() => openPopUp(opportunity)} key={opportunity.id || index}>
+              <OpportunityCard item={opportunity} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal para editar - Solo mostrar si es admin */}
+      {isAdmin && editOpen && organization.id !== undefined && (
         <PopUpModal onClose={() => setEditOpen(false)}>
           <EditOrganizationForm
             organizationId={organization.id}

@@ -33,6 +33,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.exceptions import PermissionDenied
 
 # Imports nuestros
 from .models import (
@@ -251,91 +252,91 @@ class InterestDetailView(APIView):
         interest.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class ScholarshipDetailView(APIView):
-    """
-    Vista para recuperar, actualizar o eliminar una beca específica.
-    GET: Obtener detalle de una beca
-    PUT: Actualizar una beca completa
-    PATCH: Actualizar parcialmente una beca
-    DELETE: Eliminar una beca
-    """
-    permission_classes = [permissions.IsAuthenticated]
+# class ScholarshipDetailView(APIView):
+#     """
+#     Vista para recuperar, actualizar o eliminar una beca específica.
+#     GET: Obtener detalle de una beca
+#     PUT: Actualizar una beca completa
+#     PATCH: Actualizar parcialmente una beca
+#     DELETE: Eliminar una beca
+#     """
+#     permission_classes = [permissions.IsAuthenticated]
     
-    def get_object(self, pk):
-        """Obtener objeto de beca por ID"""
-        return get_object_or_404(Scholarship, pk=pk)
+#     def get_object(self, pk):
+#         """Obtener objeto de beca por ID"""
+#         return get_object_or_404(Scholarship, pk=pk)
     
-    def check_permission(self, scholarship, user):
-        """Verificar si el usuario tiene permiso para modificar la beca"""
-        # El creador de la beca siempre puede modificarla
-        if scholarship.created_by == user:
-            return True
+#     def check_permission(self, scholarship, user):
+#         """Verificar si el usuario tiene permiso para modificar la beca"""
+#         # El creador de la beca siempre puede modificarla
+#         if scholarship.created_by == user:
+#             return True
             
-        # Si la beca pertenece a una organización, verificar si el usuario es admin
-        if scholarship.organization:
-            is_admin = Membership.objects.filter(
-                user=user,
-                organization=scholarship.organization,
-                is_admin=True,
-                is_active=True
-            ).exists()
-            return is_admin
+#         # Si la beca pertenece a una organización, verificar si el usuario es admin
+#         if scholarship.organization:
+#             is_admin = Membership.objects.filter(
+#                 user=user,
+#                 organization=scholarship.organization,
+#                 is_admin=True,
+#                 is_active=True
+#             ).exists()
+#             return is_admin
             
-        return False
+#         return False
     
-    def get(self, request, pk):
-        """Obtener detalle de una beca específica"""
-        scholarship = self.get_object(pk)
-        serializer = ScholarshipSerializer(scholarship)
-        return Response(serializer.data)
+#     def get(self, request, pk):
+#         """Obtener detalle de una beca específica"""
+#         scholarship = self.get_object(pk)
+#         serializer = ScholarshipSerializer(scholarship)
+#         return Response(serializer.data)
     
-    def put(self, request, pk):
-        """Actualizar una beca completa"""
-        scholarship = self.get_object(pk)
+#     def put(self, request, pk):
+#         """Actualizar una beca completa"""
+#         scholarship = self.get_object(pk)
         
-        # Verificar permisos
-        if not self.check_permission(scholarship, request.user):
-            return Response(
-                {"error": "No tienes permiso para modificar esta beca."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+#         # Verificar permisos
+#         if not self.check_permission(scholarship, request.user):
+#             return Response(
+#                 {"error": "No tienes permiso para modificar esta beca."},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
         
-        serializer = ScholarshipSerializer(scholarship, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         serializer = ScholarshipSerializer(scholarship, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def patch(self, request, pk):
-        """Actualizar parcialmente una beca"""
-        scholarship = self.get_object(pk)
+#     def patch(self, request, pk):
+#         """Actualizar parcialmente una beca"""
+#         scholarship = self.get_object(pk)
         
-        # Verificar permisos
-        if not self.check_permission(scholarship, request.user):
-            return Response(
-                {"error": "No tienes permiso para modificar esta beca."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+#         # Verificar permisos
+#         if not self.check_permission(scholarship, request.user):
+#             return Response(
+#                 {"error": "No tienes permiso para modificar esta beca."},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
         
-        serializer = ScholarshipSerializer(scholarship, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         serializer = ScholarshipSerializer(scholarship, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def delete(self, request, pk):
-        """Eliminar una beca"""
-        scholarship = self.get_object(pk)
+#     def delete(self, request, pk):
+#         """Eliminar una beca"""
+#         scholarship = self.get_object(pk)
         
-        # Verificar permisos
-        if not self.check_permission(scholarship, request.user):
-            return Response(
-                {"error": "No tienes permiso para eliminar esta beca."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+#         # Verificar permisos
+#         if not self.check_permission(scholarship, request.user):
+#             return Response(
+#                 {"error": "No tienes permiso para eliminar esta beca."},
+#                 status=status.HTTP_403_FORBIDDEN
+#             )
         
-        scholarship.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+#         scholarship.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 ### Vistas de la API ###
 
@@ -421,11 +422,11 @@ class UserTokenView(View):
             'refresh_token': refresh_token
         })
 
-class ScholarshipListView(APIView):
-    def get(self, request):
-        scholarships = Scholarship.objects.all()
-        serializer = ScholarshipSerializer(scholarships, many=True)
-        return Response(serializer.data)
+# class ScholarshipListView(APIView):
+#     def get(self, request):
+#         scholarships = Scholarship.objects.all()
+#         serializer = ScholarshipSerializer(scholarships, many=True)
+#         return Response(serializer.data)
     
 class ScholarshipListCreateView(APIView):
     """
@@ -560,8 +561,23 @@ class ScholarshipDetailView(APIView):
 
 class ScholarshipListView(APIView):
     permission_classes = [AllowAny]
+    
     def get(self, request):
-        scholarship_data = Scholarship.objects.all()
+        # Obtener el parámetro de organización si existe
+        organization_id = request.query_params.get('organization', None)
+        
+        # Filtrar scholarships
+        if organization_id:
+            # Verificar que la organización existe
+            organization = get_object_or_404(Organization, id=organization_id)
+            scholarship_data = Scholarship.objects.filter(organization=organization)
+        else:
+            # Si no hay filtro, devolver todas
+            scholarship_data = Scholarship.objects.all()
+        
+        # Ordenar por fecha de publicación (más recientes primero)
+        scholarship_data = scholarship_data.order_by('-publication_date')
+        
         serializer = ScholarshipSerializer(scholarship_data, many=True)
         return Response(serializer.data)
 
@@ -575,21 +591,22 @@ class UserDataListView(APIView):
 ## Vistas de Organización ##
 
 
-class OrganizationViewSet(viewsets.ModelViewSet): # Ala verga esto se hace todo el crud, el parametro nos da el crud
+class OrganizationViewSet(viewsets.ModelViewSet):
     """
     ViewSet para gestionar el CRUD completo de Organizaciones.
     Las operaciones disponibles serán:
       - list: Listar todas las organizaciones
       - create: Crear una nueva organización
       - retrieve: Obtener el detalle de una organización
-      - update: Actualizar completamente una organización
-      - partial_update: Actualizar parcialmente una organización
-      - destroy: Eliminar una organización
+      - update: Actualizar completamente una organización (solo admins)
+      - partial_update: Actualizar parcialmente una organización (solo admins)
+      - destroy: Eliminar una organización (solo admins)
     """
-    queryset = Organization.objects.all() # Queryset para listar todas las organizaciones
-    serializer_class = OrganizationSerializer # Este es el serializer que escribimos nosotros
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationSerializer
 
-    def get_permissions(self): # esta parte es para poder listar sin estar auth
+    def get_permissions(self):
+        """Definir permisos según la acción"""
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
         else:
@@ -597,9 +614,46 @@ class OrganizationViewSet(viewsets.ModelViewSet): # Ala verga esto se hace todo 
         return [permission() for permission in permission_classes]
 
     def get_serializer_context(self):
+        """Agregar contexto al serializer"""
         context = super().get_serializer_context()
-        context['request'] = self.request  # <-- This line ensures request is available in serializer
+        context['request'] = self.request           
         return context
+
+    def check_admin_permission(self, organization):
+        """
+        Verificar si el usuario actual es admin de la organización
+        """
+        if not self.request.user.is_authenticated:
+            raise PermissionDenied("Debes estar autenticado para realizar esta acción.")
+        
+        # Verificar si el usuario es admin de esta organización
+        is_admin = Membership.objects.filter(
+            user=self.request.user,
+            organization=organization,
+            is_admin=True,
+            is_active=True
+        ).exists()
+        
+        if not is_admin:
+            raise PermissionDenied("No tienes permisos de administrador para esta organización.")
+
+    def update(self, request, *args, **kwargs):
+        """Actualizar completamente una organización (solo admins)"""
+        organization = self.get_object()
+        self.check_admin_permission(organization)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Actualizar parcialmente una organización (solo admins)"""
+        organization = self.get_object()
+        self.check_admin_permission(organization)
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """Eliminar una organización (solo admins)"""
+        organization = self.get_object()
+        self.check_admin_permission(organization)
+        return super().destroy(request, *args, **kwargs)
 
 class JoinOrganizationView(APIView):
     """
@@ -668,15 +722,19 @@ class UserMembershipsView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, user_id):
-        try:
-            user = User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            return Response({"error": "El usuario no existe."},
-                            status=status.HTTP_404_NOT_FOUND)
-        
-        # Obtener las memberships donde el usuario es el propietario (foreign key en Membership)
-        memberships = Membership.objects.filter(user=user)
+    def get(self, request):
+        memberships = Membership.objects.filter(user=request.user, is_active=True)
+        serializer = MembershipSerializer(memberships, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class UserMembershipAdminView(APIView):
+    """
+    Vista para obtener las memberships de un usuario dado su id, donde es admin.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        memberships = Membership.objects.filter(user=request.user, is_active=True, is_admin=True)
         serializer = MembershipSerializer(memberships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     

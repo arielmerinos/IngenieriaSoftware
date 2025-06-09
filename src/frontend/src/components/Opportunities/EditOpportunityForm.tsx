@@ -127,7 +127,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                     fetch('http://localhost:8000/countries/', { headers }),
                     fetch('http://localhost:8000/interests/', { headers }),
                     fetch(`http://localhost:8000/scholarships/${opportunity.id}/`, { headers }),
-                    user ? fetch(`http://localhost:8000/user/${user.id}/memberships/`, { headers }) : Promise.resolve({ ok: false })
+                    user ? fetch(`http://localhost:8000/user/memberships/`, { headers }) : Promise.resolve({ ok: false })
                 ]);
 
                 if (

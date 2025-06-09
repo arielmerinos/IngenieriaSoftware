@@ -32,7 +32,8 @@ from api.views import (
     TypeListCreateView, TypeDetailView,
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
-    OrganizationViewSet, UserNotificationView
+    OrganizationViewSet, UserMembershipAdminView, 
+    UserNotificationView
 )
 
 # Nueva manera de agregar rutas hechas automaticamente
@@ -51,12 +52,11 @@ urlpatterns = [
     path("api/", include("api.urls")),
 
     # Organization views
-    # path("organizations/all/", OrganizationListView.as_view(), name="organization-list"),
-    # path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
+    path('api/', include(router.urls), name='organization-crud'),
     path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
     path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
-    path('api/', include(router.urls)), # esto nos da CRUD de orgs
-    
+
+    # Scholarship views
     path('scholarships/', ScholarshipListView.as_view(), name='scholarship-list'),
     path('scholarships/create/', ScholarshipListCreateView.as_view(), name='scholarship-list-create'),
     path('scholarships/<int:pk>/', ScholarshipDetailView.as_view(), name='scholarship-detail'),
@@ -73,9 +73,10 @@ urlpatterns = [
     path('interests/', InterestListCreateView.as_view(), name='interest-list-create'),
     path('interests/<int:pk>/', InterestDetailView.as_view(), name='interest-detail'),
 
-    # Endpoints utiles 
-    path('user/<int:user_id>/memberships/', UserMembershipsView.as_view(), name='user-memberships'),
-
+    # Endpoints para memberships
+    path('user/memberships/', UserMembershipsView.as_view(), name='user-memberships'),
+    path('api/user/admin-memberships/', UserMembershipAdminView.as_view(), name='user-memberships'),
+    
     # Endpoints para notificaciones
     path('user/notifications/', UserNotificationView.as_view(), name='user-notifications'),
 
