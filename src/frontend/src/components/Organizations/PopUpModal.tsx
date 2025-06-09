@@ -91,7 +91,7 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
       <div 
         ref={modalRef}
         onWheel={handleWheel}
-        className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg shadow-xl bg-gray-50 dark:bg-gray-800 transition-colors duration-200 scroll-smooth"
+        className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg shadow-xl transition-colors duration-200 scroll-smooth"
       >
         {children}
       </div>
