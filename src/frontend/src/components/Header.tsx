@@ -26,7 +26,7 @@ import LoginModal from './auth/LoginModal';
 import { useAuth } from "../contexts/AuthContext";
 import UserMenu from './UserMenu';
 import ThemeToggleButton from './ThemeToggleButton';
-
+import { NotificationsButton } from './Notifications/NotificationsButton';
 const Header: React.FC = () => {
   const { isAuthenticated } = useAuth();
   
@@ -52,7 +52,10 @@ const Header: React.FC = () => {
           
           {/* Menú de usuario o modal de login */}
           {isAuthenticated ? (
-            <UserMenu />
+            <div className="flex items-center space-x-4">
+              <NotificationsButton />
+              <UserMenu />
+            </div>
           ) : (
             <LoginModal />
           )}

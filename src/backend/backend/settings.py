@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "social_django",
+    'actstream',
 ]
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID')
@@ -206,3 +207,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://0.0.0.0:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+SITE_ID = 1 # Ni idea pero actstream lo pide ¯\_(ツ)_/¯
+
+ACTSTREAM_SETTINGS = {
+    'FETCH_RELATIONS': True,
+    'USE_PREFETCH': True,
+    # 'USE_JSONFIELD': True,
+    'GFK_FETCH_DEPTH': 1,
+}

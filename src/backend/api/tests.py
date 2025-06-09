@@ -443,3 +443,51 @@ class MembershipSerializerTest(TestCase):
             'is_active': True
         }
         self.assertEqual(serialized_membership, expected_output)
+
+class NotificationTest(TestCase):
+    from actstream import action
+    from actstream.models import target_stream
+    from .serializers import ActivitySerializer
+    
+    def setUp(self):
+
+        self.user = User.objects.create_user(
+            username ='idonotexist',
+            password = 'idontexist123',
+            email = 'idonot@exist.com'
+        )
+
+
+    def test_user_send_notification(self):
+
+        notifications = self.target_stream(self.user)
+        self.assertEqual(len(notifications), 0)
+
+        self.action.send(
+            sender = self.user,
+            verb = 'test notification',
+            target = self.user,
+        )
+
+        notifications = self.target_stream(self.user)
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].verb, 'test notification')
+    
+    def test_notification_serializer(self):
+
+        self.action.send(
+            sender = self.user,
+            verb = 'new test notification',
+            target = self.user,
+        )
+
+        notification = self.ActivitySerializer(self.target_stream(self.user), many=True).data[0]
+
+        print("notification", notification)
+
+
+        self.assertEqual(notification["actor"]["name"], self.user.username)
+        self.assertEqual(notification["actor"]["type"], "User")
+        self.assertEqual(notification["target"]["name"], self.user.username)
+        self.assertEqual(notification["target"]["type"], "User")
+        self.assertEqual(notification["verb"], 'new test notification')

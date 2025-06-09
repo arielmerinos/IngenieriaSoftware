@@ -31,6 +31,9 @@ from .models.type import Type
 from .models.country import Country
 from .models.interests import Interest
 
+# Imports de Notificaciones
+from actstream.models import Action # Es el modelo de los cosos que crea actstream
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -224,3 +227,35 @@ class InterestSerializer(serializers.ModelSerializer):
         model = Interest
         fields = ["id", "name","color"]
 
+class ActivitySerializer(serializers.ModelSerializer):
+
+    actor = serializers.SerializerMethodField()
+    target = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Action # Es el modelo de los cosos que crea actstream
+        fields = ['id', 'actor', 'target', 'verb', 'timestamp']
+    
+    def get_actor(self, obj):
+        if obj.actor:
+            return {
+                'id': obj.actor.id,
+                'type': obj.actor.__class__.__name__,
+                'name':
+                    obj.actor.username if hasattr(obj.actor, 'username') else
+                    "Name Not Available due to actor type."
+            }
+        return None
+
+    def get_target(self, obj):
+
+        if obj.target:
+            return {
+                'id': obj.target.id,
+                'type': obj.target.__class__.__name__,
+                'name':
+                    obj.target.username if obj.target.__class__.__name__ == "User" else 
+                    obj.target.name if obj.target.__class__.__name__ == "Organization" else
+                    "Name Not Available due to target type."
+            }
+        return None
