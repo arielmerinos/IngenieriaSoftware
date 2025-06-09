@@ -73,7 +73,7 @@ const UserMenu: React.FC = () => {
             </button>
 
             {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 border border-gray-100 dark:border-gray-700">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-100 dark:border-gray-700">
                     <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-600">
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user?.username}</p>
                         {user?.username && (

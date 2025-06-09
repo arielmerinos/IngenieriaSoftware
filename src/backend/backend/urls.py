@@ -32,7 +32,8 @@ from api.views import (
     TypeListCreateView, TypeDetailView,
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
-    OrganizationViewSet, UserMembershipAdminView
+    OrganizationViewSet, UserMembershipAdminView, 
+    UserNotificationView
 )
 
 # Nueva manera de agregar rutas hechas automaticamente
@@ -74,5 +75,9 @@ urlpatterns = [
 
     # Endpoints para memberships
     path('user/memberships/', UserMembershipsView.as_view(), name='user-memberships'),
-    path('api/user/admin-memberships/', UserMembershipAdminView.as_view(), name='user-memberships')
+    path('api/user/admin-memberships/', UserMembershipAdminView.as_view(), name='user-memberships'),
+    
+    # Endpoints para notificaciones
+    path('user/notifications/', UserNotificationView.as_view(), name='user-notifications'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
