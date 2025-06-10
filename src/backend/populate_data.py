@@ -16,6 +16,10 @@ from api.models.user_data import UserData
 def populate_data():
     print('Cargando datos iniciales...')
     
+    # Limpiar datos existentes
+    clear_data()
+    print('Datos existentes eliminados(Tipo de becas, paises e intereses).')
+
     # Crear tipos de becas
     create_scholarship_types()
     
@@ -30,10 +34,25 @@ def populate_data():
     
     print('Datos iniciales cargados correctamente.')
 
+def clear_data():
+    print('Eliminando datos existentes...')
+    
+    # Eliminar todos los tipos de becas
+    Type.objects.all().delete()
+    print('- Todos los tipos de becas han sido eliminados')
+    
+    # Eliminar todos los países
+    Country.objects.all().delete()
+    print('- Todos los países han sido eliminados')
+    
+    # Eliminar todos los intereses
+    Interest.objects.all().delete()
+    print('- Todos los intereses han sido eliminados')
+
 def create_scholarship_types():
     # Definir tipos de becas
     types_data = [
-        {'name': 'Beca completa', 'type_name': Type.BECA},
+        {'name': 'Beca', 'type_name': Type.BECA},
         {'name': 'Maestría', 'type_name': Type.MAESTRIA},
         {'name': 'Doctorado', 'type_name': Type.DOCTORADO},
         {'name': 'Postdoc', 'type_name': Type.POSTDOC},
@@ -78,6 +97,25 @@ def create_countries():
         {'name': 'Japón', 'emoji': 'JP'},
         {'name': 'Australia', 'emoji': 'AU'},
         {'name': 'Brasil', 'emoji': 'BR'},
+        {'name': 'Argentina', 'emoji': 'AR'},
+        {'name': 'Chile', 'emoji': 'CL'},
+        {'name': 'Colombia', 'emoji': 'CO'},
+        {'name': 'Perú', 'emoji': 'PE'},
+        {'name': 'Italia', 'emoji': 'IT'},
+        {'name': 'Países Bajos', 'emoji': 'NL'},
+        {'name': 'Suecia', 'emoji': 'SE'},
+        {'name': 'Suiza', 'emoji': 'CH'},
+        {'name': 'Noruega', 'emoji': 'NO'},
+        {'name': 'Finlandia', 'emoji': 'FI'},
+        {'name': 'Dinamarca', 'emoji': 'DK'},
+        {'name': 'Polonia', 'emoji': 'PL'},
+        {'name': 'Rusia', 'emoji': 'RU'},
+        {'name': 'India', 'emoji': 'IN'},
+        {'name': 'China', 'emoji': 'CN'},
+        {'name': 'Corea del Sur', 'emoji': 'KR'},
+        {'name': 'Sudáfrica', 'emoji': 'ZA'},
+        {'name': 'Nueva Zelanda', 'emoji': 'NZ'},
+        {'name': 'Otro', 'emoji': '🌍'}
     ]
     
     for country_data in countries_data:
@@ -101,6 +139,22 @@ def create_interests():
         {'name': 'Derecho', 'color': '#34495e'},
         {'name': 'Educación', 'color': '#7f8c8d'},
         {'name': 'Ciencias Sociales', 'color': '#d35400'},
+        {'name': 'Ciencias Naturales', 'color': '#c0392b'},
+        {'name': 'Matemáticas', 'color': '#8e44ad'},
+        {'name': 'Física', 'color': '#2980b9'},
+        {'name': 'Química', 'color': '#27ae60'},
+        {'name': 'Biología', 'color': '#f39c12'},
+        {'name': 'Psicología', 'color': '#2c3e50'},
+        {'name': 'Sociología', 'color': '#16a085'},
+        {'name': 'Antropología', 'color': '#d35400'},
+        {'name': 'Historia', 'color': '#c0392b'},
+        {'name': 'Literatura', 'color': '#8e44ad'},
+        {'name': 'Filosofía', 'color': '#2980b9'},
+        {'name': 'Lingüística', 'color': '#27ae60'},
+        {'name': 'Ecología', 'color': '#f39c12'},
+        {'name': 'Astronomía', 'color': '#2c3e50'},
+        {'name': 'Geografía', 'color': '#16a085'},
+        {'name': 'Otro', 'color': '#7f8c8d'}
     ]
     
     for interest_data in interests_data:
