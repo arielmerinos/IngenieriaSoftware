@@ -33,6 +33,7 @@ import {
     PencilIcon,
     TrashIcon
 } from '@heroicons/react/outline';
+import { CommentSection } from './Comments/CommentSection';
 
 const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
     const { user } = useAuth();
@@ -205,6 +206,9 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Comments section */}
+            <CommentSection opportunityId={item.id} />
 
             {/* Action buttons */}
             {user?.username === item.author && (
