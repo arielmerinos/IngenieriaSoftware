@@ -307,13 +307,6 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
         >
             <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Editar Convocatoria</h2>
-                <button 
-                    type="button" 
-                    onClick={() => popUpContext.setOpen(false)}
-                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                    <XIcon className="h-5 w-5" />
-                </button>
             </div>
             
             {serverError && (
