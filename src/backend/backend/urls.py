@@ -33,7 +33,7 @@ from api.views import (
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
     OrganizationViewSet, UserMembershipAdminView, 
-    UserNotificationView
+    UserNotificationView, CommentView
 )
 
 # Nueva manera de agregar rutas hechas automaticamente
@@ -79,5 +79,8 @@ urlpatterns = [
     
     # Endpoints para notificaciones
     path('user/notifications/', UserNotificationView.as_view(), name='user-notifications'),
+
+    # Endpoints para comentarios
+    path('scholarships/<int:pk>/comment/', CommentView.as_view(), name='scholarship-comments'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

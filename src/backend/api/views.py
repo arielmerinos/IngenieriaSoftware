@@ -40,10 +40,13 @@ from .models import (
     Scholarship, UserData, Organization, Membership, Category,
     Type, Country, Interest
 )
+
+from .models.scholarship import Comment
+
 from .serializers import (
     UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
     MembershipSerializer, CategorySerializer, UserDataSerializer, 
-    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer
+    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, CommentSerializer
 )
 
 # Imports de Notifiaciones
@@ -755,3 +758,53 @@ class TypeListView(APIView):
         types = Type.objects.all()
         serializer = TypeSerializer(types, many=True)
         return Response(serializer.data)
+
+class CommentView(APIView):
+    """
+    Vista para comentarios en una beca.
+    
+    PUT: Crear un nuevo comentario.
+
+    GET: Listar todos los comentarios de una beca.
+    """
+
+    def put(self, request, pk):
+
+        scholarship = get_object_or_404(Scholarship, pk=pk)
+
+        content = request.data.get("content")
+        
+        if not content:
+            return Response({"error": "El contenido del comentario es obligatorio."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        comment = Comment.objects.create(
+            scholarship=scholarship,
+            user=request.user,
+            content=content
+        )
+
+        serializer = CommentSerializer(comment)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get(self, request, pk):
+
+        scholarship = get_object_or_404(Scholarship, pk=pk)
+        
+        comments = Comment.objects.filter(scholarship=scholarship)
+        
+        serializer = CommentSerializer(comments, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def get_permissions(self):
+        """
+        Define los permisos para cada vista.
+        Se pueden ver los comentarios de una beca sin autenticación,
+        pero para crear un comentario se requiere autenticación.
+        """
+        if self.request.method in ['GET']:
+            return [permissions.AllowAny()]
+        
+        return [permissions.IsAuthenticated()]
+
