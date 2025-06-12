@@ -19,7 +19,7 @@ COPY package*.json ./
 
 # Instalar dependencias y corregir vulnerabilidades
 RUN npm install
-RUN npm audit fix
+#RUN npm audit fix
 
 # Generar el archivo de configuración de Tailwind
 RUN npx tailwindcss init -p

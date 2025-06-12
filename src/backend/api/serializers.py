@@ -158,7 +158,7 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserData
-        fields = ["id", "history_search", "interests", "phone_number", "birthday", "user", "memberships", "history_search"]
+        fields = ["id", "history_search", "interests", "phone_number", "birthday", "user", "memberships", "history_search", "photo"]
         read_only_fields = ["user", "id"]
         extra_kwargs = {"user": {"read_only": True}}
         
@@ -260,3 +260,10 @@ class ActivitySerializer(serializers.ModelSerializer):
                     "Name Not Available due to target type."
             }
         return None
+
+class PublicUserProfileSerializer(serializers.ModelSerializer):
+    student = UserDataSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'student']
