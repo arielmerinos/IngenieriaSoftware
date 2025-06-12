@@ -22,7 +22,7 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 import { Comment } from "../../../types/comment"
 import { UserIcon, ClockIcon } from '@heroicons/react/outline';
 
-export function CommentCard({ comment }: { comment: Comment }) {
+export function CommentCard({ comment, op }: { comment: Comment, op  : boolean }) {
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('es-ES', {
@@ -41,6 +41,7 @@ export function CommentCard({ comment }: { comment: Comment }) {
             <b className="text-sm flex items-center gap-1">
                 <UserIcon className="h-4 w-4"/>
                 {comment.author}
+                { op && <p className="text-xs">(OP)</p> }
                 <div className="text-xs flex gap-1 w-full justify-end">
                 {formatDate(comment.createdAt)}
                 <ClockIcon className="h-4 w-4"/>

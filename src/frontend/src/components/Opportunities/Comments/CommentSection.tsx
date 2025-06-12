@@ -26,13 +26,13 @@ import { CommentCard } from "./CommentCard";
 import { useAuth } from "../../../contexts/AuthContext";
 import { PaperAirplaneIcon } from '@heroicons/react/outline';
 import { useForm } from "react-hook-form";
-import { register } from "module";
+import { OpportunityContent } from "../../../types/opportunity";
 
 interface FormData {
     content: string
 }
 
-export function CommentSection( { opportunityId }: { opportunityId: number } ) {
+export function CommentSection( { opportunityContent }: { opportunityContent: OpportunityContent } ) {
 
     const { register, handleSubmit, reset, formState: { isValid } } = useForm<FormData>({ mode: 'onChange' });
     const authContext = useAuth();
@@ -45,7 +45,7 @@ export function CommentSection( { opportunityId }: { opportunityId: number } ) {
         }
 
         apiInstance.put(
-            `scholarships/${ opportunityId }/comment/`,
+            `scholarships/${ opportunityContent.id }/comment/`,
             { content: data.content },
             { headers: { 'Authorization': `Bearer ${ authContext.authToken }` } }
         )
@@ -62,7 +62,7 @@ export function CommentSection( { opportunityId }: { opportunityId: number } ) {
     }
 
     useEffect(() => {
-        apiInstance.get(`scholarships/${ opportunityId }/comment/`)
+        apiInstance.get(`scholarships/${ opportunityContent.id }/comment/`)
             .then(response => {
                 console.log("Comentarios:", response.data);
                 setComments(response.data.map((comment: any) => parseComment(comment)));
@@ -78,7 +78,7 @@ export function CommentSection( { opportunityId }: { opportunityId: number } ) {
             { comments.length > 0 ?
                 <div>
                     { comments.map((comment : Comment) => (
-                        <CommentCard key={ comment.id } comment={ comment } />
+                        <CommentCard key={ comment.id } comment={ comment }  op={opportunityContent.author == comment.author} />
                     )) }
                 </div>
                 : (
