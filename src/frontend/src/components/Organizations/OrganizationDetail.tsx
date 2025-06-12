@@ -32,7 +32,9 @@ import OpportunityDetails from '../Opportunities/OpportunityDetails';
 import { usePopUp } from '../../contexts/PopUpContext';
 import { OpportunityContent } from '../../types/opportunity';
 import { parseOpportunity } from '../../types/opportunity';
-import { SearchIcon, FilterIcon } from "@heroicons/react/outline";
+import { SearchIcon, FilterIcon, StarIcon } from "@heroicons/react/outline";
+import { StarIcon as StarIconSolid } from "@heroicons/react/solid";
+import PromoteInOrg from './PromoteInOrg'; // Import the new component
 
 // Interfaz para los objetos que devuelve la API
 interface ApiObject {
@@ -58,6 +60,16 @@ interface Scholarship {
   country: (string | ApiObject)[];
 }
 
+// Interfaz para la respuesta de membership
+interface Membership {
+  id: number;
+  user: number;
+  organization: Organization;
+  organization_id: number;
+  is_admin: boolean;
+  is_active: boolean;
+}
+
 const OrganizationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -65,12 +77,18 @@ const OrganizationDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [scholarshipsLoading, setScholarshipsLoading] = useState<boolean>(true);
   const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [promoteOpen, setPromoteOpen] = useState<boolean>(false); // New state for PromoteInOrg pop-up
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminMembershipsLoading, setAdminMembershipsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("");
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
+  
+  // Estados para el seguimiento
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const [followLoading, setFollowLoading] = useState<boolean>(false);
+  const [followError, setFollowError] = useState<string | null>(null);
   
   const authContext = useAuth();
   const popUpContext = usePopUp();
@@ -83,6 +101,67 @@ const OrganizationDetail: React.FC = () => {
     popUpContext?.setContent(<OpportunityDetails item={opportunity} />);
     popUpContext?.setOpen(true);
   }
+
+  // Función para verificar si el usuario sigue la organización
+  const checkFollowStatus = async () => {
+    if (!authContext.authToken || !id) return;
+    
+    try {
+      const token = authContext.authToken;
+      const response = await apiInstance.get('user/memberships/', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      // Buscar si existe una membership activa con esta organización
+      const memberships = response.data;
+      const currentMembership = memberships.find((membership: any) => 
+        membership.organization.id === parseInt(id)
+      );
+      
+      if (currentMembership) {
+        setIsFollowing(currentMembership.is_active);
+      }
+    } catch (error) {
+      console.error('Error al verificar estado de seguimiento:', error);
+    }
+  };
+
+  // Función para alternar el seguimiento
+  const toggleFollow = async () => {
+    if (!authContext.authToken || !id) return;
+    
+    setFollowLoading(true);
+    setFollowError(null);
+    
+    try {
+      const token = authContext.authToken;
+      const response = await apiInstance.post(
+        'organization/follow/',
+        { organization_id: parseInt(id) },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      // Actualizar el estado basado en la respuesta
+      const membership: Membership = response.data;
+      setIsFollowing(membership.is_active);
+      
+    } catch (error: any) {
+      console.error('Error al seguir/dejar de seguir organización:', error);
+      setFollowError(
+        error.response?.data?.error || 
+        'Error al procesar la solicitud. Inténtalo de nuevo.'
+      );
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   // Función para verificar si el usuario es admin de la organización
   const checkAdminMembership = async () => {
@@ -162,6 +241,7 @@ const OrganizationDetail: React.FC = () => {
       // Verificar si el usuario es admin (solo si está autenticado)
       if (authContext.authToken) {
         checkAdminMembership();
+        checkFollowStatus();
       } else {
         setAdminMembershipsLoading(false);
       }
@@ -230,6 +310,38 @@ const OrganizationDetail: React.FC = () => {
           {/* Banner superior más sutil */}
           <div className="relative">
             <div className="h-32 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700"></div>
+            
+            {/* Botón de seguir - Posicionado en la esquina superior derecha del banner */}
+            {authContext.authToken && (
+              <div className="absolute top-4 right-4">
+                <button
+                  onClick={toggleFollow}
+                  disabled={followLoading}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
+                    ${followLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                    ${isFollowing 
+                      ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg' 
+                      : 'bg-white/90 hover:bg-white text-gray-700 border border-white/20 backdrop-blur-sm'
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2
+                  `}
+                  title={isFollowing ? 'Dejar de seguir' : 'Seguir organización'}
+                >
+                  {followLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current"></div>
+                  ) : isFollowing ? (
+                    <StarIconSolid className="h-5 w-5" />
+                  ) : (
+                    <StarIcon className="h-5 w-5" />
+                  )}
+                  <span className="text-sm">
+                    {followLoading ? 'Cargando...' : isFollowing ? 'Siguiendo' : 'Seguir'}
+                  </span>
+                </button>
+              </div>
+            )}
+            
             {/* Logo - Ahora el doble de grande (48x48 -> 96x96) */}
             <div className="absolute left-8 top-8 w-48 h-48 bg-white dark:bg-gray-800 rounded-lg border-4 border-white dark:border-gray-800 shadow-md overflow-hidden">
               <img
@@ -240,6 +352,13 @@ const OrganizationDetail: React.FC = () => {
               />
             </div>
           </div>
+
+          {/* Mostrar error de seguimiento si existe */}
+          {followError && (
+            <div className="mx-8 mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg text-sm">
+              {followError}
+            </div>
+          )}
 
           {/* Contenido principal - Ajustado para la imagen más grande */}
           <div className="pt-32 pb-8 px-8">
@@ -294,8 +413,24 @@ const OrganizationDetail: React.FC = () => {
                 </div>
 
                 {/* Botones de acción - Ahora debajo de los medios de contacto, en la esquina derecha */}
-                {isAdmin && (
-                  <div className="flex justify-end">
+                {authContext.authToken && isAdmin && (
+                  <div className="flex justify-between items-end"> {/* Use justify-between to push buttons to ends */}
+                    {/* New Promote Button - Left aligned */}
+                    <button
+                      onClick={() => setPromoteOpen(true)}
+                      className="
+                        px-6 py-2 rounded-lg
+                        bg-green-600 dark:bg-green-700
+                        text-white font-medium
+                        hover:bg-green-700 dark:hover:bg-green-800
+                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+                        transition-colors duration-200
+                        border border-transparent
+                      "
+                    >
+                      Administradores
+                    </button>
+                    {/* Existing Edit and Delete Buttons - Right aligned */}
                     <div className="flex gap-3">
                       <button
                         onClick={() => setEditOpen(true)}
@@ -456,6 +591,13 @@ const OrganizationDetail: React.FC = () => {
             }}
             onUpdated={handleEditUpdated}
           />
+        </PopUpModal>
+      )}
+
+      {/* New Modal for PromoteInOrg - Only show if isAdmin */}
+      {isAdmin && promoteOpen && (
+        <PopUpModal onClose={() => setPromoteOpen(false)}>
+          <PromoteInOrg organizationId={organization.id} onClose={() => setPromoteOpen(false)} />
         </PopUpModal>
       )}
     </div>

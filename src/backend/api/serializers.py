@@ -45,21 +45,6 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
-# class TypeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Type
-#         fields = ['id', 'name', 'type_name']
-        
-# class CountrySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Country
-#         fields = ['id', 'name', 'emoji']
-    
-# class InterestSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Interest
-#         fields = ['id', 'name', 'color']
-
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Type
@@ -200,6 +185,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         
 class MembershipSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(read_only=True) 
+    user = UserSerializer(read_only=True)
     organization_id = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         source='organization',  

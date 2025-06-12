@@ -76,7 +76,7 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
       (scrollTop === 0 && e.deltaY < 0) ||
       (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0)
     ) {
-      e.preventDefault();
+      // e.preventDefault();
     }
   };
 
@@ -91,7 +91,15 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
       <div 
         ref={modalRef}
         onWheel={handleWheel}
-        className="relative w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg shadow-xl transition-colors duration-200 scroll-smooth"
+        className="
+          relative
+          w-full max-w-xl mx-2
+          max-h-[90vh] overflow-y-auto
+          rounded-lg shadow-xl
+          bg-white border-none
+          dark:bg-gray-800
+          transition-colors duration-200 scroll-smooth
+        "
       >
         {children}
       </div>
@@ -100,3 +108,4 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
 };
 
 export default PopUpModal;
+
