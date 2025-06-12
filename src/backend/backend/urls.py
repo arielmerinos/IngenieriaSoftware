@@ -80,4 +80,8 @@ urlpatterns = [
     # Endpoints para notificaciones
     path('user/notifications/', UserNotificationView.as_view(), name='user-notifications'),
 
+    #endpointss para el perfil de usuario
+    path('api/user/<int:id>/profile/', PublicUserProfileView.as_view(), name='public-user-profile'),
+    path('api/user/photo/', UpdateProfilePhotoView.as_view(), name='update-profile-photo'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -43,7 +43,7 @@ from .models import (
 from .serializers import (
     UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
     MembershipSerializer, CategorySerializer, UserDataSerializer, 
-    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer
+    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, PublicUserProfileSerializer
 )
 
 # Imports de Notifiaciones
@@ -755,3 +755,26 @@ class TypeListView(APIView):
         types = Type.objects.all()
         serializer = TypeSerializer(types, many=True)
         return Response(serializer.data)
+
+
+class PublicUserProfileView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, id):
+        user = get_object_or_404(User, id=id)
+        serializer = PublicUserProfileSerializer(user)
+        return Response(serializer.data)
+
+
+class UpdateProfilePhotoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user_data = request.user.student
+        photo = request.FILES.get('photo')
+        if not photo:
+            return Response({"error": "No se proporcionó ninguna imagen."}, status=400)
+
+        user_data.photo = photo
+        user_data.save()
+        return Response({"message": "Foto actualizada correctamente."})
