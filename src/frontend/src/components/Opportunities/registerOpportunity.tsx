@@ -171,7 +171,7 @@ const RegisterOpportunity: React.FC = () => {
             }
 
             // Send request to server
-            const response = await fetch('http://localhost:8000/scholarships/create/', {
+            const response = await fetch('http://is.arielmerinos.com/scholarships/create/', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`,
