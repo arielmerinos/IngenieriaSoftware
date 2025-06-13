@@ -61,13 +61,18 @@ const Opportunities: React.FC = () => {
                 return response.json();
             })
             .then((items) => {
+                console.log("Oportunidades obtenidas:", items);
                 const opportunities = items.map((item: any) => parseOpportunity(item));
+                console.log("Oportunidades parseadas:", opportunities);
                 cardsContext?.setElems(opportunities);
                 
                 // Extract all types from opportunities for filtering
                 const types = new Set<string>();
                 opportunities.forEach((opportunity: OpportunityContent) => {
-                    opportunity.type.forEach(type => types.add(type));
+                    opportunity.type.forEach(type => {
+                        types.add(type);
+                        console.log("Tipo encontrado:", type);
+                    });
                 });
                 setAvailableTypes(Array.from(types));
                 
