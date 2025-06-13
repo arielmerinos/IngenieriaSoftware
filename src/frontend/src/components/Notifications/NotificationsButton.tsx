@@ -70,7 +70,7 @@ export function NotificationsButton() {
 
             fetchData(); // Primera carga de notificaciones
 
-        // Polling desactivado para la paz mental del autor.
+        // Polling desactivado para la paz mental del autor JAJAJAJAJAAJJA.
 
         //     // Polling notificaciones
         //     setInterval(() => {

@@ -29,5 +29,4 @@ export const FEATURED_ITEMS: FeaturedItem[] = [
       category: "Herramientas",
       date: "Abierto hasta Mar 31, 25",
       image: "/excel-course.jpg"
-    },
-  ];
+    }  ];

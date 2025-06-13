@@ -44,11 +44,9 @@ function OpportunityFeed() {
   return (
     <section className="w-full min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <Suspense fallback={<Loader />}>
-        {/* GridProvider must be before PopUpProvider so PopUp can see the grid */}
         <GridProvider>
           <PopUpProvider>
             <div className="container mx-auto px-4 py-6">
-              {/* Only show the create button if authenticated */}
               {authContext.isAuthenticated && <OpportunitiesButton />}
               <Opportunities />
             </div>
