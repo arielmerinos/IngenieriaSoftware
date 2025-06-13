@@ -38,7 +38,7 @@ const OpportunitiesSection: React.FC = () => {
   const popUpContext = usePopUp();
 
   useEffect(() => {
-    fetch("http://localhost:8000/scholarships/")
+    fetch("http://in.arielmerinos.com/scholarships/")
       .then((res) => {
         if (!res.ok) throw new Error("No se pudieron cargar las oportunidades");
         return res.json();
