@@ -25,6 +25,8 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { usePopUp } from '../../contexts/PopUpContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Organization } from '../../models/organization';
+import React, { useRef, useState, useEffect } from 'react';
+import { PhotographIcon, XIcon } from '@heroicons/react/outline';
 
 export interface RegisterOrganizationFormProps {
   onUpdate: (org: Organization) => void;
@@ -33,11 +35,15 @@ export interface RegisterOrganizationFormProps {
 export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormProps) {
   const authContext = useAuth();
   const popUpContext = usePopUp();
-  
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid }
+    formState: { errors, isValid },
+    setValue,
+    watch,
   } = useForm<Organization>({
     mode: 'onChange',
     defaultValues: {
@@ -45,9 +51,23 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
       email: '',
       website: '',
       description: '',
+      logo: undefined as any,
     }
   });
-    
+
+  const watchLogo = watch('logo');
+
+  useEffect(() => {
+    if (watchLogo && watchLogo.length > 0) {
+      const file = watchLogo[0];
+      const reader = new FileReader();
+      reader.onloadend = () => setLogoPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setLogoPreview(null);
+    }
+  }, [watchLogo]);
+
   const handleRegisterOrganization = async (data: Organization) => {
     try {
       const token = authContext.authToken;
@@ -55,34 +75,43 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
         console.error("No se encontró token de autenticación.");
         return;
       }
-    
+
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      formData.append('website', data.website);
+      formData.append('description', data.description || '');
+      if (data.logo && data.logo[0]) {
+        formData.append('logo', data.logo[0]);
+      }
+
       const response = await apiInstance.post(
         "api/organizations/",
-        data,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
       );
-    
+
       console.log("Organización creada exitosamente:", response.data);
-      
+
       onUpdate(response.data);
-      
+
       popUpContext.setOpen(false);
     } catch (error) {
       console.error("Error al registrar la organización:", error);
     }
   };
-    
+
   const submitHandler: SubmitHandler<Organization> = async (data: Organization) => {
     await handleRegisterOrganization(data);
   };
-  
+
   return (
-    <form onSubmit={handleSubmit(submitHandler)} className="space-y-6 bg-white dark:bg-gray-800 rounded-xl p-6">
+    <form onSubmit={handleSubmit(submitHandler)} className="space-y-6 bg-white dark:bg-gray-800 rounded-xl p-6" encType="multipart/form-data">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Registro de Organización</h2>
@@ -132,7 +161,6 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
           Sitio Web
         </label>
         <input
-          // type="url"
           id="website"
           placeholder="https://www.miempresa.com"
           {...register('website', {
@@ -161,6 +189,61 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
         />
       </div>
   
+      {/* Logo Field */}
+      <div>
+        <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Logo de la organización (opcional)
+        </label>
+        <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+          <div className="space-y-1 text-center w-full">
+            {logoPreview ? (
+              <div className="flex flex-col items-center">
+                <img
+                  src={logoPreview}
+                  alt="Logo Preview"
+                  className="h-40 object-cover rounded-lg shadow-md mb-3"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setValue('logo', undefined as any);
+                    setLogoPreview(null);
+                    if (logoInputRef.current) logoInputRef.current.value = '';
+                  }}
+                  className="text-sm text-red-600 dark:text-red-400 hover:underline flex items-center gap-1"
+                >
+                  <XIcon className="h-4 w-4" /> Eliminar logo
+                </button>
+              </div>
+            ) : (
+              <>
+                <PhotographIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="flex text-sm text-gray-600 dark:text-gray-400 justify-center">
+                  <label className="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 focus-within:outline-none">
+                    <span>Subir logo</span>
+                    <input
+                      type="file"
+                      id="logo"
+                      accept="image/*"
+                      {...register('logo')}
+                      ref={e => {
+                        register('logo').ref(e);
+                        logoInputRef.current = e;
+                      }}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="pl-1">o arrastra y suelta</p>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  PNG, JPG, GIF hasta 10MB
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Submit Button */}
       <div className="flex justify-end pt-4">
       <button

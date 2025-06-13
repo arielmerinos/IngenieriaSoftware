@@ -26,7 +26,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 import json
 from datetime import date, timedelta
-from .models.scholarship import Scholarship
+from .models.scholarship import Scholarship, Comment
 from .models.type import Type
 from .models.country import Country
 from .models.interests import Interest
@@ -385,61 +385,91 @@ class OrganizationSerializerTest(TestCase):
         serializer = OrganizationSerializer(data=data_invalida, context=self.context)
         self.assertFalse(serializer.is_valid())
         self.assertIn('name', serializer.errors)
-
-
-class MembershipSerializerTest(TestCase):
-    def setUp(self):
-        # Usuario y organización para probar Membership
-        self.user = User.objects.create_user(
-            username='memberuser',
-            password='pass123',
-            email='member@example.com'
-        )
-        self.organization = Organization.objects.create(
-            name='testorg',
-            email='unam@gmail.com',
-            website='http://unam.com.mx',
-            description='testorg description',
-            phone_number='7774761814',
-            logo='/media/logos/IMG_0587.jpeg'
-        )
-        # Datos iniciales para la membresía
-        self.membership_data = {
-            'user': self.user.id,
-            'organization_id': self.organization.id,
-            'is_admin': True,
-            'is_active': True
-        }
         
-    def test_membership_serializer_creacion(self):
-        print("Membership Data:", self.membership_data)
-        serializer = MembershipSerializer(data=self.membership_data)
-        self.assertTrue(serializer.is_valid(), serializer.errors)
-        membership = serializer.save()
 
-        # Verificar los datos de la membresía
-        self.assertEqual(membership.user, self.user)
-        self.assertEqual(membership.organization, self.organization)
-        self.assertTrue(membership.is_admin)
-        self.assertTrue(membership.is_active)
+class NotificationTest(TestCase):
+    from actstream import action
+    from actstream.models import target_stream
+    from .serializers import ActivitySerializer
+    
+    def setUp(self):
 
-        # Serializar la membresía creada
-        serialized_membership = MembershipSerializer(membership).data
+        self.user = User.objects.create_user(
+            username ='idonotexist',
+            password = 'idontexist123',
+            email = 'idonot@exist.com'
+        )
 
-        # Verificar la salida serializada
-        expected_output = {
-            'id': membership.id,
-            'user': self.user.id,
-            'organization': {
-                'id': self.organization.id,
-                'name': self.organization.name,
-                'email': self.organization.email,
-                'website': self.organization.website,
-                'description': self.organization.description,
-                'phone_number': self.organization.phone_number,
-                'logo': self.organization.logo.url if self.organization.logo else None,  # Use the URL of the logo
-            },
-            'is_admin': True,
-            'is_active': True
+
+    def test_user_send_notification(self):
+
+        notifications = self.target_stream(self.user)
+        self.assertEqual(len(notifications), 0)
+
+        self.action.send(
+            sender = self.user,
+            verb = 'test notification',
+            target = self.user,
+        )
+
+        notifications = self.target_stream(self.user)
+        self.assertEqual(len(notifications), 1)
+        self.assertEqual(notifications[0].verb, 'test notification')
+    
+    def test_notification_serializer(self):
+
+        self.action.send(
+            sender = self.user,
+            verb = 'new test notification',
+            target = self.user,
+        )
+
+        notification = self.ActivitySerializer(self.target_stream(self.user), many=True).data[0]
+
+        print("notification", notification)
+
+
+        self.assertEqual(notification["actor"]["name"], self.user.username)
+        self.assertEqual(notification["actor"]["type"], "User")
+        self.assertEqual(notification["target"]["name"], self.user.username)
+        self.assertEqual(notification["target"]["type"], "User")
+        self.assertEqual(notification["verb"], 'new test notification')
+
+class CommentTest(TestCase):
+
+    def setUp(self):
+
+        self.user = User.objects.create_user(
+            username='commenter',
+            password='commenter123'
+            )
+        
+        self.scholarship = Scholarship.objects.create(
+            name='Scholarship for Testing',
+            start_date=date.today(),
+            end_date=date.today() + timedelta(days=30),
+            content='This is a test scholarship.',
+            created_by=self.user,
+            organization=None
+        )
+
+    def test_create_comment(self):
+
+        comments = Comment.objects.filter(scholarship=self.scholarship)
+
+        self.assertEqual(comments.count(), 0)
+
+        comment_data = {
+            'scholarship': self.scholarship,
+            'user': self.user,
+            'content': 'This is a test comment.'
         }
-        self.assertEqual(serialized_membership, expected_output)
+
+        serializer = Comment.objects.create(**comment_data)
+
+        # Verificar que el comentario se haya creado correctamente
+        self.assertEqual(serializer.scholarship, self.scholarship)
+        self.assertEqual(serializer.user, self.user)
+        self.assertEqual(serializer.content, 'This is a test comment.')
+        self.assertIsNotNone(serializer.created_at)
+        self.assertEqual(comments.count(), 1)

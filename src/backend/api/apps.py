@@ -23,3 +23,15 @@ from django.apps import AppConfig
 class ApiConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'api'
+
+    def ready(self):
+        from django.contrib.auth.models import User
+        from api.models.organization import Organization
+        from api.models.scholarship import Scholarship, Comment
+        from actstream import registry
+        
+        # Es necesario regstrar los modelos relacionados a las notificaciones
+        registry.register(User)
+        registry.register(Organization)
+        registry.register(Scholarship)
+        registry.register(Comment)

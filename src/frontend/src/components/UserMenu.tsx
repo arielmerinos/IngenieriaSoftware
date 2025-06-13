@@ -23,6 +23,7 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 // src/components/UserMenu.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const UserMenu: React.FC = () => {
     const { user, logout } = useAuth();
@@ -73,14 +74,16 @@ const UserMenu: React.FC = () => {
             </button>
 
             {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 border border-gray-100 dark:border-gray-700">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-100 dark:border-gray-700">
                     <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-600">
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user?.username}</p>
                         {user?.username && (
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.username}</p>
                         )}
                     </div>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mi perfil</a>
+                    <Link to={`/user/${user?.id}`} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        Mi Perfil
+                    </Link>
                     <a href="#" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Configuración</a>
                     <button
                         onClick={handleLogout}

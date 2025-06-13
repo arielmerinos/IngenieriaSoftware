@@ -12,7 +12,8 @@ import {
     TagIcon,
     GlobeAltIcon,
     HeartIcon,
-    XIcon
+    XIcon,
+    OfficeBuildingIcon // Use this icon instead of BuildingOffice2Icon
 } from '@heroicons/react/outline';
 
 interface FormData {
@@ -25,12 +26,13 @@ interface FormData {
     interests: number[];
     created_by: number;
     country: number[];
+    organization?: number;
 }
 
 const RegisterOpportunity: React.FC = () => {
     const { register, handleSubmit, control, formState: { errors, isValid }, getValues, setValue, watch } = 
         useForm<FormData>({ mode: 'onChange' });
-    
+
     const [opportunityTypes, setOpportunityTypes] = useState<{ id: number, name: string }[]>([]);
     const [countries, setCountries] = useState<{ id: number; name: string, emoji: string }[]>([]);
     const [interests, setInterests] = useState<{ id: number; name: string, color: string }[]>([]);
@@ -38,9 +40,11 @@ const RegisterOpportunity: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    
     const watchImageField = watch("image");
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+    // 👉 Add memberships state here:
+    const [memberships, setMemberships] = useState<{ id: number, organization: { id: number, name: string } }[]>([]);
 
     const gridContext = useGrid();
     const popUpContext = usePopUp();
@@ -73,9 +77,10 @@ const RegisterOpportunity: React.FC = () => {
             try {
                 setLoading(true);
                 setError(null);
-                
+
                 const token = authContext.authToken;
-                if (!token) {
+                const userId = authContext.user?.id;
+                if (!token || !userId) {
                     setError('No se ha iniciado sesión');
                     return;
                 }
@@ -85,27 +90,37 @@ const RegisterOpportunity: React.FC = () => {
                     'Content-Type': 'application/json',
                 };
 
-                // Using Promise.all to parallelize the requests
-                const [typesResponse, countriesResponse, interestsResponse] = await Promise.all([
+                // Add memberships fetch to Promise.all
+                const [
+                    typesResponse,
+                    countriesResponse,
+                    interestsResponse,
+                    membershipsResponse
+                ] = await Promise.all([
                     fetch('http://localhost:8000/types/', { headers }),
                     fetch('http://localhost:8000/countries/', { headers }),
                     fetch('http://localhost:8000/interests/', { headers }),
+                    fetch(`http://localhost:8000/user/memberships/`, { headers }),
                 ]);
 
-                // Check if all requests were successful
-                if (!typesResponse.ok || !countriesResponse.ok || !interestsResponse.ok) {
+                if (
+                    !typesResponse.ok ||
+                    !countriesResponse.ok ||
+                    !interestsResponse.ok ||
+                    !membershipsResponse.ok
+                ) {
                     throw new Error('Error al obtener datos del servidor');
                 }
 
-                // Parse the responses
                 const typesData = await typesResponse.json();
                 const countriesData = await countriesResponse.json();
                 const interestsData = await interestsResponse.json();
+                const membershipsData = await membershipsResponse.json();
 
-                // Set the data in state
                 setOpportunityTypes(typesData);
                 setCountries(countriesData);
                 setInterests(interestsData);
+                setMemberships(membershipsData);
 
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -116,7 +131,7 @@ const RegisterOpportunity: React.FC = () => {
         };
 
         fetchData();
-    }, [authContext.authToken]);
+    }, [authContext.authToken, authContext.user?.id]);
 
     const submitHandler: SubmitHandler<FormData> = async (data) => {
         try {
@@ -148,6 +163,11 @@ const RegisterOpportunity: React.FC = () => {
             // Add image if selected
             if (data.image && data.image.length > 0) {
                 formData.append('image', data.image[0]);
+            }
+
+            // Add organization if selected
+            if (data.organization) {
+                formData.append('organization_id', data.organization.toString());
             }
 
             // Send request to server
@@ -446,6 +466,28 @@ const RegisterOpportunity: React.FC = () => {
                     Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples opciones
                 </p>
                 {errors.country && <span className="text-red-500 text-sm block">{errors.country.message}</span>}
+            </div>
+
+            {/* Organization Field */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Organización <span className="text-gray-400 text-xs">(opcional)</span>
+                </label>
+                <div className="relative">
+                    <OfficeBuildingIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <select
+                        {...register('organization')}
+                        className="w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    >
+                        <option value="">Selecciona una organización</option>
+                        {memberships.map(m => (
+                            <option key={m.organization.id} value={m.organization.id}>
+                                {m.organization.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                {/* No required error message since it's optional */}
             </div>
 
             {/* Submit Button */}

@@ -27,12 +27,15 @@ from rest_framework.routers import DefaultRouter
 
 from api.views import (
     CreateUserView, UserDetailView, UserMembershipsView, UserTokenView,
-    ScholarshipListView, JoinOrganizationView, AcceptMembershipView,
+    ScholarshipListView, FollowOrganizationView, ToggleAdminStatusView,
     ScholarshipListCreateView, ScholarshipDetailView, 
     TypeListCreateView, TypeDetailView,
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
-    OrganizationViewSet  
+    OrganizationViewSet, UserMembershipAdminView, 
+    UserNotificationView, PublicUserProfileView,
+    UserNotificationView, OrganizationMembershipsView,
+    CommentView, CommentEditView
 )
 
 # Nueva manera de agregar rutas hechas automaticamente
@@ -51,12 +54,12 @@ urlpatterns = [
     path("api/", include("api.urls")),
 
     # Organization views
-    # path("organizations/all/", OrganizationListView.as_view(), name="organization-list"),
-    # path("organization/create/", OrganizationCreateView.as_view(), name='organization-create'),
-    path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
-    path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
-    path('api/', include(router.urls)), # esto nos da CRUD de orgs
-    
+    path('api/', include(router.urls), name='organization-crud'),   
+    path('organization/follow/', FollowOrganizationView.as_view(), name='organization-follow'),
+    path('memberships/toggle-admin/', ToggleAdminStatusView.as_view(), name='organization-promote-toggle'),
+    path('api/organizations/<int:organization_id>/memberships/', OrganizationMembershipsView.as_view(), name='organization-memberships'),
+
+    # Scholarship views
     path('scholarships/', ScholarshipListView.as_view(), name='scholarship-list'),
     path('scholarships/create/', ScholarshipListCreateView.as_view(), name='scholarship-list-create'),
     path('scholarships/<int:pk>/', ScholarshipDetailView.as_view(), name='scholarship-detail'),
@@ -73,6 +76,18 @@ urlpatterns = [
     path('interests/', InterestListCreateView.as_view(), name='interest-list-create'),
     path('interests/<int:pk>/', InterestDetailView.as_view(), name='interest-detail'),
 
-    # Endpoints utiles 
-    path('user/<int:user_id>/memberships/', UserMembershipsView.as_view(), name='user-memberships'),
+    # Endpoints para memberships
+    path('user/memberships/', UserMembershipsView.as_view(), name='user-memberships'),
+    path('api/user/admin-memberships/', UserMembershipAdminView.as_view(), name='user-memberships'),
+    
+    # Endpoints para notificaciones
+    path('user/notifications/', UserNotificationView.as_view(), name='user-notifications'),
+
+    #endpointss para el perfil de usuario
+    path('api/user/<int:id>/profile/', PublicUserProfileView.as_view(), name='public-user-profile'),
+
+    # Endpoints para comentarios
+    path('scholarships/<int:pk>/comment/', CommentView.as_view(), name='scholarship-comments'),
+    path('comment/<int:pk>', CommentEditView.as_view(), name='comment-operations'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

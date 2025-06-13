@@ -34,12 +34,12 @@ if (!rootElement) throw new Error('No se encontró el elemento root');
 
 createRoot(rootElement).render(
   <StrictMode>
-      <AuthProvider>
-    <ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-    </ThemeProvider>
-      </AuthProvider>
+      </ThemeProvider>
+    </AuthProvider>
   </StrictMode>
 );

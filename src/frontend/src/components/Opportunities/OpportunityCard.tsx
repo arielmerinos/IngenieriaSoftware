@@ -81,17 +81,19 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                 {/* Content section */}
                 <div className='p-5 flex flex-col flex-grow text-left'>
                     {/* Organization or author */}
-                    {item.organization ? (
-                        <div className='flex items-center mb-2'>
-                            <GlobeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 mr-1" />
-                            <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{item.organization}</p>
-                        </div>
-                    ) : (
-                        <div className='flex items-center mb-2'>
-                            <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" />
-                            <p className='text-sm text-gray-600 dark:text-gray-400'>{item.author}</p>
-                        </div>
-                    )}
+                    <div className='flex items-center mb-2'>
+                        {item.organization ? (
+                            <>
+                                <GlobeIcon className="h-4 w-4 text-blue-500 dark:text-blue-400 mr-1" />
+                                <p className='text-sm font-medium text-blue-600 dark:text-blue-400'>{item.organization}</p>
+                            </>
+                        ) : (
+                            <>
+                                <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-1" />
+                                <p className='text-sm text-gray-600 dark:text-gray-400'>{item.author}</p>
+                            </>
+                        )}
+                    </div>
                     
                     {/* Title */}
                     <h2 className="font-bold text-lg mb-3 text-gray-800 dark:text-white">
