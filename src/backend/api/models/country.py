@@ -22,8 +22,7 @@ from django.db import models
 from .category import Category
 
 """
-Each country will have a name and an emoji to represent it. Extends from Category
-to be able to filter scholarships by country.
+Cada país tiene un emoji que lo representa, por ejemplo, 🇲🇽 para México.
 """
 class Country(Category):
     emoji = models.CharField(max_length=8) #this will be used to represent country flags

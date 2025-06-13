@@ -257,91 +257,6 @@ class InterestDetailView(APIView):
         interest.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-# class ScholarshipDetailView(APIView):
-#     """
-#     Vista para recuperar, actualizar o eliminar una beca específica.
-#     GET: Obtener detalle de una beca
-#     PUT: Actualizar una beca completa
-#     PATCH: Actualizar parcialmente una beca
-#     DELETE: Eliminar una beca
-#     """
-#     permission_classes = [permissions.IsAuthenticated]
-    
-#     def get_object(self, pk):
-#         """Obtener objeto de beca por ID"""
-#         return get_object_or_404(Scholarship, pk=pk)
-    
-#     def check_permission(self, scholarship, user):
-#         """Verificar si el usuario tiene permiso para modificar la beca"""
-#         # El creador de la beca siempre puede modificarla
-#         if scholarship.created_by == user:
-#             return True
-            
-#         # Si la beca pertenece a una organización, verificar si el usuario es admin
-#         if scholarship.organization:
-#             is_admin = Membership.objects.filter(
-#                 user=user,
-#                 organization=scholarship.organization,
-#                 is_admin=True,
-#                 is_active=True
-#             ).exists()
-#             return is_admin
-            
-#         return False
-    
-#     def get(self, request, pk):
-#         """Obtener detalle de una beca específica"""
-#         scholarship = self.get_object(pk)
-#         serializer = ScholarshipSerializer(scholarship)
-#         return Response(serializer.data)
-    
-#     def put(self, request, pk):
-#         """Actualizar una beca completa"""
-#         scholarship = self.get_object(pk)
-        
-#         # Verificar permisos
-#         if not self.check_permission(scholarship, request.user):
-#             return Response(
-#                 {"error": "No tienes permiso para modificar esta beca."},
-#                 status=status.HTTP_403_FORBIDDEN
-#             )
-        
-#         serializer = ScholarshipSerializer(scholarship, data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-#     def patch(self, request, pk):
-#         """Actualizar parcialmente una beca"""
-#         scholarship = self.get_object(pk)
-        
-#         # Verificar permisos
-#         if not self.check_permission(scholarship, request.user):
-#             return Response(
-#                 {"error": "No tienes permiso para modificar esta beca."},
-#                 status=status.HTTP_403_FORBIDDEN
-#             )
-        
-#         serializer = ScholarshipSerializer(scholarship, data=request.data, partial=True)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-#     def delete(self, request, pk):
-#         """Eliminar una beca"""
-#         scholarship = self.get_object(pk)
-        
-#         # Verificar permisos
-#         if not self.check_permission(scholarship, request.user):
-#             return Response(
-#                 {"error": "No tienes permiso para eliminar esta beca."},
-#                 status=status.HTTP_403_FORBIDDEN
-#             )
-        
-#         scholarship.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 ### Vistas de la API ###
 
@@ -388,17 +303,6 @@ class UserNotificationView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    # def get(self, request):
-    #     user = request.user
-    #     notifications = actor_stream(user)
-    #     notifications = [{
-    #         'actor': str(notification.actor),
-    #         'verb': notification.verb,
-    #         'action_object': str(notification.action_object) if notification.action_object else None,
-    #         'target': str(notification.target) if notification.target else None,
-    #         'timestamp': notification.timestamp.isoformat()
-    #     } for notification in notifications]
-    #     return JsonResponse(notifications, safe=False)
 
     def get(self, request):
         user = request.user
@@ -429,11 +333,6 @@ class UserTokenView(View):
             'refresh_token': refresh_token
         })
 
-# class ScholarshipListView(APIView):
-#     def get(self, request):
-#         scholarships = Scholarship.objects.all()
-#         serializer = ScholarshipSerializer(scholarships, many=True)
-#         return Response(serializer.data)
     
 class ScholarshipListCreateView(APIView):
     """
@@ -456,23 +355,7 @@ class ScholarshipListCreateView(APIView):
         serializer = ScholarshipSerializer(data=request.data)
         
         if serializer.is_valid():
-        #     # Verificar si se especificó una organización
-        #     organization_id = request.data.get('organization')
-            
-        #     # Si se especificó organización, verificar que el usuario pertenezca a ella
-        #     if organization_id:
-        #         # Verificar que el usuario es miembro activo de la organización
-        #         is_member = Membership.objects.filter(
-        #             user=request.user,
-        #             organization_id=organization_id,
-        #             is_active=True
-        #         ).exists()
-                
-        #         if not is_member:
-        #             return Response(
-        #                 {"error": "No tienes permiso para crear becas para esta organización."},
-        #                 status=status.HTTP_403_FORBIDDEN
-        #             )
+
             
             # Guardar la beca con el usuario actual como creador
             scholarship = serializer.save(created_by=request.user)
