@@ -27,6 +27,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { PaperAirplaneIcon } from '@heroicons/react/outline';
 import { useForm } from "react-hook-form";
 import { OpportunityContent } from "../../../types/opportunity";
+import { Spinner } from "../../General/Spinner";
 
 interface FormData {
     content: string
@@ -37,6 +38,7 @@ export function CommentSection( { opportunityContent }: { opportunityContent: Op
     const { register, handleSubmit, reset, formState: { isValid } } = useForm<FormData>({ mode: 'onChange' });
     const authContext = useAuth();
     const [comments, setComments] = useState<Comment[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     const handleCommentSubmit = (data: FormData) => {
         if (!authContext.isAuthenticated) {
@@ -66,13 +68,21 @@ export function CommentSection( { opportunityContent }: { opportunityContent: Op
             .then(response => {
                 console.log("Comentarios:", response.data);
                 setComments(response.data.map((comment: any) => parseComment(comment)));
+                setLoading(false);
             })
             .catch(error => {
                 console.error("Error al obtener los comentarios:", error);
+                setLoading(false);
             });
     }
 
     useEffect(() => { fetchData() }, []);
+
+    if(loading){
+        return(
+            <Spinner />
+        )
+    }
 
     return (
         <div>
