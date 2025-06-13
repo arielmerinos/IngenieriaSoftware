@@ -19,6 +19,7 @@
 # junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 # Imports de Django
+from urllib import request
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
@@ -729,7 +730,8 @@ class PublicUserProfileView(APIView):
                 user.refresh_from_db()
             
             print("Serializando datos del usuario...")
-            serializer = PublicUserProfileSerializer(user)
+            #serializer = PublicUserProfileSerializer(user)
+            serializer = PublicUserProfileSerializer(user, context={'request': request})
             print(f"Datos serializados: {serializer.data}")
             
             return Response(serializer.data)
