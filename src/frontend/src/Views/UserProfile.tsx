@@ -23,39 +23,12 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-interface Interest {
-  id: number;
-  name: string;
-}
+// Importar tipos
+import { ProfileData, EditForm } from '../types/profile';
 
-interface Organization {
-  id: number;
-  name: string;
-}
-
-interface Membership {
-  organization: Organization;
-}
-
-interface Student {
-  photo?: string;
-  phone_number?: string;
-  birthday?: string;
-  interests: Interest[];
-  memberships: Membership[];
-  bio?: string;
-  location?: string;
-  education?: string;
-  current_position?: string;
-}
-
-interface ProfileData {
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  student: Student;
-}
+// Importar componentes
+import ProfileHeader from '../components/Profile/ProfileHeader';
+import ProfileContent from '../components/Profile/ProfileContent';
 
 const UserProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -66,7 +39,7 @@ const UserProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
+  const [editForm, setEditForm] = useState<EditForm>({
     first_name: '',
     last_name: '',
     email: '',
@@ -75,7 +48,7 @@ const UserProfile: React.FC = () => {
     birthday: '',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const hasLoadedRef = useRef(false); // Evitar múltiples cargas
+  const hasLoadedRef = useRef(false);
 
   // Cargar perfil solo una vez
   useEffect(() => {
@@ -143,12 +116,10 @@ const UserProfile: React.FC = () => {
       
       console.log('Uploading photo using main PATCH endpoint...');
       
-      // Usar el mismo endpoint PATCH principal con FormData
       const response = await fetch(`${API_BASE_URL}/api/user/`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
-          // NO pongas Content-Type con FormData, el navegador lo hace automáticamente
         },
         body: formData,
       });
@@ -156,10 +127,7 @@ const UserProfile: React.FC = () => {
       if (response.ok) {
         const responseData = await response.json();
         console.log('Photo uploaded successfully, response:', responseData);
-        
-        // Actualizar directamente con la respuesta del servidor
         setProfile(responseData);
-        
       } else {
         const errorText = await response.text();
         console.error('Error uploading photo:', response.status, errorText);
@@ -169,7 +137,7 @@ const UserProfile: React.FC = () => {
       console.error('Error uploading photo:', error);
       alert('Error de conexión al subir la imagen');
     }
-  }, [id]);
+  }, []);
 
   const handleInputChange = useCallback((field: string, value: string) => {
     setEditForm(prev => ({
@@ -209,11 +177,9 @@ const UserProfile: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          // Campos del User
           first_name: editForm.first_name,
           last_name: editForm.last_name,
           email: editForm.email,
-          // Campos del UserData
           phone_number: editForm.phone_number,
           bio: editForm.bio,
           birthday: editForm.birthday,
@@ -223,21 +189,36 @@ const UserProfile: React.FC = () => {
       if (response.ok) {
         const responseData = await response.json();
         console.log('Profile saved to server successfully:', responseData);
-        
-        // Usar directamente la respuesta del servidor
         setProfile(responseData);
-        
       } else {
         const errorText = await response.text();
         console.error('Server update failed:', response.status, errorText);
-        // No revertir cambios locales, pero mostrar warning
         console.warn('Datos guardados localmente, pero no en el servidor');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
       console.warn('Datos guardados localmente, pero no en el servidor');
     }
-  }, [editForm, id]);
+  }, [editForm]);
+
+  const handleEdit = useCallback(() => {
+    setIsEditing(true);
+  }, []);
+
+  const handleCancel = useCallback(() => {
+    setIsEditing(false);
+    // Restaurar el formulario con los datos originales
+    if (profile) {
+      setEditForm({
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        email: profile.email || '',
+        phone_number: profile.student?.phone_number || '',
+        bio: profile.student?.bio || '',
+        birthday: profile.student?.birthday || '',
+      });
+    }
+  }, [profile]);
 
   // Estados de carga
   if (loading) {
@@ -293,360 +274,32 @@ const UserProfile: React.FC = () => {
     );
   }
 
-  const { username, email, first_name, last_name, student } = profile;
-
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Header - Ancho completo */}
-      <div className="relative w-full">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 h-64 w-full"></div>
-        <div className="bg-white shadow-lg relative">
-          <div className="max-w-6xl mx-auto px-6 pb-6">
-            <div className="flex items-start space-x-6">
-              {/* Foto de perfil */}
-              <div className="relative -mt-20">
-                <img
-                  src={student?.photo || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iMzciIHI9IjEyIiBmaWxsPSIjOUI5RkE3Ii8+CjxwYXRoIGQ9Im0zNSA2MyAzMC0uMTQzYTUuNjggNS42OCAwIDAgMSAzLjI4MSAxLjUwN2wuNTMyLjQxNmEzIDMgMCAwIDEgMS4xODUgMi4zODRWNzBIMzVWNjNaIiBmaWxsPSIjOUI5RkE3Ii8+Cjwvc3ZnPgo='}
-                  alt="Foto de perfil"
-                  className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg bg-gray-100"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    // Solo cambiar una vez para evitar loops
-                    if (!target.dataset.fallbackUsed) {
-                      target.dataset.fallbackUsed = 'true';
-                      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjUwIiBjeT0iMzciIHI9IjEyIiBmaWxsPSIjOUI5RkE3Ii8+CjxwYXRoIGQ9Im0zNSA2MyAzMC0uMTQzYTUuNjggNS42OCAwIDAgMSAzLjI4MSAxLjUwN2wuNTMyLjQxNmEzIDMgMCAwIDEgMS4xODUgMi4zODRWNzBIMzVWNjNaIiBmaWxsPSIjOUI5RkE3Ii8+Cjwvc3ZnPgo=';
-                    }
-                  }}
-                />
-                {isOwnProfile && (
-                  <>
-                    <button
-                      onClick={handleEditPhoto}
-                      className="absolute bottom-2 right-2 bg-white border-2 border-gray-300 p-2 rounded-full shadow-lg hover:bg-gray-50 transition-colors"
-                      title="Editar foto de perfil"
-                    >
-                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </button>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </>
-                )}
-              </div>
-              
-              {/* Información básica */}
-              <div className="flex-1 pt-6">
-                {isEditing ? (
-                  <div className="space-y-4">
-                    <div className="flex space-x-4">
-                      <input
-                        type="text"
-                        value={editForm.first_name}
-                        onChange={(e) => handleInputChange('first_name', e.target.value)}
-                        placeholder="Nombre"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                      <input
-                        type="text"
-                        value={editForm.last_name}
-                        onChange={(e) => handleInputChange('last_name', e.target.value)}
-                        placeholder="Apellido"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <h1 className="text-4xl font-bold text-gray-900">
-                      {first_name} {last_name}
-                    </h1>
-                    <p className="text-xl text-gray-600 mt-2">
-                      Estudiante
-                    </p>
-                    <p className="text-gray-500 mt-1">@{username}</p>
-                    <div className="flex items-center space-x-4 mt-3 text-gray-500">
-                      {student?.birthday && (
-                        <span className="flex items-center">
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {new Date(student.birthday).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Botones de acción */}
-              <div className="pt-6">
-                {isOwnProfile ? (
-                  <div className="space-y-2">
-                    {isEditing ? (
-                      <>
-                        <button 
-                          onClick={handleSaveProfile}
-                          className="w-full px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
-                        >
-                          Guardar cambios
-                        </button>
-                        <button 
-                          onClick={() => setIsEditing(false)}
-                          className="w-full px-6 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
-                        >
-                          Cancelar
-                        </button>
-                      </>
-                    ) : (
-                      <button 
-                        onClick={() => setIsEditing(true)}
-                        className="px-6 py-2 border border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
-                      >
-                        Editar perfil
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <button className="w-full px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                      Conectar
-                    </button>
-                    <button className="w-full px-6 py-2 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors">
-                      Mensaje
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Contenido principal */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Columna izquierda */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Información de contacto */}
-            <section className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Información de contacto</h2>
-                {isOwnProfile && (
-                  <button 
-                    onClick={() => setIsEditing(true)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    Editar
-                  </button>
-                )}
-              </div>
-              
-              {isOwnProfile && isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={editForm.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
-                    <input
-                      type="date"
-                      value={editForm.birthday}
-                      onChange={(e) => handleInputChange('birthday', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                    <input
-                      type="tel"
-                      value={editForm.phone_number}
-                      onChange={(e) => handleInputChange('phone_number', e.target.value)}
-                      placeholder="+52 555 123 4567"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div className="flex space-x-2 pt-2">
-                    <button 
-                      onClick={handleSaveProfile}
-                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                    >
-                      Guardar
-                    </button>
-                    <button 
-                      onClick={() => setIsEditing(false)}
-                      className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-gray-700">{email || 'No especificado'}</span>
-                  </div>
-                  {student?.phone_number ? (
-                    <div className="flex items-center space-x-3">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                      <span className="text-gray-700">{student.phone_number}</span>
-                    </div>
-                  ) : isOwnProfile ? (
-                    <button 
-                      onClick={() => setIsEditing(true)}
-                      className="flex items-center space-x-3 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer group"
-                    >
-                      <svg className="w-5 h-5 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      <span className="text-sm">Agregar teléfono</span>
-                    </button>
-                  ) : null}
-                  
-                  {student?.birthday && (
-                    <div className="flex items-center space-x-3">
-                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-gray-700">{new Date(student.birthday).toLocaleDateString()}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
-          </div>
-
-          {/* Columna derecha */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Acerca de */}
-            <section className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">Acerca de</h2>
-                {isOwnProfile && !isEditing && (
-                  <button 
-                    onClick={() => setIsEditing(true)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    {student?.bio ? 'Editar' : 'Agregar'}
-                  </button>
-                )}
-              </div>
-              
-              {isOwnProfile && isEditing ? (
-                <div className="space-y-4">
-                  <textarea
-                    value={editForm.bio}
-                    onChange={(e) => handleInputChange('bio', e.target.value)}
-                    placeholder="Cuéntanos sobre ti, tu experiencia, objetivos y lo que te apasiona..."
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={handleSaveProfile}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Guardar
-                    </button>
-                    <button 
-                      onClick={() => setIsEditing(false)}
-                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3 text-gray-700">
-                  {student?.bio ? (
-                    <p className="leading-relaxed text-base">{student.bio}</p>
-                  ) : (
-                    <p className="text-gray-500 italic">
-                      {isOwnProfile ? 'Agrega una descripción sobre ti' : 'Sin descripción disponible'}
-                    </p>
-                  )}
-                </div>
-              )}
-            </section>
-
-            {/* Intereses */}
-            <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Intereses</h2>
-              {student?.interests && student.interests.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {student.interests.map((interest) => (
-                    <span
-                      key={interest.id}
-                      className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
-                    >
-                      {interest.name}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">
-                  {isOwnProfile ? 'Agrega tus intereses' : 'No hay intereses registrados'}
-                </p>
-              )}
-            </section>
-
-            {/* Organizaciones */}
-            <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Organizaciones</h2>
-              {student?.memberships && student.memberships.length > 0 ? (
-                <div className="space-y-4">
-                  {student.memberships.map((membership, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{membership.organization.name}</h3>
-                        <p className="text-sm text-gray-500">Miembro activo</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">
-                  {isOwnProfile ? 'Únete a organizaciones' : 'No pertenece a ninguna organización'}
-                </p>
-              )}
-            </section>
-
-            {/* Becas guardadas */}
-            <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Becas guardadas</h2>
-              <div className="text-center py-12">
-                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <p className="text-gray-500 text-lg">Funcionalidad en desarrollo...</p>
-                <p className="text-gray-400 text-sm mt-2">Pronto podrás guardar y gestionar tus becas favoritas</p>
-              </div>
-            </section>
-          </div>
-        </div>
-      </div>
+      <ProfileHeader
+        profile={profile}
+        isOwnProfile={isOwnProfile}
+        isEditing={isEditing}
+        editForm={editForm}
+        onInputChange={handleInputChange}
+        onEdit={handleEdit}
+        onSave={handleSaveProfile}
+        onCancel={handleCancel}
+        onEditPhoto={handleEditPhoto}
+        fileInputRef={fileInputRef}
+        onFileChange={handleFileChange}
+      />
+      
+      <ProfileContent
+        profile={profile}
+        isOwnProfile={isOwnProfile}
+        isEditing={isEditing}
+        editForm={editForm}
+        onInputChange={handleInputChange}
+        onEdit={handleEdit}
+        onSave={handleSaveProfile}
+        onCancel={handleCancel}
+      />
     </div>
   );
 };
