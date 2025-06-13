@@ -23,6 +23,7 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 // src/components/UserMenu.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const UserMenu: React.FC = () => {
     const { user, logout } = useAuth();
@@ -80,7 +81,9 @@ const UserMenu: React.FC = () => {
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.username}</p>
                         )}
                     </div>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Mi perfil</a>
+                    <Link to={`/user/${user?.id}`} className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        Mi Perfil
+                    </Link>
                     <a href="#" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Configuración</a>
                     <button
                         onClick={handleLogout}

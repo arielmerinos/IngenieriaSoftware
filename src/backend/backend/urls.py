@@ -33,6 +33,7 @@ from api.views import (
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
     OrganizationViewSet, UserMembershipAdminView, 
+    UserNotificationView, PublicUserProfileView,
     UserNotificationView, OrganizationMembershipsView,
     CommentView, CommentEditView
 )
@@ -81,6 +82,9 @@ urlpatterns = [
     
     # Endpoints para notificaciones
     path('user/notifications/', UserNotificationView.as_view(), name='user-notifications'),
+
+    #endpointss para el perfil de usuario
+    path('api/user/<int:id>/profile/', PublicUserProfileView.as_view(), name='public-user-profile'),
 
     # Endpoints para comentarios
     path('scholarships/<int:pk>/comment/', CommentView.as_view(), name='scholarship-comments'),
