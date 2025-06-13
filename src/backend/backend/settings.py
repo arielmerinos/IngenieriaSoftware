@@ -217,8 +217,8 @@ ACTSTREAM_SETTINGS = {
     'GFK_FETCH_DEPTH': 1,
 }
 
-# Debug info (quitar después de que funcione)
-print(f"SECRET_KEY configurada: {len(SECRET_KEY) > 2}")
-print(f"DEBUG: {DEBUG}")
-print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
-print(f"Database: {DATABASES['default']['NAME']}")
+csrf_origins_str = os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://is.arielmerinos.com,https://*.railway.app')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()]
+
+
+
