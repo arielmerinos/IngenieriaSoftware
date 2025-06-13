@@ -64,6 +64,7 @@ export function CommentSection( { opportunityContent }: { opportunityContent: Op
     }
 
     function fetchData(){
+        setLoading(true);
         apiInstance.get(`scholarships/${ opportunityContent.id }/comment/`)
             .then(response => {
                 console.log("Comentarios:", response.data);
