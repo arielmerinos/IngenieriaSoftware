@@ -153,7 +153,13 @@ const UserProfile: React.FC = () => {
 
       if (response.ok) {
         console.log('Photo uploaded successfully');
-        alert('Foto actualizada. Recarga la página para ver los cambios.');
+        // Actualizar el perfil completo para obtener la nueva imagen
+        const updatedProfile = await fetch(`${API_BASE_URL}/api/user/${id}/profile/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }).then(res => res.json());
+        setProfile(updatedProfile);
       } else {
         console.error('Error uploading photo');
         alert('Error al subir la imagen');
@@ -162,7 +168,7 @@ const UserProfile: React.FC = () => {
       console.error('Error uploading photo:', error);
       alert('Error de conexión');
     }
-  }, []);
+  }, [id]);
 
   const handleInputChange = useCallback((field: string, value: string) => {
     setEditForm(prev => ({
@@ -176,21 +182,28 @@ const UserProfile: React.FC = () => {
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
       const token = localStorage.getItem('authToken');
       
-      const userResponse = await fetch(`${API_BASE_URL}/api/user/`, {
+      // Un solo endpoint que maneja todos los campos
+      const response = await fetch(`${API_BASE_URL}/api/user/`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          // Campos del User
           first_name: editForm.first_name,
           last_name: editForm.last_name,
           email: editForm.email,
+          // Campos del UserData
+          phone_number: editForm.phone_number,
+          bio: editForm.bio,
+          location: editForm.location,
+          current_position: editForm.current_position,
         }),
       });
 
-      if (userResponse.ok) {
-        // Actualizar el estado local sin hacer fetch
+      if (response.ok) {
+        // Actualizar el estado local
         setProfile(prev => prev ? {
           ...prev,
           first_name: editForm.first_name,
@@ -206,10 +219,16 @@ const UserProfile: React.FC = () => {
         } : null);
         
         setIsEditing(false);
+        alert('Perfil actualizado correctamente');
         console.log('Profile updated successfully');
+      } else {
+        const errorText = await response.text();
+        console.error('Update error:', errorText);
+        alert('Error al actualizar el perfil');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
+      alert('Error de conexión al guardar el perfil');
     }
   }, [editForm]);
 
@@ -349,13 +368,7 @@ const UserProfile: React.FC = () => {
                       placeholder="Ubicación"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
-                    <textarea
-                      value={editForm.bio}
-                      onChange={(e) => handleInputChange('bio', e.target.value)}
-                      placeholder="Descripción personal"
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+
                   </div>
                 ) : (
                   <>
@@ -377,9 +390,6 @@ const UserProfile: React.FC = () => {
                       <span>•</span>
                       <span>{email}</span>
                     </div>
-                    {student?.bio && (
-                      <p className="mt-4 text-gray-700 leading-relaxed text-lg">{student.bio}</p>
-                    )}
                   </>
                 )}
               </div>
@@ -435,31 +445,91 @@ const UserProfile: React.FC = () => {
           <div className="lg:col-span-1 space-y-6">
             {/* Información de contacto */}
             <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Información de contacto</h2>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-gray-700">{email || 'No especificado'}</span>
-                </div>
-                {student?.phone_number && (
-                  <div className="flex items-center space-x-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    <span className="text-gray-700">{student.phone_number}</span>
-                  </div>
-                )}
-                {student?.birthday && (
-                  <div className="flex items-center space-x-3">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="text-gray-700">{new Date(student.birthday).toLocaleDateString()}</span>
-                  </div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Información de contacto</h2>
+                {isOwnProfile && (
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  >
+                    Editar
+                  </button>
                 )}
               </div>
+              
+              {isOwnProfile && isEditing ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={editForm.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input
+                      type="tel"
+                      value={editForm.phone_number}
+                      onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                      placeholder="+52 555 123 4567"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex space-x-2 pt-2">
+                    <button 
+                      onClick={handleSaveProfile}
+                      className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      Guardar
+                    </button>
+                    <button 
+                      onClick={() => setIsEditing(false)}
+                      className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-gray-700">{email || 'No especificado'}</span>
+                  </div>
+                  {student?.phone_number ? (
+                    <div className="flex items-center space-x-3">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      <span className="text-gray-700">{student.phone_number}</span>
+                    </div>
+                  ) : isOwnProfile ? (
+                    <button 
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center space-x-3 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer group"
+                    >
+                      <svg className="w-5 h-5 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span className="text-sm">Agregar teléfono</span>
+                    </button>
+                  ) : null}
+                  
+                  {student?.birthday && (
+                    <div className="flex items-center space-x-3">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-gray-700">{new Date(student.birthday).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
           </div>
 
@@ -467,16 +537,53 @@ const UserProfile: React.FC = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Acerca de */}
             <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Acerca de</h2>
-              <div className="space-y-3 text-gray-700">
-                {student?.bio ? (
-                  <p className="leading-relaxed">{student.bio}</p>
-                ) : (
-                  <p className="text-gray-500 italic">
-                    {isOwnProfile ? 'Agrega una descripción sobre ti' : 'Sin descripción disponible'}
-                  </p>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Acerca de</h2>
+                {isOwnProfile && !isEditing && (
+                  <button 
+                    onClick={() => setIsEditing(true)}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  >
+                    {student?.bio ? 'Editar' : 'Agregar'}
+                  </button>
                 )}
               </div>
+              
+              {isOwnProfile && isEditing ? (
+                <div className="space-y-4">
+                  <textarea
+                    value={editForm.bio}
+                    onChange={(e) => handleInputChange('bio', e.target.value)}
+                    placeholder="Cuéntanos sobre ti, tu experiencia, objetivos y lo que te apasiona..."
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={handleSaveProfile}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Guardar
+                    </button>
+                    <button 
+                      onClick={() => setIsEditing(false)}
+                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 text-gray-700">
+                  {student?.bio ? (
+                    <p className="leading-relaxed text-base">{student.bio}</p>
+                  ) : (
+                    <p className="text-gray-500 italic">
+                      {isOwnProfile ? 'Agrega una descripción sobre ti' : 'Sin descripción disponible'}
+                    </p>
+                  )}
+                </div>
+              )}
             </section>
 
             {/* Intereses */}
