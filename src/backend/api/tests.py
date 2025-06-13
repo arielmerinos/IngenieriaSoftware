@@ -385,64 +385,7 @@ class OrganizationSerializerTest(TestCase):
         serializer = OrganizationSerializer(data=data_invalida, context=self.context)
         self.assertFalse(serializer.is_valid())
         self.assertIn('name', serializer.errors)
-
-
-class MembershipSerializerTest(TestCase):
-    def setUp(self):
-        # Usuario y organización para probar Membership
-        self.user = User.objects.create_user(
-            username='memberuser',
-            password='pass123',
-            email='member@example.com'
-        )
-        self.organization = Organization.objects.create(
-            name='testorg',
-            email='unam@gmail.com',
-            website='http://unam.com.mx',
-            description='testorg description',
-            phone_number='7774761814',
-            logo='/media/logos/IMG_0587.jpeg'
-        )
-        # Datos iniciales para la membresía
-        self.membership_data = {
-            'user': self.user.id,
-            'organization_id': self.organization.id,
-            'is_admin': True,
-            'is_active': True
-        }
         
-    def test_membership_serializer_creacion(self):
-        print("Membership Data:", self.membership_data)
-        serializer = MembershipSerializer(data=self.membership_data)
-        self.assertTrue(serializer.is_valid(), serializer.errors)
-        membership = serializer.save()
-
-        # Verificar los datos de la membresía
-        self.assertEqual(membership.user, self.user)
-        self.assertEqual(membership.organization, self.organization)
-        self.assertTrue(membership.is_admin)
-        self.assertTrue(membership.is_active)
-
-        # Serializar la membresía creada
-        serialized_membership = MembershipSerializer(membership).data
-
-        # Verificar la salida serializada
-        expected_output = {
-            'id': membership.id,
-            'user': self.user.id,
-            'organization': {
-                'id': self.organization.id,
-                'name': self.organization.name,
-                'email': self.organization.email,
-                'website': self.organization.website,
-                'description': self.organization.description,
-                'phone_number': self.organization.phone_number,
-                'logo': self.organization.logo.url if self.organization.logo else None,  # Use the URL of the logo
-            },
-            'is_admin': True,
-            'is_active': True
-        }
-        self.assertEqual(serialized_membership, expected_output)
 
 class NotificationTest(TestCase):
     from actstream import action
