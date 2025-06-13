@@ -31,6 +31,8 @@ class UserData(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=True)
     memberships = models.ManyToManyField(Membership, related_name='students', related_query_name='student')
     photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True) 
+    bio = models.TextField(max_length=500, blank=True, null=True, help_text="Descripción personal")
+    
     # history search has a foreign key to user
     def __str__(self):
-        return self.user.username
+        return self.user.username   

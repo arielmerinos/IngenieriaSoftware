@@ -799,49 +799,39 @@ class UserDetailView(APIView):
         return Response(serializer.data)
     
     def patch(self, request):
-        """Actualizar datos del usuario y del perfil de estudiante"""
         user = request.user
-        
-        # Asegurar que el usuario tenga UserData
+    
         user_data, created = UserData.objects.get_or_create(user=user)
-        
-        # Actualizar campos del User
+    
         user_fields = ['first_name', 'last_name', 'email']
         user_updated = False
         for field in user_fields:
             if field in request.data:
                 setattr(user, field, request.data[field])
                 user_updated = True
-        
+    
         if user_updated:
             user.save()
-        
-        # Actualizar campos del UserData
-        student_fields = ['phone_number', 'bio', 'location', 'current_position']
+            print(f"User updated: {user.first_name} {user.last_name}")
+    
+        student_fields = ['phone_number', 'bio', 'birthday']
         student_updated = False
         for field in student_fields:
             if field in request.data:
                 setattr(user_data, field, request.data[field])
                 student_updated = True
-        
+    
+        if 'photo' in request.FILES:
+            user_data.photo = request.FILES['photo']
+            student_updated = True
+            print(f"Photo updated: {user_data.photo.name}")
+    
         if student_updated:
             user_data.save()
-        
-        # Devolver los datos actualizados del usuario
-        serializer = UserSerializer(user)
+            print(f"UserData updated: bio={user_data.bio}, photo={user_data.photo}")
+    
+        user.refresh_from_db()
+        user_data.refresh_from_db()
+        serializer = PublicUserProfileSerializer(user, context={'request': request})
         return Response(serializer.data)
-
-class UpdateProfilePhotoView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request):
-        user_data = request.user.student
-        photo = request.FILES.get('photo')
-        if not photo:
-            return Response({"error": "No se proporcionó ninguna imagen."}, status=400)
-
-        user_data.photo = photo
-        user_data.save()
-        return Response({"message": "Foto actualizada correctamente."})
-
 

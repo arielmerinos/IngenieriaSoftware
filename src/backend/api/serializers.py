@@ -266,6 +266,7 @@ class ActivitySerializer(serializers.ModelSerializer):
 class UserDataSerializer(serializers.ModelSerializer):
     interests = InterestSerializer(many=True, read_only=True)
     memberships = MembershipSerializer(many=True, read_only=True)
+    photo = serializers.ImageField(read_only=True)
     
     class Meta:
         model = UserData
@@ -276,14 +277,23 @@ class UserDataSerializer(serializers.ModelSerializer):
             "birthday", 
             "user", 
             "memberships", 
-            "photo"
+            "photo",
+            "bio"
         ]
         read_only_fields = ["user", "id"]
         extra_kwargs = {"user": {"read_only": True}}
-        
+
 class PublicUserProfileSerializer(serializers.ModelSerializer):
     student = UserDataSerializer(read_only=True)
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'student']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data['student'] and data['student']['photo']:
+            request = self.context.get('request')
+            if request:
+                data['student']['photo'] = request.build_absolute_uri(data['student']['photo'])
+        return data

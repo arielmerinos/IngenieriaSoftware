@@ -33,7 +33,7 @@ from api.views import (
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
     OrganizationViewSet, UserMembershipAdminView, 
-    UserNotificationView, PublicUserProfileView,UpdateProfilePhotoView
+    UserNotificationView, PublicUserProfileView
 )
 
 # Nueva manera de agregar rutas hechas automaticamente
@@ -82,7 +82,6 @@ urlpatterns = [
 
     #endpointss para el perfil de usuario
     path('api/user/<int:id>/profile/', PublicUserProfileView.as_view(), name='public-user-profile'),
-    path('api/user/photo/', UpdateProfilePhotoView.as_view(), name='update-profile-photo'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

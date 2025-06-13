@@ -72,8 +72,7 @@ const UserProfile: React.FC = () => {
     email: '',
     phone_number: '',
     bio: '',
-    location: '',
-    current_position: '',
+    birthday: '',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedRef = useRef(false); // Evitar múltiples cargas
@@ -113,8 +112,7 @@ const UserProfile: React.FC = () => {
           email: data.email || '',
           phone_number: data.student?.phone_number || '',
           bio: data.student?.bio || '',
-          location: data.student?.location || '',
-          current_position: data.student?.current_position || '',
+          birthday: data.student?.birthday || '',
         });
       } catch (err) {
         console.error('Error fetching profile:', err);
@@ -143,30 +141,33 @@ const UserProfile: React.FC = () => {
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch(`${API_BASE_URL}/api/user/photo/`, {
+      console.log('Uploading photo using main PATCH endpoint...');
+      
+      // Usar el mismo endpoint PATCH principal con FormData
+      const response = await fetch(`${API_BASE_URL}/api/user/`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
+          // NO pongas Content-Type con FormData, el navegador lo hace automáticamente
         },
         body: formData,
       });
 
       if (response.ok) {
-        console.log('Photo uploaded successfully');
-        // Actualizar el perfil completo para obtener la nueva imagen
-        const updatedProfile = await fetch(`${API_BASE_URL}/api/user/${id}/profile/`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }).then(res => res.json());
-        setProfile(updatedProfile);
+        const responseData = await response.json();
+        console.log('Photo uploaded successfully, response:', responseData);
+        
+        // Actualizar directamente con la respuesta del servidor
+        setProfile(responseData);
+        
       } else {
-        console.error('Error uploading photo');
-        alert('Error al subir la imagen');
+        const errorText = await response.text();
+        console.error('Error uploading photo:', response.status, errorText);
+        alert('Error al subir la imagen: ' + errorText);
       }
     } catch (error) {
       console.error('Error uploading photo:', error);
-      alert('Error de conexión');
+      alert('Error de conexión al subir la imagen');
     }
   }, [id]);
 
@@ -182,7 +183,25 @@ const UserProfile: React.FC = () => {
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
       const token = localStorage.getItem('authToken');
       
-      // Un solo endpoint que maneja todos los campos
+      console.log('Saving profile with data:', editForm);
+      
+      // Actualizar inmediatamente el estado local para UX rápida
+      setProfile(prev => prev ? {
+        ...prev,
+        first_name: editForm.first_name,
+        last_name: editForm.last_name,
+        email: editForm.email,
+        student: {
+          ...prev.student,
+          phone_number: editForm.phone_number,
+          bio: editForm.bio,
+          birthday: editForm.birthday,
+        }
+      } : null);
+      
+      setIsEditing(false);
+      
+      // Enviar al servidor en background
       const response = await fetch(`${API_BASE_URL}/api/user/`, {
         method: 'PATCH',
         headers: {
@@ -197,40 +216,28 @@ const UserProfile: React.FC = () => {
           // Campos del UserData
           phone_number: editForm.phone_number,
           bio: editForm.bio,
-          location: editForm.location,
-          current_position: editForm.current_position,
+          birthday: editForm.birthday,
         }),
       });
 
       if (response.ok) {
-        // Actualizar el estado local
-        setProfile(prev => prev ? {
-          ...prev,
-          first_name: editForm.first_name,
-          last_name: editForm.last_name,
-          email: editForm.email,
-          student: {
-            ...prev.student,
-            phone_number: editForm.phone_number,
-            bio: editForm.bio,
-            location: editForm.location,
-            current_position: editForm.current_position,
-          }
-        } : null);
+        const responseData = await response.json();
+        console.log('Profile saved to server successfully:', responseData);
         
-        setIsEditing(false);
-        alert('Perfil actualizado correctamente');
-        console.log('Profile updated successfully');
+        // Usar directamente la respuesta del servidor
+        setProfile(responseData);
+        
       } else {
         const errorText = await response.text();
-        console.error('Update error:', errorText);
-        alert('Error al actualizar el perfil');
+        console.error('Server update failed:', response.status, errorText);
+        // No revertir cambios locales, pero mostrar warning
+        console.warn('Datos guardados localmente, pero no en el servidor');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Error de conexión al guardar el perfil');
+      console.warn('Datos guardados localmente, pero no en el servidor');
     }
-  }, [editForm]);
+  }, [editForm, id]);
 
   // Estados de carga
   if (loading) {
@@ -354,21 +361,6 @@ const UserProfile: React.FC = () => {
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
-                    <input
-                      type="text"
-                      value={editForm.current_position}
-                      onChange={(e) => handleInputChange('current_position', e.target.value)}
-                      placeholder="Posición actual"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <input
-                      type="text"
-                      value={editForm.location}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      placeholder="Ubicación"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-
                   </div>
                 ) : (
                   <>
@@ -376,19 +368,18 @@ const UserProfile: React.FC = () => {
                       {first_name} {last_name}
                     </h1>
                     <p className="text-xl text-gray-600 mt-2">
-                      {student?.current_position || 'Estudiante'}
+                      Estudiante
                     </p>
                     <p className="text-gray-500 mt-1">@{username}</p>
                     <div className="flex items-center space-x-4 mt-3 text-gray-500">
-                      <span className="flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        {student?.location || 'Ubicación no especificada'}
-                      </span>
-                      <span>•</span>
-                      <span>{email}</span>
+                      {student?.birthday && (
+                        <span className="flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {new Date(student.birthday).toLocaleDateString()}
+                        </span>
+                      )}
                     </div>
                   </>
                 )}
@@ -465,6 +456,15 @@ const UserProfile: React.FC = () => {
                       type="email"
                       value={editForm.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento</label>
+                    <input
+                      type="date"
+                      value={editForm.birthday}
+                      onChange={(e) => handleInputChange('birthday', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
