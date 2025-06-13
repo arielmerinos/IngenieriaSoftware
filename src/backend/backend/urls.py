@@ -33,7 +33,7 @@ from api.views import (
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
     OrganizationViewSet, UserMembershipAdminView, 
-    UserNotificationView, PublicUserProfileView
+    UserNotificationView, PublicUserProfileView,
     UserNotificationView, OrganizationMembershipsView,
     CommentView, CommentEditView
 )

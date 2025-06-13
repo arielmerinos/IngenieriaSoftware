@@ -141,13 +141,6 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class UserDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserData
-        fields = ["id", "history_search", "interests", "phone_number", "birthday", "user", "memberships", "history_search", "photo"]
-        read_only_fields = ["user", "id"]
-        extra_kwargs = {"user": {"read_only": True}}
-        
 class OrganizationSerializer(serializers.ModelSerializer):
     website = serializers.CharField(allow_blank=True, required=False)
 
@@ -216,10 +209,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ["id", "name"]
 
-
-
 class ActivitySerializer(serializers.ModelSerializer):
-
     actor = serializers.SerializerMethodField()
     target = serializers.SerializerMethodField()
     action_object = serializers.SerializerMethodField()
@@ -240,7 +230,6 @@ class ActivitySerializer(serializers.ModelSerializer):
         return None
 
     def get_target(self, obj):
-
         if obj.target:
             return {
                 'id': obj.target.id,
@@ -250,6 +239,18 @@ class ActivitySerializer(serializers.ModelSerializer):
                     obj.target.name if obj.target.__class__.__name__ == "Organization" else
                     obj.target.name if obj.target.__class__.__name__ == "Scholarship" else
                     "Name Not Available due to target type."
+            }
+        return None
+    
+    def get_action_object(self, obj):
+        if obj.action_object:
+            return {
+                'id': obj.action_object.id,
+                'type': obj.action_object.__class__.__name__,
+                'name':
+                    obj.action_object.content if obj.action_object.__class__.__name__ == "Comment" else
+                    obj.action_object.name if obj.action_object.__class__.__name__ == "Organization" else
+                    "Name Not Available due to action_object type."
             }
         return None
 
@@ -287,21 +288,8 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
             if request:
                 data['student']['photo'] = request.build_absolute_uri(data['student']['photo'])
         return data
-    
-    def get_action_object(self, obj):
-        if obj.action_object:
-            return {
-                'id': obj.action_object.id,
-                'type': obj.action_object.__class__.__name__,
-                'name':
-                    obj.action_object.content if obj.action_object.__class__.__name__ == "Comment" else
-                    obj.action_object.name if obj.action_object.__class__.__name__ == "Organization" else
-                    "Name Not Available due to action_object type."
-            }
-        return None
 
 class CommentSerializer(serializers.ModelSerializer):
-
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(),
         slug_field='username',

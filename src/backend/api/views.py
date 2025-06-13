@@ -46,11 +46,7 @@ from .models.scholarship import Comment
 from .serializers import (
     UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
     MembershipSerializer, CategorySerializer, UserDataSerializer, 
-<<<<<<< HEAD
-    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, PublicUserProfileSerializer
-=======
-    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, CommentSerializer
->>>>>>> origin/develop
+    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, PublicUserProfileSerializer, CommentSerializer
 )
 
 # Imports de Notifiaciones
