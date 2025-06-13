@@ -46,21 +46,6 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
-# class TypeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Type
-#         fields = ['id', 'name', 'type_name']
-        
-# class CountrySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Country
-#         fields = ['id', 'name', 'emoji']
-    
-# class InterestSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Interest
-#         fields = ['id', 'name', 'color']
-
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Type
@@ -137,7 +122,6 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         type_data = validated_data.pop('type_ids', [])
         interests_data = validated_data.pop('interest_ids', [])
         country_data = validated_data.pop('country_ids', [])
-        # organization is handled by organization_id/source='organization'
         scholarship = Scholarship.objects.create(**validated_data)
         if type_data:
             scholarship.type.set(type_data)
@@ -201,6 +185,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         
 class MembershipSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(read_only=True) 
+    user = UserSerializer(read_only=True)
     organization_id = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         source='organization',  

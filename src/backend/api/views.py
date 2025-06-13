@@ -638,7 +638,6 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             raise PermissionDenied("Debes estar autenticado para realizar esta acción.")
         
-        # Verificar si el usuario es admin de esta organización
         is_admin = Membership.objects.filter(
             user=self.request.user,
             organization=organization,
@@ -667,65 +666,101 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         self.check_admin_permission(organization)
         return super().destroy(request, *args, **kwargs)
 
-class JoinOrganizationView(APIView):
+class FollowOrganizationView(APIView):
     """
-    Vista para solicitar unirse a una organización.
-    
-    POST: Solicitar unirse a una organización
+    Vista para alternar el seguimiento de una organización.
+
+    POST: Si no existe la relación, la crea con is_active=True.
+          Si ya existe, invierte el valor de is_active (seguir / dejar de seguir).
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, format=None):
         organization_id = request.data.get("organization_id")
         if not organization_id:
-            return Response({"error": "Se requiere el organization_id."}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            organization = Organization.objects.get(id=organization_id)
-        except Organization.DoesNotExist:
-            return Response({"error": "La organización no existe."}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Verifica si ya existe una solicitud o el usuario ya es miembro
-        if Membership.objects.filter(user=request.user, organization=organization).exists():
-            return Response({"error": "Ya has solicitado o eres miembro de esta organización."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        membership = Membership.objects.create(
+            return Response(
+                {"error": "Se requiere el organization_id."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        organization = get_object_or_404(Organization, id=organization_id)
+
+        membership, created = Membership.objects.get_or_create(
             user=request.user,
             organization=organization,
-            is_admin=False,
-            is_active=False
+            defaults={
+                'is_admin': False,
+                'is_active': True
+            }
         )
+
+        if not created:
+            membership.is_active = not membership.is_active
+            membership.save()
+
         serializer = MembershipSerializer(membership)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        return Response(serializer.data, status=status_code)
         
-class AcceptMembershipView(APIView):
+class ToggleAdminStatusView(APIView):
     """
-    Vista para aceptar una solicitud de membresía.
-    
-    POST: Aceptar una solicitud de membresía
+    Vista para alternar el estado de administrador de una membresía.
+    Si es admin, lo degrada. Si no es admin, lo promueve.
     """
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, format=None):
+    def post(self, request, *args, **kwargs):
         membership_id = request.data.get("membership_id")
         if not membership_id:
-            return Response({"error": "Se requiere el membership_id."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Se requiere el ID de la membresía (membership_id)."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            membership = Membership.objects.get(id=membership_id)
+            membership_to_change = Membership.objects.get(id=membership_id)
         except Membership.DoesNotExist:
-            return Response({"error": "La solicitud de membresía no existe."}, status=status.HTTP_404_NOT_FOUND)
-        
-        admin_exists = Membership.objects.filter(
-            organization=membership.organization,
+            return Response({"error": "La membresía no existe."}, status=status.HTTP_404_NOT_FOUND)
+
+        is_requester_admin = Membership.objects.filter(
+            organization=membership_to_change.organization,
             user=request.user,
-            is_admin=True,
-            is_active=True  
+            is_admin=True
         ).exists()
-        if not admin_exists:
-            return Response({"error": "No tienes permisos para aceptar miembros en esta organización."}, status=status.HTTP_403_FORBIDDEN)
+
+        if not is_requester_admin:
+            return Response({"error": "No tienes permisos para modificar roles en esta organización."}, status=status.HTTP_403_FORBIDDEN)
+
+        membership_to_change.is_admin = not membership_to_change.is_admin
+        membership_to_change.save()
+
+        serializer = MembershipSerializer(membership_to_change)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class OrganizationMembershipsView(APIView):
+    """
+    Vista para obtener todas las membresías de una organización específica.
+    Requiere que el usuario que hace la petición sea admin de dicha organización.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, organization_id, *args, **kwargs):
+        # Verificar que la organización existe para evitar errores
+        from .models import Organization # Importación local para evitar importación circular si es necesario
+        if not Organization.objects.filter(id=organization_id).exists():
+            return Response({"error": "Organización no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Verificación de permisos: El usuario que pide la lista debe ser admin de esa organización.
+        is_requester_admin = Membership.objects.filter(
+            organization__id=organization_id,
+            user=request.user,
+            is_admin=True
+        ).exists()
+
+        if not is_requester_admin:
+            return Response({"error": "No tienes permisos para ver los miembros de esta organización."}, status=status.HTTP_403_FORBIDDEN)
         
-        membership.is_active = True
-        membership.save()
-        serializer = MembershipSerializer(membership)
+        # Si tiene permisos, obtener y devolver todos los miembros de la organización.
+        memberships = Membership.objects.filter(organization__id=organization_id)
+        serializer = MembershipSerializer(memberships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class UserMembershipsView(APIView):
@@ -746,7 +781,7 @@ class UserMembershipAdminView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        memberships = Membership.objects.filter(user=request.user, is_active=True, is_admin=True)
+        memberships = Membership.objects.filter(user=request.user, is_admin=True)
         serializer = MembershipSerializer(memberships, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
