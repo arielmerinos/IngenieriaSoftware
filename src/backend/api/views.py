@@ -586,6 +586,12 @@ class FollowOrganizationView(APIView):
             membership.save()
 
         serializer = MembershipSerializer(membership)
+        
+        action.send(
+            request.user,
+            target=organization,
+            verb= "addFollower" if membership.is_active else "dropFollower"
+        )
 
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(serializer.data, status=status_code)
@@ -620,6 +626,24 @@ class ToggleAdminStatusView(APIView):
         membership_to_change.save()
 
         serializer = MembershipSerializer(membership_to_change)
+
+        if membership_to_change.is_admin:
+            follow(membership_to_change.user, membership_to_change.organization, actor_only=False)
+            action.send(
+                request.user,
+                target=membership_to_change.user,
+                verb="givenAdmin",
+                action_object=membership_to_change.organization
+            )
+        else:
+            unfollow(membership_to_change.user, membership_to_change.organization)
+            action.send(
+                request.user,
+                target=membership_to_change.user,
+                verb="lostAdmin",
+                action_object=membership_to_change.organization
+            )
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class OrganizationMembershipsView(APIView):

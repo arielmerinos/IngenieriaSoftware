@@ -32,6 +32,9 @@ export interface Notification {
     target: NotificationActor,
     /** Tipo de la notificacion */
     type: NotificationType,
+    /** Objeto relacionado a la notificacion */
+    object: NotificationActor,
+    /** Fecha de la notificacion */
     date: Date,
 }
 
@@ -41,6 +44,10 @@ export interface Notification {
 export enum NotificationType {
     createdAccount = "createdAccount",
     newComment = "newComment",
+    addFollower = "addFollower",
+    dropFollower = "dropFollower",
+    givenAdmin = "givenAdmin",
+    lostAdmin = "lostAdmin",
     Unknown = "Unknown",
 }
 
@@ -71,6 +78,10 @@ export function parseNotification(data: any): Notification {
         author: parseNotificationActor(data.actor),
         target: parseNotificationActor(data.target),
         type: parseNotificationType(data),
+        object:
+            data.action_object == null
+                ? { id: -1, type: NotificationActorType.Unknown, name: "Unkown"}
+                : parseNotificationActor(data.action_object),
         date: new Date(data.timestamp),
     }
 }
@@ -81,6 +92,14 @@ export function parseNotificationType(data: any): NotificationType {
             return NotificationType.createdAccount;
         case "newComment":
             return NotificationType.newComment;
+        case "addFollower":
+            return NotificationType.addFollower;
+        case "dropFollower":
+            return NotificationType.dropFollower;
+        case "givenAdmin":
+            return NotificationType.givenAdmin;
+        case "lostAdmin":
+            return NotificationType.lostAdmin;
         default:
             return NotificationType.Unknown;
     }
