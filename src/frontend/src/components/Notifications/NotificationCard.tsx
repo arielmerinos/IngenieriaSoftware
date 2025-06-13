@@ -45,6 +45,12 @@ export function NotificationCard({ notification } : { notification: Notification
                                 Notificación Desconocida {notification.type}.
                             </p>
                         );
+                    case NotificationType.newComment:
+                        return (
+                            <p>
+                                <b>{notification.author.name}</b> ha comentado en tu oportunidad <b>{notification.target.name}</b>.
+                            </p>
+                        );
                     default:
                         return (
                             <p>

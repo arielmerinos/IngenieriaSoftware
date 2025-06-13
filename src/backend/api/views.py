@@ -52,6 +52,8 @@ from .serializers import (
 # Imports de Notifiaciones
 from actstream import action
 from actstream.models import target_stream # Metodo que devuelve las notificaciones del target
+from actstream.models import user_stream # Metodo que devuelve las notificaciones de las cosas que sigue el usuario
+from actstream.actions import follow, unfollow
 
 class TypeListCreateView(APIView):
     """
@@ -401,8 +403,10 @@ class UserNotificationView(APIView):
     def get(self, request):
         user = request.user
         # Obtener las notificaciones del usuario
-        notifications = target_stream(user)
-        
+        # notifications = target_stream(user)
+        notifications = user_stream(
+            request.user, with_user_activity=True).exclude(verb='started following')
+        # Excluir notificaciones de "started following"
         # Serializar las notificaciones
         serializer = ActivitySerializer(notifications, many=True)
         
@@ -472,6 +476,11 @@ class ScholarshipListCreateView(APIView):
             
             # Guardar la beca con el usuario actual como creador
             scholarship = serializer.save(created_by=request.user)
+
+            # El autor de la beca sigue a la beca pa que las notificaciones
+            # relacioandas a esta aparezcan en su stream
+            follow(request.user, scholarship, actor_only=False)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -784,6 +793,14 @@ class CommentView(APIView):
         )
 
         serializer = CommentSerializer(comment)
+
+        # Envia la notifiacion a quien siga la beca
+        action.send(
+            request.user, # El usuario que crea el comentario
+            verb='newComment',
+            action_object=comment, # El comentario creado
+            target=scholarship, # La beca a la que se le hace el comentario
+        )
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -808,3 +825,26 @@ class CommentView(APIView):
         
         return [permissions.IsAuthenticated()]
 
+class CommentEditView(APIView):
+    """
+    Vista para editar o eliminar un comentario.
+
+    DELETE: Eliminar un comentario existente.
+    """
+    
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def delete(self, request, pk):
+        
+        comment = get_object_or_404(Comment, pk=pk)
+        
+        # Verificar que el usuario es el autor del comentario
+        if comment.user != request.user:
+            return Response(
+                {"error": "No tienes permiso para eliminar este comentario."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        comment.delete()
+        
+        return Response(status=status.HTTP_200_OK)
