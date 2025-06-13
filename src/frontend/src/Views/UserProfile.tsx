@@ -19,6 +19,27 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
+/*
+Nombre del programa: Impulsa tu futuro
+Copyright (C) 2025 - Autores:
+Merino Peña Kevin Ariel
+Ortíz Montiel Diego Iain
+Rodríguez Dimayuga Laura Itzel
+Sosa Romo Juan Mario
+Vargas Campos Miguel Angel
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU v3 publicada por
+la Free Software Foundation.
+
+Este programa se distribuye con la esperanza de que sea útil,
+pero SIN NINGUNA GARANTÍA; sin incluso la garantía implícita de
+COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
+Consulte la Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General de GNU
+junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
+*/
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -50,7 +71,6 @@ const UserProfile: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedRef = useRef(false);
 
-  // Cargar perfil solo una vez
   useEffect(() => {
     if (!id || hasLoadedRef.current) return;
     
@@ -98,7 +118,6 @@ const UserProfile: React.FC = () => {
     fetchProfile();
   }, [id]);
 
-  // Funciones optimizadas con useCallback
   const handleEditPhoto = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
@@ -153,7 +172,6 @@ const UserProfile: React.FC = () => {
       
       console.log('Saving profile with data:', editForm);
       
-      // Actualizar inmediatamente el estado local para UX rápida
       setProfile(prev => prev ? {
         ...prev,
         first_name: editForm.first_name,
@@ -169,7 +187,6 @@ const UserProfile: React.FC = () => {
       
       setIsEditing(false);
       
-      // Enviar al servidor en background
       const response = await fetch(`${API_BASE_URL}/api/user/`, {
         method: 'PATCH',
         headers: {
@@ -207,7 +224,6 @@ const UserProfile: React.FC = () => {
 
   const handleCancel = useCallback(() => {
     setIsEditing(false);
-    // Restaurar el formulario con los datos originales
     if (profile) {
       setEditForm({
         first_name: profile.first_name || '',
@@ -220,20 +236,19 @@ const UserProfile: React.FC = () => {
     }
   }, [profile]);
 
-  // Estados de carga
   if (loading) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div className="max-w-6xl mx-auto p-6">
           <div className="animate-pulse">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-800 h-64 w-full"></div>
-            <div className="bg-white p-6 shadow-lg relative -mt-20">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 h-64 w-full"></div>
+            <div className="bg-white dark:bg-gray-800 p-6 shadow-lg relative -mt-20">
               <div className="flex items-start space-x-6">
-                <div className="w-40 h-40 bg-gray-300 rounded-full"></div>
+                <div className="w-40 h-40 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
                 <div className="flex-1 pt-6 space-y-3">
-                  <div className="h-8 bg-gray-300 rounded w-1/3"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
                 </div>
               </div>
             </div>
@@ -245,16 +260,16 @@ const UserProfile: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div className="max-w-6xl mx-auto p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <h2 className="text-red-600 text-lg font-semibold mb-2">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
+            <h2 className="text-red-600 dark:text-red-400 text-lg font-semibold mb-2">
               Error al cargar el perfil
             </h2>
-            <p className="text-red-500 mb-4">{error}</p>
+            <p className="text-red-500 dark:text-red-300 mb-4">{error}</p>
             <button 
               onClick={() => window.location.reload()} 
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white rounded transition-colors"
             >
               Reintentar
             </button>
@@ -266,16 +281,16 @@ const UserProfile: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="bg-gray-50 min-h-screen">
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div className="max-w-6xl mx-auto p-6 text-center">
-          <p className="text-gray-500">No se encontró el perfil</p>
+          <p className="text-gray-500 dark:text-gray-400">No se encontró el perfil</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <ProfileHeader
         profile={profile}
         isOwnProfile={isOwnProfile}
