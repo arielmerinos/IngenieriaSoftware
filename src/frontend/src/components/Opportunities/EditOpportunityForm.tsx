@@ -123,11 +123,11 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                     opportunityResponse,
                     membershipsResponse
                 ] = await Promise.all([
-                    fetch('http://is.arielmerinos.com/types/', { headers }),
-                    fetch('http://is.arielmerinos.com/countries/', { headers }),
-                    fetch('http://is.arielmerinos.com/interests/', { headers }),
-                    fetch(`http://is.arielmerinos.com/scholarships/${opportunity.id}/`, { headers }),
-                    user ? fetch(`http://is.arielmerinos.com/user/memberships/`, { headers }) : Promise.resolve({ ok: false })
+                    fetch('https://is.arielmerinos.com/types/', { headers }),
+                    fetch('https://is.arielmerinos.com/countries/', { headers }),
+                    fetch('https://is.arielmerinos.com/interests/', { headers }),
+                    fetch(`https://is.arielmerinos.com/scholarships/${opportunity.id}/`, { headers }),
+                    user ? fetch(`https://is.arielmerinos.com/user/memberships/`, { headers }) : Promise.resolve({ ok: false })
                 ]);
 
                 if (
@@ -245,7 +245,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                 formData.append('organization_id', data.organization_id.toString());
             }
 
-            const response = await fetch(`http://is.arielmerinos.com/scholarships/${opportunity.id}/`, {
+            const response = await fetch(`https://is.arielmerinos.com/scholarships/${opportunity.id}/`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${authToken}`,

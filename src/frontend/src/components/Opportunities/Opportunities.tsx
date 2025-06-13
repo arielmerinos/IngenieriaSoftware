@@ -52,7 +52,7 @@ const Opportunities: React.FC = () => {
      */
     useEffect(() => {
         setLoading(true);
-        const url = "http://is.arielmerinos.com/scholarships/";
+        const url = "https://is.arielmerinos.com/scholarships/";
         fetch(url)
             .then((response) => {
                 if (!response.ok) {
