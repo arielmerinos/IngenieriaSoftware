@@ -21,8 +21,18 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
 import { Notification, NotificationType } from "../../types/notification"
+import { ClockIcon } from '@heroicons/react/outline';
 
 export function NotificationCard({ notification } : { notification: Notification }) {
+
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
+
     return (
         <div
             className="
@@ -59,6 +69,10 @@ export function NotificationCard({ notification } : { notification: Notification
                         );
                 }
             })()}
+            <div className="text-xs flex gap-1 w-full justify-end mt-1">
+                {formatDate(notification.date)}
+                <ClockIcon className="h-4 w-4"/>
+            </div>
         </div>
     )
 }
