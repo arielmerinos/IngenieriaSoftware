@@ -169,7 +169,7 @@ export const createTypeService = async (
   }
 
   try {
-    const response = await fetch('http://localhost:8000/types/', {
+    const response = await fetch('https://is.arielmerinos.com/types/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -74,7 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const fetchUserData = async (token: string) => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/user/`,
+                `${import.meta.env.VITE_API_BASE_URL || "https://is.arielmerinos.com"}/api/user/`,
                 {
                     method: "GET",
                     headers: {
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const login = async (username: string, password: string): Promise<boolean> => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/token/`,
+                `${import.meta.env.VITE_API_BASE_URL || "https://is.arielmerinos.com"}/api/token/`,
                 {
                     method: "POST",
                     headers: {
@@ -153,7 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     ): Promise<boolean> => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+                `${import.meta.env.VITE_API_BASE_URL || "https://is.arielmerinos.com"
                 }/api/user/register/`,
                 {
                     method: "POST",

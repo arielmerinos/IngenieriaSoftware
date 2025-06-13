@@ -22,7 +22,7 @@ export interface Opportunity {
      * @returns Una opportunity con la info del JSON.
      */
 export function parseOpportunity(element: any) {
-    const baseUrl = "http://localhost:8000"; // Base URL for media files
+    const baseUrl = "https://is.arielmerinos.com"; // Base URL for media files
     let newElem = {
         id: element.id,
         organization: element.organization || "", // Default to empty string if not present

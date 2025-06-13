@@ -19,6 +19,6 @@ Una vez nuestras imágenes están creadas, las corremos con
 docker compose up 
 ```
 
-Para ver el backend, abre tu navegador y navega a [http://localhost:8000/](http://localhost:8000/).
+Para ver el backend, abre tu navegador y navega a [https://is.arielmerinos.com/](https://is.arielmerinos.com/).
 
 Para ver el frontend, abre tu navegador y navega a [http://localhost:3000/](http://localhost:3000/).

@@ -30,7 +30,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ isLoginMode }) => {
             type="button"
             onClick={() =>
             (window.location.href =
-                "http://localhost:8000/oauth/login/google-oauth2/")
+                "https://is.arielmerinos.com/oauth/login/google-oauth2/")
             }
             className="flex items-center justify-center w-full border border-gray-300 dark:border-gray-600 rounded-full py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
         >

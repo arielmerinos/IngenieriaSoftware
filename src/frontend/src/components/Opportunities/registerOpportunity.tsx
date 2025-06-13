@@ -97,10 +97,10 @@ const RegisterOpportunity: React.FC = () => {
                     interestsResponse,
                     membershipsResponse
                 ] = await Promise.all([
-                    fetch('http://localhost:8000/types/', { headers }),
-                    fetch('http://localhost:8000/countries/', { headers }),
-                    fetch('http://localhost:8000/interests/', { headers }),
-                    fetch(`http://localhost:8000/user/memberships/`, { headers }),
+                    fetch('https://is.arielmerinos.com/types/', { headers }),
+                    fetch('https://is.arielmerinos.com/countries/', { headers }),
+                    fetch('https://is.arielmerinos.com/interests/', { headers }),
+                    fetch(`https://is.arielmerinos.com/user/memberships/`, { headers }),
                 ]);
 
                 if (
