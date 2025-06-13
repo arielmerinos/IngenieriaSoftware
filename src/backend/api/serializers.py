@@ -23,6 +23,7 @@ from django.contrib.auth.models import User
 from django.core.validators import URLValidator, ValidationError
 from rest_framework import serializers
 from .models.scholarship import Scholarship
+from .models.scholarship import Comment
 from .models.user_data import UserData
 from .models.organization import Organization
 from .models.organization import Membership
@@ -260,3 +261,22 @@ class ActivitySerializer(serializers.ModelSerializer):
                     "Name Not Available due to target type."
             }
         return None
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username',
+        required=True
+    )
+
+    scholarship = serializers.PrimaryKeyRelatedField(
+        queryset=Scholarship.objects.all(),
+        write_only=True,
+        required=False
+    )
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'scholarship', 'user', 'content', 'created_at']
+        read_only_fields = ['id', 'created_at']
