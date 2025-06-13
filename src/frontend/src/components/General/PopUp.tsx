@@ -24,14 +24,10 @@ import { useEffect } from "react";
 import { XIcon } from "@heroicons/react/outline";
 import { usePopUp } from "../../contexts/PopUpContext";
 
-/**
- * PopUp component - enhanced with dark mode support and animations
- * This component should only be used via PopUpProvider from the context folder.
- */
+
 export function PopUp() {
     const context = usePopUp();
 
-    // Add keyboard support for Escape key to close the popup
     useEffect(() => {
         const handleEscapeKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && context?.isOpen) {
@@ -39,14 +35,11 @@ export function PopUp() {
             }
         };
 
-        // Add event listener when popup is open
         if (context?.isOpen) {
             document.addEventListener('keydown', handleEscapeKey);
-            // Prevent scrolling on the body when popup is open
             document.body.style.overflow = 'hidden';
         }
 
-        // Cleanup function to remove event listener and restore scrolling
         return () => {
             document.removeEventListener('keydown', handleEscapeKey);
             if (context?.isOpen) {

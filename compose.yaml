@@ -78,7 +78,7 @@ services:
     depends_on:
       - django-web
     environment:
-      REACT_APP_API_URL: http://localhost:8000
+      REACT_APP_API_URL: https://is.arielmerinos.com
     env_file:
       - .env
     volumes:

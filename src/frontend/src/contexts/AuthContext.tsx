@@ -28,14 +28,6 @@ import React, {
     ReactNode,
 } from "react";
 
-// Define la estructura de la información del usuario
-// interface User {
-//     id: number;
-//     username: string;
-//     name: string;
-//     access: string;
-//     refresh: string;
-// }
 
 interface User {
     id: number;
@@ -74,7 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const fetchUserData = async (token: string) => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/user/`,
+                `${import.meta.env.VITE_API_BASE_URL || "https://is.arielmerinos.com"}/api/user/`,
                 {
                     method: "GET",
                     headers: {
@@ -99,7 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    // Opcional: cargar datos del usuario al iniciar o cuando cambia el token
+    // Opcional cargar datos del usuario al iniciar o cuando cambia el token
     useEffect(() => {
         if (authToken) {
             fetchUserData(authToken);
@@ -114,7 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const login = async (username: string, password: string): Promise<boolean> => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/token/`,
+                `${import.meta.env.VITE_API_BASE_URL || "https://is.arielmerinos.com"}/api/token/`,
                 {
                     method: "POST",
                     headers: {
@@ -129,8 +121,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("authToken", data.access);
                 localStorage.setItem("refreshToken", data.refresh);
                 setAuthToken(data.access);
-                // Actualizamos la información del usuario (puedes ajustar el id u otros campos según la respuesta)
-                // setUser({ id: data.user_id || 1, username, name: "", access: data.access, refresh: data.refresh });
                 setUser({ id: data.id, username: data.username });
                 localStorage.setItem("username", username);
                 console.log("Login exitoso, token almacenado:", data.access);
@@ -153,7 +143,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     ): Promise<boolean> => {
         try {
             const response = await fetch(
-                `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+                `${import.meta.env.VITE_API_BASE_URL || "https://is.arielmerinos.com"
                 }/api/user/register/`,
                 {
                     method: "POST",
@@ -168,7 +158,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("authToken", data.token);
                 setAuthToken(data.token);
                 localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
-                // setUser({ id: data.id, username, name, access: data.access, refresh: data.refresh });
                 setUser({ id: data.id, username: data.username });
                 setAuthToken(data.access);
                 localStorage.setItem("authToken", data.access);

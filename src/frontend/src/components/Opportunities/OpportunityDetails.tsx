@@ -55,7 +55,7 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta oportunidad?");
         if (confirmDelete) {
             try {
-                const response = await fetch(`http://localhost:8000/scholarships/${item.id}/`, {
+                const response = await fetch(`https://is.arielmerinos.com/scholarships/${item.id}/`, {
                     method: 'DELETE',
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('authToken')}`,
