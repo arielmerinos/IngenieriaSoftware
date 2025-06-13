@@ -67,6 +67,7 @@ const UserProfile: React.FC = () => {
     phone_number: '',
     bio: '',
     birthday: '',
+    photo: '',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hasLoadedRef = useRef(false);
@@ -106,6 +107,7 @@ const UserProfile: React.FC = () => {
           phone_number: data.student?.phone_number || '',
           bio: data.student?.bio || '',
           birthday: data.student?.birthday || '',
+          photo: data.student?.photo || '',
         });
       } catch (err) {
         console.error('Error fetching profile:', err);

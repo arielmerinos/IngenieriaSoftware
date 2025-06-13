@@ -33,6 +33,7 @@ export interface ProfileData {
 }
 
 export interface EditForm {
+  photo: string;
   first_name: string;
   last_name: string;
   email: string;
