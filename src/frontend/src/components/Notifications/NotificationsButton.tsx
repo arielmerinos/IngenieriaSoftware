@@ -58,7 +58,11 @@ export function NotificationsButton() {
                         let parsedNotifications = response.data.map((notification: any) => parseNotification(notification));
                         let validNotifications = parsedNotifications.filter((notification : Notification) => 
                             notification.type !== NotificationType.Unknown &&
-                            (notification.type !== NotificationType.newComment || notification.author.name !== authContext.user?.username) // Evitar notificaciones de comentarios propios
+                            (notification.type !== NotificationType.newComment || notification.author.name !== authContext.user?.username) && // Evitar notificaciones de comentarios propios
+                            (notification.type !== NotificationType.addFollower || notification.author.name !== authContext.user?.username) &&
+                            (notification.type !== NotificationType.givenAdmin || notification.target.name == authContext.user?.username) && // No muestra donde se le da admin a otros usuarios
+                            (notification.type !== NotificationType.lostAdmin || notification.target.name == authContext.user?.username) &&
+                            (notification.type !== NotificationType.lostAdmin || notification.author.name != authContext.user?.username) // No envia notificacion si tu solito te quitas el privilegio
                         );
                         console.log("Notificaciones obtenidas:", validNotifications);
                         setNotifications(validNotifications);
