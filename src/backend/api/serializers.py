@@ -34,6 +34,7 @@ from .models.interests import Interest
 
 # Imports de Notificaciones
 from actstream.models import Action # Es el modelo de los cosos que crea actstream
+from actstream.actions import follow, unfollow
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -181,6 +182,9 @@ class OrganizationSerializer(serializers.ModelSerializer):
             is_admin=True,
             is_active=True
         )
+
+        follow(request.user, organization, actor_only=False)
+
         return organization
         
 class MembershipSerializer(serializers.ModelSerializer):
@@ -256,6 +260,7 @@ class ActivitySerializer(serializers.ModelSerializer):
                 'type': obj.action_object.__class__.__name__,
                 'name':
                     obj.action_object.content if obj.action_object.__class__.__name__ == "Comment" else
+                    obj.action_object.name if obj.action_object.__class__.__name__ == "Organization" else
                     "Name Not Available due to action_object type."
             }
         return None
