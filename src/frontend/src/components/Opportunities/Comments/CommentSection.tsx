@@ -61,7 +61,7 @@ export function CommentSection( { opportunityContent }: { opportunityContent: Op
         });
     }
 
-    useEffect(() => {
+    function fetchData(){
         apiInstance.get(`scholarships/${ opportunityContent.id }/comment/`)
             .then(response => {
                 console.log("Comentarios:", response.data);
@@ -70,7 +70,9 @@ export function CommentSection( { opportunityContent }: { opportunityContent: Op
             .catch(error => {
                 console.error("Error al obtener los comentarios:", error);
             });
-    }, []);
+    }
+
+    useEffect(() => { fetchData() }, []);
 
     return (
         <div>
@@ -78,7 +80,12 @@ export function CommentSection( { opportunityContent }: { opportunityContent: Op
             { comments.length > 0 ?
                 <div>
                     { comments.map((comment : Comment) => (
-                        <CommentCard key={ comment.id } comment={ comment }  op={opportunityContent.author == comment.author} />
+                        <CommentCard
+                            key={ comment.id }
+                            comment={ comment }
+                            op={opportunityContent.author == comment.author}
+                            reloadParent={fetchData}
+                        />
                     )) }
                 </div>
                 : (

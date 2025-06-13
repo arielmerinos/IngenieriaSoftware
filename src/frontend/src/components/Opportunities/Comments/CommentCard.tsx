@@ -19,10 +19,14 @@ Consulte la Licencia Pública General de GNU para más detalles.
 Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
+import { useAuth } from "../../../contexts/AuthContext";
+import apiInstance from "../../../services/axiosInstance";
 import { Comment } from "../../../types/comment"
-import { UserIcon, ClockIcon } from '@heroicons/react/outline';
+import { UserIcon, ClockIcon, TrashIcon } from '@heroicons/react/outline';
 
-export function CommentCard({ comment, op }: { comment: Comment, op  : boolean }) {
+export function CommentCard({ comment, op, reloadParent }: { comment: Comment, op  : boolean, reloadParent: () => void }) {
+
+    const authContext = useAuth();
 
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('es-ES', {
@@ -32,12 +36,25 @@ export function CommentCard({ comment, op }: { comment: Comment, op  : boolean }
         });
     };
 
+    function handleDelete(){
+        apiInstance.delete(
+            `comment/${comment.id}`,
+            { headers: { 'Authorization': `Bearer ${ authContext.authToken }` } }
+        )
+            .then(response => {
+                console.log("Comentarios:", response.data);
+                reloadParent()
+            })
+            .catch(error => {
+                console.error("Error al borrar comentario:", error);
+            });
+    }
+
     return (
-        <div>
+        <div className="mb-4 text-gray-700 dark:text-gray-300">
         <div
             className="
-                p-3 mb-4 text-gray-700 dark:text-gray-300
-                rounded-xl shadow-md dark:shadow-gray-900">
+                p-3 rounded-xl shadow-md dark:shadow-gray-900">
             <b className="text-sm flex items-center gap-1">
                 <UserIcon className="h-4 w-4"/>
                 {comment.author}
@@ -48,6 +65,19 @@ export function CommentCard({ comment, op }: { comment: Comment, op  : boolean }
             </div>
             </b>
             <p className="text-sm mt-2">{comment.content}</p>
+            <div className="flex w-100% justify-end mt-2">
+            {
+                comment.author == authContext.user?.username &&
+                <TrashIcon
+                    onClick={handleDelete}
+                    className="
+                        h-6 w-6
+                        p-1 rounded-full
+                        hover:bg-gray-300
+                        dark:hover:bg-gray-600"
+                />
+            }
+        </div>
         </div>
         </div>
     );
