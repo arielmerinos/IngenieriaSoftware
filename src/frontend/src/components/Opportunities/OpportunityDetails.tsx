@@ -33,6 +33,7 @@ import {
     PencilIcon,
     TrashIcon
 } from '@heroicons/react/outline';
+import { CommentSection } from './Comments/CommentSection';
 
 const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
     const { user } = useAuth();
@@ -206,9 +207,12 @@ const OpportunityDetails: React.FC<Opportunity> = ({ item }) => {
                 </div>
             </div>
 
+            {/* Comments section */}
+            <CommentSection opportunityContent={item} />
+
             {/* Action buttons */}
             {user?.username === item.author && (
-                <div className="mt-4 flex justify-end space-x-3">
+                <div className="mt-4 flex justify-start space-x-3">
                     <button
                         onClick={handleEdit}
                         disabled={isEditing || isDeleting}

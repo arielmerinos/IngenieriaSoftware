@@ -23,6 +23,7 @@ from django.contrib.auth.models import User
 from django.core.validators import URLValidator, ValidationError
 from rest_framework import serializers
 from .models.scholarship import Scholarship
+from .models.scholarship import Comment
 from .models.user_data import UserData
 from .models.organization import Organization
 from .models.organization import Membership
@@ -218,10 +219,11 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     actor = serializers.SerializerMethodField()
     target = serializers.SerializerMethodField()
+    action_object = serializers.SerializerMethodField()
 
     class Meta:
         model = Action # Es el modelo de los cosos que crea actstream
-        fields = ['id', 'actor', 'target', 'verb', 'timestamp']
+        fields = ['id', 'actor', 'action_object', 'target', 'verb', 'timestamp']
     
     def get_actor(self, obj):
         if obj.actor:
@@ -243,6 +245,37 @@ class ActivitySerializer(serializers.ModelSerializer):
                 'name':
                     obj.target.username if obj.target.__class__.__name__ == "User" else 
                     obj.target.name if obj.target.__class__.__name__ == "Organization" else
+                    obj.target.name if obj.target.__class__.__name__ == "Scholarship" else
                     "Name Not Available due to target type."
             }
         return None
+    
+    def get_action_object(self, obj):
+        if obj.action_object:
+            return {
+                'id': obj.action_object.id,
+                'type': obj.action_object.__class__.__name__,
+                'name':
+                    obj.action_object.content if obj.action_object.__class__.__name__ == "Comment" else
+                    "Name Not Available due to action_object type."
+            }
+        return None
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username',
+        required=True
+    )
+
+    scholarship = serializers.PrimaryKeyRelatedField(
+        queryset=Scholarship.objects.all(),
+        write_only=True,
+        required=False
+    )
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'scholarship', 'user', 'content', 'created_at']
+        read_only_fields = ['id', 'created_at']

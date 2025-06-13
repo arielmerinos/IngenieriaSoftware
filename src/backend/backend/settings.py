@@ -66,7 +66,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=3000),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
@@ -203,6 +203,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
+    "https://in.arielmerinos.com",
     "http://localhost:3000",
     "http://0.0.0.0:3000",
 ]
@@ -216,3 +217,9 @@ ACTSTREAM_SETTINGS = {
     # 'USE_JSONFIELD': True,
     'GFK_FETCH_DEPTH': 1,
 }
+
+csrf_origins_str = os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://is.arielmerinos.com,https://*.railway.app')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()]
+
+
+

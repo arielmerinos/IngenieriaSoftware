@@ -63,3 +63,23 @@ class Scholarship(models.Model):
     class Meta:
         verbose_name = "Scholarship"
         verbose_name_plural = "Scholarships"
+
+class Comment(models.Model):
+
+    id = models.AutoField(primary_key=True)
+    
+    scholarship = models.ForeignKey(
+        Scholarship,
+        on_delete=models.CASCADE
+    )
+    
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True) # Solo se establece al crear el comentario, no al actualizarlo
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.scholarship.name}"

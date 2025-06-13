@@ -27,7 +27,11 @@ export function NotificationsMenu({ notifications } : { notifications: Notificat
         <div className="relative">
             <div
                 className="absolute left-1/2 -translate-x-1/2 mt-2 w-96 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-100 dark:border-gray-700">
-                    {
+                    {   notifications.length === 0 ?
+                        <div className="px-8 py-2 text-sm text-gray-700 dark:text-gray-200">
+                            No tienes notificaciones
+                        </div>
+                        :
                         notifications.map((notification) => (
                             <NotificationCard notification={notification} />
                         ))
