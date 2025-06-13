@@ -261,6 +261,26 @@ class ActivitySerializer(serializers.ModelSerializer):
             }
         return None
 
+
+
+class UserDataSerializer(serializers.ModelSerializer):
+    interests = InterestSerializer(many=True, read_only=True)
+    memberships = MembershipSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = UserData
+        fields = [
+            "id", 
+            "interests", 
+            "phone_number", 
+            "birthday", 
+            "user", 
+            "memberships", 
+            "photo"
+        ]
+        read_only_fields = ["user", "id"]
+        extra_kwargs = {"user": {"read_only": True}}
+        
 class PublicUserProfileSerializer(serializers.ModelSerializer):
     student = UserDataSerializer(read_only=True)
 

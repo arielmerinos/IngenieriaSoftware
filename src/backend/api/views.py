@@ -757,14 +757,39 @@ class TypeListView(APIView):
         return Response(serializer.data)
 
 
+
 class PublicUserProfileView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, id):
-        user = get_object_or_404(User, id=id)
-        serializer = PublicUserProfileSerializer(user)
-        return Response(serializer.data)
-
+        print(f"=== DEBUG: Obteniendo perfil para usuario ID: {id} ===")
+        print(f"Request headers: {dict(request.headers)}")
+        
+        try:
+            user = get_object_or_404(User, id=id)
+            print(f"Usuario encontrado: {user.username}")
+            
+            # Asegurar que el usuario tenga un objeto student
+            if not hasattr(user, 'student'):
+                print("Creando UserData para el usuario...")
+                UserData.objects.create(user=user)
+                # Refrescar el objeto user desde la base de datos
+                user.refresh_from_db()
+            
+            print("Serializando datos del usuario...")
+            serializer = PublicUserProfileSerializer(user)
+            print(f"Datos serializados: {serializer.data}")
+            
+            return Response(serializer.data)
+            
+        except Exception as e:
+            print(f"Error in PublicUserProfileView: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {'error': f'Error al obtener el perfil: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class UpdateProfilePhotoView(APIView):
     permission_classes = [IsAuthenticated]
@@ -778,3 +803,25 @@ class UpdateProfilePhotoView(APIView):
         user_data.photo = photo
         user_data.save()
         return Response({"message": "Foto actualizada correctamente."})
+
+class UpdateUserView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def patch(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+class UpdateStudentView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def patch(self, request):
+        student, created = UserData.objects.get_or_create(user=request.user)
+        serializer = UserDataSerializer(student, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
