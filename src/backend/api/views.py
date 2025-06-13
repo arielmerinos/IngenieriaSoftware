@@ -19,6 +19,7 @@
 # junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 
 # Imports de Django
+from urllib import request
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
@@ -46,7 +47,7 @@ from .models.scholarship import Comment
 from .serializers import (
     UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
     MembershipSerializer, CategorySerializer, UserDataSerializer, 
-    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, CommentSerializer
+    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, PublicUserProfileSerializer, CommentSerializer
 )
 
 # Imports de Notifiaciones
@@ -582,6 +583,12 @@ class FollowOrganizationView(APIView):
             membership.save()
 
         serializer = MembershipSerializer(membership)
+        
+        action.send(
+            request.user,
+            target=organization,
+            verb= "addFollower" if membership.is_active else "dropFollower"
+        )
 
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(serializer.data, status=status_code)
@@ -616,6 +623,24 @@ class ToggleAdminStatusView(APIView):
         membership_to_change.save()
 
         serializer = MembershipSerializer(membership_to_change)
+
+        if membership_to_change.is_admin:
+            follow(membership_to_change.user, membership_to_change.organization, actor_only=False)
+            action.send(
+                request.user,
+                target=membership_to_change.user,
+                verb="givenAdmin",
+                action_object=membership_to_change.organization
+            )
+        else:
+            unfollow(membership_to_change.user, membership_to_change.organization)
+            action.send(
+                request.user,
+                target=membership_to_change.user,
+                verb="lostAdmin",
+                action_object=membership_to_change.organization
+            )
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class OrganizationMembershipsView(APIView):
@@ -684,6 +709,86 @@ class TypeListView(APIView):
     def get(self, request):
         types = Type.objects.all()
         serializer = TypeSerializer(types, many=True)
+        return Response(serializer.data)
+
+class PublicUserProfileView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, id):
+        print(f"=== DEBUG: Obteniendo perfil para usuario ID: {id} ===")
+        print(f"Request headers: {dict(request.headers)}")
+        
+        try:
+            user = get_object_or_404(User, id=id)
+            print(f"Usuario encontrado: {user.username}")
+            
+            # Asegurar que el usuario tenga un objeto student
+            if not hasattr(user, 'student'):
+                print("Creando UserData para el usuario...")
+                UserData.objects.create(user=user)
+                # Refrescar el objeto user desde la base de datos
+                user.refresh_from_db()
+            
+            print("Serializando datos del usuario...")
+            #serializer = PublicUserProfileSerializer(user)
+            serializer = PublicUserProfileSerializer(user, context={'request': request})
+            print(f"Datos serializados: {serializer.data}")
+            
+            return Response(serializer.data)
+            
+        except Exception as e:
+            print(f"Error in PublicUserProfileView: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {'error': f'Error al obtener el perfil: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class UserDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        print(user)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+    
+    def patch(self, request):
+        user = request.user
+    
+        user_data, created = UserData.objects.get_or_create(user=user)
+    
+        user_fields = ['first_name', 'last_name', 'email']
+        user_updated = False
+        for field in user_fields:
+            if field in request.data:
+                setattr(user, field, request.data[field])
+                user_updated = True
+    
+        if user_updated:
+            user.save()
+            print(f"User updated: {user.first_name} {user.last_name}")
+    
+        student_fields = ['phone_number', 'bio', 'birthday']
+        student_updated = False
+        for field in student_fields:
+            if field in request.data:
+                setattr(user_data, field, request.data[field])
+                student_updated = True
+    
+        if 'photo' in request.FILES:
+            user_data.photo = request.FILES['photo']
+            student_updated = True
+            print(f"Photo updated: {user_data.photo.name}")
+    
+        if student_updated:
+            user_data.save()
+            print(f"UserData updated: bio={user_data.bio}, photo={user_data.photo}")
+    
+        user.refresh_from_db()
+        user_data.refresh_from_db()
+        serializer = PublicUserProfileSerializer(user, context={'request': request})
         return Response(serializer.data)
 
 class CommentView(APIView):

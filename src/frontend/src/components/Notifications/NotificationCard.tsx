@@ -52,7 +52,7 @@ export function NotificationCard({ notification } : { notification: Notification
                     case NotificationType.Unknown:
                         return (
                             <p>
-                                Notificación Desconocida {notification.type}.
+                                <b>{notification.type}</b>, <b>{notification.author.name}</b>, <b>{notification.target.name}</b>.
                             </p>
                         );
                     case NotificationType.newComment:
@@ -61,10 +61,34 @@ export function NotificationCard({ notification } : { notification: Notification
                                 <b>{notification.author.name}</b> ha comentado en tu oportunidad <b>{notification.target.name}</b>.
                             </p>
                         );
+                    case NotificationType.addFollower:
+                        return (
+                            <p>
+                                <b>{notification.author.name}</b> ahora sigue a tu organización <b>{notification.target.name}</b>.
+                            </p>
+                        );
+                    case NotificationType.dropFollower:
+                        return (
+                            <p>
+                                <b>{notification.author.name}</b> ha dejado de seguir a tu organización <b>{notification.target.name}</b>.
+                            </p>
+                        )
+                    case NotificationType.givenAdmin:
+                        return (
+                            <p>
+                                <b>{notification.author.name}</b> te ha convertido en administrador de la organización <b>{notification.object.name}</b>.
+                            </p>
+                        )
+                    case NotificationType.lostAdmin:
+                        return (
+                            <p>
+                                El usuario <b>{notification.author.name}</b> te ha retirado privilegios de administrador de la organización <b>{notification.object.name}</b>.
+                            </p>
+                        )
                     default:
                         return (
                             <p>
-                                Tipo de Notificación Desconocida {notification.type}.
+                                <b>{notification.type}</b>, <b>{notification.author.name}</b>, <b>{notification.target.name}</b>.
                             </p>
                         );
                 }

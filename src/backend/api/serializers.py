@@ -34,6 +34,7 @@ from .models.interests import Interest
 
 # Imports de Notificaciones
 from actstream.models import Action # Es el modelo de los cosos que crea actstream
+from actstream.actions import follow, unfollow
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -140,13 +141,6 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class UserDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserData
-        fields = ["id", "history_search", "interests", "phone_number", "birthday", "user", "memberships", "history_search"]
-        read_only_fields = ["user", "id"]
-        extra_kwargs = {"user": {"read_only": True}}
-        
 class OrganizationSerializer(serializers.ModelSerializer):
     website = serializers.CharField(allow_blank=True, required=False)
 
@@ -181,6 +175,9 @@ class OrganizationSerializer(serializers.ModelSerializer):
             is_admin=True,
             is_active=True
         )
+
+        follow(request.user, organization, actor_only=False)
+
         return organization
         
 class MembershipSerializer(serializers.ModelSerializer):
@@ -212,10 +209,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ["id", "name"]
 
-
-
 class ActivitySerializer(serializers.ModelSerializer):
-
     actor = serializers.SerializerMethodField()
     target = serializers.SerializerMethodField()
     action_object = serializers.SerializerMethodField()
@@ -236,7 +230,6 @@ class ActivitySerializer(serializers.ModelSerializer):
         return None
 
     def get_target(self, obj):
-
         if obj.target:
             return {
                 'id': obj.target.id,
@@ -256,12 +249,47 @@ class ActivitySerializer(serializers.ModelSerializer):
                 'type': obj.action_object.__class__.__name__,
                 'name':
                     obj.action_object.content if obj.action_object.__class__.__name__ == "Comment" else
+                    obj.action_object.name if obj.action_object.__class__.__name__ == "Organization" else
                     "Name Not Available due to action_object type."
             }
         return None
 
-class CommentSerializer(serializers.ModelSerializer):
+class UserDataSerializer(serializers.ModelSerializer):
+    interests = InterestSerializer(many=True, read_only=True)
+    memberships = MembershipSerializer(many=True, read_only=True)
+    photo = serializers.ImageField(read_only=True)
+    
+    class Meta:
+        model = UserData
+        fields = [
+            "id", 
+            "interests", 
+            "phone_number", 
+            "birthday", 
+            "user", 
+            "memberships", 
+            "photo",
+            "bio"
+        ]
+        read_only_fields = ["user", "id"]
+        extra_kwargs = {"user": {"read_only": True}}
 
+class PublicUserProfileSerializer(serializers.ModelSerializer):
+    student = UserDataSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'student']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data['student'] and data['student']['photo']:
+            request = self.context.get('request')
+            if request:
+                data['student']['photo'] = request.build_absolute_uri(data['student']['photo'])
+        return data
+
+class CommentSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         queryset=User.objects.all(),
         slug_field='username',
