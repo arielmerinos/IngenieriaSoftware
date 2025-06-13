@@ -216,3 +216,9 @@ ACTSTREAM_SETTINGS = {
     # 'USE_JSONFIELD': True,
     'GFK_FETCH_DEPTH': 1,
 }
+
+# Debug info (quitar después de que funcione)
+print(f"SECRET_KEY configurada: {len(SECRET_KEY) > 20}")
+print(f"DEBUG: {DEBUG}")
+print(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+print(f"Database: {DATABASES['default']['NAME']}")
