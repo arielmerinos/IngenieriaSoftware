@@ -28,14 +28,6 @@ import React, {
     ReactNode,
 } from "react";
 
-// Define la estructura de la información del usuario
-// interface User {
-//     id: number;
-//     username: string;
-//     name: string;
-//     access: string;
-//     refresh: string;
-// }
 
 interface User {
     id: number;
@@ -99,7 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     };
 
-    // Opcional: cargar datos del usuario al iniciar o cuando cambia el token
+    // Opcional cargar datos del usuario al iniciar o cuando cambia el token
     useEffect(() => {
         if (authToken) {
             fetchUserData(authToken);
@@ -129,8 +121,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("authToken", data.access);
                 localStorage.setItem("refreshToken", data.refresh);
                 setAuthToken(data.access);
-                // Actualizamos la información del usuario (puedes ajustar el id u otros campos según la respuesta)
-                // setUser({ id: data.user_id || 1, username, name: "", access: data.access, refresh: data.refresh });
                 setUser({ id: data.id, username: data.username });
                 localStorage.setItem("username", username);
                 console.log("Login exitoso, token almacenado:", data.access);
@@ -168,7 +158,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 localStorage.setItem("authToken", data.token);
                 setAuthToken(data.token);
                 localStorage.setItem("username", username); // Guardar el nombre de usuario en localStorag
-                // setUser({ id: data.id, username, name, access: data.access, refresh: data.refresh });
                 setUser({ id: data.id, username: data.username });
                 setAuthToken(data.access);
                 localStorage.setItem("authToken", data.access);
