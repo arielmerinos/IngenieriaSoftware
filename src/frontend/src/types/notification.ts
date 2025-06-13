@@ -40,6 +40,7 @@ export interface Notification {
  */
 export enum NotificationType {
     createdAccount = "createdAccount",
+    newComment = "newComment",
     Unknown = "Unknown",
 }
 
@@ -55,6 +56,7 @@ export interface NotificationActor {
 export enum NotificationActorType {
     User = "User",
     Organization = "Organization",
+    Scholarship = "Scholarship",
     Unknown = "Unknown",
 }
 
@@ -77,6 +79,8 @@ export function parseNotificationType(data: any): NotificationType {
     switch (data.verb) {
         case "createdAccount":
             return NotificationType.createdAccount;
+        case "newComment":
+            return NotificationType.newComment;
         default:
             return NotificationType.Unknown;
     }
