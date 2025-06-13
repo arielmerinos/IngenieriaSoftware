@@ -32,21 +32,21 @@ import OpportunityDetails from '../Opportunities/OpportunityDetails';
 import { usePopUp } from '../../contexts/PopUpContext';
 import { OpportunityContent } from '../../types/opportunity';
 import { parseOpportunity } from '../../types/opportunity';
-import { SearchIcon, FilterIcon } from "@heroicons/react/outline";
+import { SearchIcon, FilterIcon, StarIcon } from "@heroicons/react/outline";
+import { StarIcon as StarIconSolid } from "@heroicons/react/solid";
+import PromoteInOrg from './PromoteInOrg';
 
-// Interfaz para los objetos que devuelve la API
 interface ApiObject {
   id: number;
   name: string;
   color?: string;
 }
 
-// Interfaz para las scholarships (basada en tu serializer)
 interface Scholarship {
   id: number;
   name: string;
   content: string;
-  organization: string; // nombre de la organización
+  organization: string;
   organization_id: number;
   publication_date: string;
   start_date: string;
@@ -58,6 +58,15 @@ interface Scholarship {
   country: (string | ApiObject)[];
 }
 
+interface Membership {
+  id: number;
+  user: number;
+  organization: Organization;
+  organization_id: number;
+  is_admin: boolean;
+  is_active: boolean;
+}
+
 const OrganizationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [organization, setOrganization] = useState<Organization | null>(null);
@@ -65,26 +74,94 @@ const OrganizationDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [scholarshipsLoading, setScholarshipsLoading] = useState<boolean>(true);
   const [editOpen, setEditOpen] = useState<boolean>(false);
+  const [promoteOpen, setPromoteOpen] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [adminMembershipsLoading, setAdminMembershipsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("");
   const [availableTypes, setAvailableTypes] = useState<string[]>([]);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const [followLoading, setFollowLoading] = useState<boolean>(false);
+  const [followError, setFollowError] = useState<string | null>(null);
   
   const authContext = useAuth();
   const popUpContext = usePopUp();
 
   /**
-   * Abre el Pop Up de la oportunidad que le hace click
-   * @param OpportunityContent de la oportunidad que le hace click
+   * Abre el modal de detalles de una oportunidad específica
    */
   function openPopUp(opportunity: OpportunityContent) {
     popUpContext?.setContent(<OpportunityDetails item={opportunity} />);
     popUpContext?.setOpen(true);
   }
 
-  // Función para verificar si el usuario es admin de la organización
+  /**
+   * Verifica si el usuario actual sigue la organización
+   */
+  const checkFollowStatus = async () => {
+    if (!authContext.authToken || !id) return;
+    
+    try {
+      const token = authContext.authToken;
+      const response = await apiInstance.get('user/memberships/', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const memberships = response.data;
+      const currentMembership = memberships.find((membership: any) => 
+        membership.organization.id === parseInt(id)
+      );
+      
+      if (currentMembership) {
+        setIsFollowing(currentMembership.is_active);
+      }
+    } catch (error) {
+      console.error('Error al verificar estado de seguimiento:', error);
+    }
+  };
+
+  /**
+   * Alterna el estado de seguimiento de la organización
+   */
+  const toggleFollow = async () => {
+    if (!authContext.authToken || !id) return;
+    
+    setFollowLoading(true);
+    setFollowError(null);
+    
+    try {
+      const token = authContext.authToken;
+      const response = await apiInstance.post(
+        'organization/follow/',
+        { organization_id: parseInt(id) },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      const membership: Membership = response.data;
+      setIsFollowing(membership.is_active);
+      
+    } catch (error: any) {
+      console.error('Error al seguir/dejar de seguir organización:', error);
+      setFollowError(
+        error.response?.data?.error || 
+        'Error al procesar la solicitud. Inténtalo de nuevo.'
+      );
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  /**
+   * Verifica si el usuario tiene permisos de administrador en la organización
+   */
   const checkAdminMembership = async () => {
     try {
       const token = authContext.authToken;
@@ -94,7 +171,6 @@ const OrganizationDetail: React.FC = () => {
         }
       });
       
-      // Verificar si la organización actual está en la lista de memberships admin
       const adminOrganizations = response.data;
       const isUserAdmin = adminOrganizations.some((membership: any) => 
         membership.organization.id === parseInt(id || '0')
@@ -109,20 +185,19 @@ const OrganizationDetail: React.FC = () => {
     }
   };
 
-  // Función para cargar las scholarships de la organización
+  /**
+   * Carga las oportunidades de beca de la organización
+   */
   const loadScholarships = async () => {
     try {
       setScholarshipsLoading(true);
       setError(null);
-      // Hacer la petición al endpoint correcto con el filtro de organización
       const response = await apiInstance.get(`scholarships/?organization=${id}`);
       const rawScholarships = response.data || [];
       
-      // Convertir las scholarships al formato OpportunityContent usando parseOpportunity
       const opportunities = rawScholarships.map((item: any) => parseOpportunity(item));
       setScholarships(opportunities);
       
-      // Extract all types from opportunities for filtering
       const types = new Set<string>();
       opportunities.forEach((opportunity: OpportunityContent) => {
         if (Array.isArray(opportunity.type)) {
@@ -144,7 +219,6 @@ const OrganizationDetail: React.FC = () => {
 
   useEffect(() => {
     if (id) {
-      // Cargar datos de la organización
       apiInstance
         .get(`api/organizations/${id}/`)
         .then((response: { data: Organization | null }) => {
@@ -156,18 +230,20 @@ const OrganizationDetail: React.FC = () => {
           setLoading(false);
         });
 
-      // Cargar scholarships de la organización
       loadScholarships();
 
-      // Verificar si el usuario es admin (solo si está autenticado)
       if (authContext.authToken) {
         checkAdminMembership();
+        checkFollowStatus();
       } else {
         setAdminMembershipsLoading(false);
       }
     }
   }, [id, authContext.authToken]);
 
+  /**
+   * Maneja la eliminación de la organización
+   */
   const handleDelete = () => {
     if (window.confirm('¿Estás seguro de eliminar esta organización?')) {
       const token = authContext.authToken;
@@ -191,6 +267,9 @@ const OrganizationDetail: React.FC = () => {
     }
   };
 
+  /**
+   * Maneja la actualización exitosa de la organización
+   */
   const handleEditUpdated = (updatedData: Organization) => {
     if (organization) {
       setOrganization({ ...organization, ...updatedData });
@@ -198,7 +277,9 @@ const OrganizationDetail: React.FC = () => {
     setEditOpen(false);
   };
 
-  // Filter opportunities based on search term and filter type
+  /**
+   * Filtra las oportunidades basado en término de búsqueda y tipo
+   */
   const filteredScholarships = scholarships.filter((opportunity) => {
     const matchesSearch = searchTerm === "" || 
       opportunity.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -219,7 +300,6 @@ const OrganizationDetail: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Encabezado de la organización - Modificado */}
       <div className="mb-8">
         <div className="
           bg-white dark:bg-gray-800
@@ -227,10 +307,39 @@ const OrganizationDetail: React.FC = () => {
           overflow-hidden
           transition-colors duration-200
         ">
-          {/* Banner superior más sutil */}
           <div className="relative">
             <div className="h-32 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700"></div>
-            {/* Logo - Ahora el doble de grande (48x48 -> 96x96) */}
+            
+            {authContext.authToken && (
+              <div className="absolute top-4 right-4">
+                <button
+                  onClick={toggleFollow}
+                  disabled={followLoading}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
+                    ${followLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                    ${isFollowing 
+                      ? 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-lg' 
+                      : 'bg-white/90 hover:bg-white text-gray-700 border border-white/20 backdrop-blur-sm'
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2
+                  `}
+                  title={isFollowing ? 'Dejar de seguir' : 'Seguir organización'}
+                >
+                  {followLoading ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-current"></div>
+                  ) : isFollowing ? (
+                    <StarIconSolid className="h-5 w-5" />
+                  ) : (
+                    <StarIcon className="h-5 w-5" />
+                  )}
+                  <span className="text-sm">
+                    {followLoading ? 'Cargando...' : isFollowing ? 'Siguiendo' : 'Seguir'}
+                  </span>
+                </button>
+              </div>
+            )}
+            
             <div className="absolute left-8 top-8 w-48 h-48 bg-white dark:bg-gray-800 rounded-lg border-4 border-white dark:border-gray-800 shadow-md overflow-hidden">
               <img
                 src={organization.logo || '/default-logo.svg'}
@@ -241,10 +350,14 @@ const OrganizationDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Contenido principal - Ajustado para la imagen más grande */}
+          {followError && (
+            <div className="mx-8 mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg text-sm">
+              {followError}
+            </div>
+          )}
+
           <div className="pt-32 pb-8 px-8">
             <div className="flex flex-col gap-6">
-              {/* Información básica */}
               <div className="flex-grow">
                 <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-3">
                   {organization.name}
@@ -253,7 +366,6 @@ const OrganizationDetail: React.FC = () => {
                   {organization.description}
                 </p>
 
-                {/* Información de contacto en grid horizontal */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
                     <span className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -293,9 +405,22 @@ const OrganizationDetail: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Botones de acción - Ahora debajo de los medios de contacto, en la esquina derecha */}
-                {isAdmin && (
-                  <div className="flex justify-end">
+                {authContext.authToken && isAdmin && (
+                  <div className="flex justify-between items-end">
+                    <button
+                      onClick={() => setPromoteOpen(true)}
+                      className="
+                        px-6 py-2 rounded-lg
+                        bg-green-600 dark:bg-green-700
+                        text-white font-medium
+                        hover:bg-green-700 dark:hover:bg-green-800
+                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+                        transition-colors duration-200
+                        border border-transparent
+                      "
+                    >
+                      Administradores
+                    </button>
                     <div className="flex gap-3">
                       <button
                         onClick={() => setEditOpen(true)}
@@ -334,7 +459,6 @@ const OrganizationDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Sección de Oportunidades */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -347,10 +471,8 @@ const OrganizationDetail: React.FC = () => {
           </div>
         </div>
         
-        {/* Search and filter section - Solo mostrar si hay oportunidades */}
         {scholarships.length > 0 && (
           <div className="flex flex-col md:flex-row gap-4 mb-8">
-            {/* Search bar */}
             <div className="relative flex-grow">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <SearchIcon className="h-5 w-5 text-gray-400" />
@@ -364,7 +486,6 @@ const OrganizationDetail: React.FC = () => {
               />
             </div>
             
-            {/* Type filter */}
             {availableTypes.length > 0 && (
               <div className="relative w-full md:w-64">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -388,21 +509,18 @@ const OrganizationDetail: React.FC = () => {
         )}
       </div>
 
-      {/* Loading state */}
       {scholarshipsLoading && (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}
 
-      {/* Error state */}
       {error && (
         <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg mb-6">
           <p>{error}</p>
         </div>
       )}
 
-      {/* No results state */}
       {!scholarshipsLoading && !error && scholarships.length === 0 && (
         <div className="text-center py-12 bg-gray-100 dark:bg-gray-700 rounded-lg">
           <div className="text-gray-400 mb-4">
@@ -419,7 +537,6 @@ const OrganizationDetail: React.FC = () => {
         </div>
       )}
 
-      {/* Filtered no results state */}
       {!scholarshipsLoading && !error && scholarships.length > 0 && filteredScholarships.length === 0 && (
         <div className="text-center py-12">
           <h3 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -431,7 +548,6 @@ const OrganizationDetail: React.FC = () => {
         </div>
       )}
 
-      {/* Opportunities grid */}
       {!scholarshipsLoading && !error && filteredScholarships.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {filteredScholarships.map((opportunity, index) => (
@@ -442,7 +558,6 @@ const OrganizationDetail: React.FC = () => {
         </div>
       )}
 
-      {/* Modal para editar - Solo mostrar si es admin */}
       {isAdmin && editOpen && organization.id !== undefined && (
         <PopUpModal onClose={() => setEditOpen(false)}>
           <EditOrganizationForm
@@ -456,6 +571,12 @@ const OrganizationDetail: React.FC = () => {
             }}
             onUpdated={handleEditUpdated}
           />
+        </PopUpModal>
+      )}
+
+      {isAdmin && promoteOpen && (
+        <PopUpModal onClose={() => setPromoteOpen(false)}>
+          <PromoteInOrg organizationId={organization.id} onClose={() => setPromoteOpen(false)} />
         </PopUpModal>
       )}
     </div>

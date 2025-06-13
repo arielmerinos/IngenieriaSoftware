@@ -22,7 +22,7 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 import { BellIcon } from "@heroicons/react/outline";
 import { useRef, useState, useEffect } from "react";
 import { NotificationsMenu } from "./NotificationsMenu";
-import { Notification, parseNotification } from "../../types/notification";
+import { Notification, NotificationType, parseNotification } from "../../types/notification";
 import { useAuth } from "../../contexts/AuthContext";
 import apiInstance from "../../services/axiosInstance";
 
@@ -56,7 +56,12 @@ export function NotificationsButton() {
                 )
                     .then(response => {
                         let parsedNotifications = response.data.map((notification: any) => parseNotification(notification));
-                        setNotifications(parsedNotifications);
+                        let validNotifications = parsedNotifications.filter((notification : Notification) => 
+                            notification.type !== NotificationType.Unknown &&
+                            (notification.type !== NotificationType.newComment || notification.author.name !== authContext.user?.username) // Evitar notificaciones de comentarios propios
+                        );
+                        console.log("Notificaciones obtenidas:", validNotifications);
+                        setNotifications(validNotifications);
                     })
                     .catch(error => {
                         console.error('Error al obtener las notificaciones:', error);
@@ -65,7 +70,7 @@ export function NotificationsButton() {
 
             fetchData(); // Primera carga de notificaciones
 
-        // Polling desactivado para la paz mental del autor.
+        // Polling desactivado para la paz mental del autor JAJAJAJAJAAJJA.
 
         //     // Polling notificaciones
         //     setInterval(() => {

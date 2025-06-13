@@ -23,6 +23,7 @@ from django.contrib.auth.models import User
 from django.core.validators import URLValidator, ValidationError
 from rest_framework import serializers
 from .models.scholarship import Scholarship
+from .models.scholarship import Comment
 from .models.user_data import UserData
 from .models.organization import Organization
 from .models.organization import Membership
@@ -45,21 +46,6 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
     
-# class TypeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Type
-#         fields = ['id', 'name', 'type_name']
-        
-# class CountrySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Country
-#         fields = ['id', 'name', 'emoji']
-    
-# class InterestSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Interest
-#         fields = ['id', 'name', 'color']
-
 class TypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Type
@@ -136,7 +122,6 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         type_data = validated_data.pop('type_ids', [])
         interests_data = validated_data.pop('interest_ids', [])
         country_data = validated_data.pop('country_ids', [])
-        # organization is handled by organization_id/source='organization'
         scholarship = Scholarship.objects.create(**validated_data)
         if type_data:
             scholarship.type.set(type_data)
@@ -200,6 +185,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         
 class MembershipSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(read_only=True) 
+    user = UserSerializer(read_only=True)
     organization_id = serializers.PrimaryKeyRelatedField(
         queryset=Organization.objects.all(),
         source='organization',  
@@ -232,10 +218,11 @@ class ActivitySerializer(serializers.ModelSerializer):
 
     actor = serializers.SerializerMethodField()
     target = serializers.SerializerMethodField()
+    action_object = serializers.SerializerMethodField()
 
     class Meta:
         model = Action # Es el modelo de los cosos que crea actstream
-        fields = ['id', 'actor', 'target', 'verb', 'timestamp']
+        fields = ['id', 'actor', 'action_object', 'target', 'verb', 'timestamp']
     
     def get_actor(self, obj):
         if obj.actor:
@@ -257,11 +244,10 @@ class ActivitySerializer(serializers.ModelSerializer):
                 'name':
                     obj.target.username if obj.target.__class__.__name__ == "User" else 
                     obj.target.name if obj.target.__class__.__name__ == "Organization" else
+                    obj.target.name if obj.target.__class__.__name__ == "Scholarship" else
                     "Name Not Available due to target type."
             }
         return None
-
-
 
 class UserDataSerializer(serializers.ModelSerializer):
     interests = InterestSerializer(many=True, read_only=True)
@@ -297,3 +283,33 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
             if request:
                 data['student']['photo'] = request.build_absolute_uri(data['student']['photo'])
         return data
+    
+    def get_action_object(self, obj):
+        if obj.action_object:
+            return {
+                'id': obj.action_object.id,
+                'type': obj.action_object.__class__.__name__,
+                'name':
+                    obj.action_object.content if obj.action_object.__class__.__name__ == "Comment" else
+                    "Name Not Available due to action_object type."
+            }
+        return None
+
+class CommentSerializer(serializers.ModelSerializer):
+
+    user = serializers.SlugRelatedField(
+        queryset=User.objects.all(),
+        slug_field='username',
+        required=True
+    )
+
+    scholarship = serializers.PrimaryKeyRelatedField(
+        queryset=Scholarship.objects.all(),
+        write_only=True,
+        required=False
+    )
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'scholarship', 'user', 'content', 'created_at']
+        read_only_fields = ['id', 'created_at']

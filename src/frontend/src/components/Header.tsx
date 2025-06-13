@@ -41,9 +41,7 @@ const Header: React.FC = () => {
         <nav className="hidden md:flex space-x-6">
           <a href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Home</a>
           <a href="/feed" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Oportunidades</a>
-          <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Quiénes somos</a>
           <a href="/org" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Organizaciones</a>
-          <a href="#" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">Ayuda</a>
         </nav>
         
         <div className="flex items-center space-x-4">

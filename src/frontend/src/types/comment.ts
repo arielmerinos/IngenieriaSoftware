@@ -20,13 +20,22 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import { FeaturedItem } from "../types";
+export interface Comment {
+    /** Id del comentario */
+    id: number;
+    /** Usuario que hizo el comentario */
+    author: string;
+    /** Contenido del comentario */
+    content: string;
+    /** Fecha de creación del comentario */
+    createdAt: Date;
+}
 
-export const FEATURED_ITEMS: FeaturedItem[] = [
-    {
-      title: "Excel - de básico a Intermedio",
-      provider: "Impulsa Academy",
-      category: "Herramientas",
-      date: "Abierto hasta Mar 31, 25",
-      image: "/excel-course.jpg"
-    }  ];
+export function parseComment(comment: any): Comment {
+    return {
+        id: comment.id,
+        author: comment.user,
+        content: comment.content,
+        createdAt: new Date(comment.created_at),
+    };
+}

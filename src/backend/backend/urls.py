@@ -27,13 +27,15 @@ from rest_framework.routers import DefaultRouter
 
 from api.views import (
     CreateUserView, UserDetailView, UserMembershipsView, UserTokenView,
-    ScholarshipListView, JoinOrganizationView, AcceptMembershipView,
+    ScholarshipListView, FollowOrganizationView, ToggleAdminStatusView,
     ScholarshipListCreateView, ScholarshipDetailView, 
     TypeListCreateView, TypeDetailView,
     CountryListCreateView, CountryDetailView,
     InterestListCreateView, InterestDetailView,
     OrganizationViewSet, UserMembershipAdminView, 
     UserNotificationView, PublicUserProfileView
+    UserNotificationView, OrganizationMembershipsView,
+    CommentView, CommentEditView
 )
 
 # Nueva manera de agregar rutas hechas automaticamente
@@ -52,9 +54,10 @@ urlpatterns = [
     path("api/", include("api.urls")),
 
     # Organization views
-    path('api/', include(router.urls), name='organization-crud'),
-    path('organization/join/', JoinOrganizationView.as_view(), name='organization-join'),
-    path('organization/accept/', AcceptMembershipView.as_view(), name='organization-accept'),
+    path('api/', include(router.urls), name='organization-crud'),   
+    path('organization/follow/', FollowOrganizationView.as_view(), name='organization-follow'),
+    path('memberships/toggle-admin/', ToggleAdminStatusView.as_view(), name='organization-promote-toggle'),
+    path('api/organizations/<int:organization_id>/memberships/', OrganizationMembershipsView.as_view(), name='organization-memberships'),
 
     # Scholarship views
     path('scholarships/', ScholarshipListView.as_view(), name='scholarship-list'),
@@ -83,5 +86,8 @@ urlpatterns = [
     #endpointss para el perfil de usuario
     path('api/user/<int:id>/profile/', PublicUserProfileView.as_view(), name='public-user-profile'),
 
+    # Endpoints para comentarios
+    path('scholarships/<int:pk>/comment/', CommentView.as_view(), name='scholarship-comments'),
+    path('comment/<int:pk>', CommentEditView.as_view(), name='comment-operations'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

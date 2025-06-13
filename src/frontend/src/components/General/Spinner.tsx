@@ -20,13 +20,11 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import { FeaturedItem } from "../types";
-
-export const FEATURED_ITEMS: FeaturedItem[] = [
-    {
-      title: "Excel - de básico a Intermedio",
-      provider: "Impulsa Academy",
-      category: "Herramientas",
-      date: "Abierto hasta Mar 31, 25",
-      image: "/excel-course.jpg"
-    }  ];
+export function Spinner(){
+    return(
+        <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600">
+            </div>
+        </div>
+    )
+}
