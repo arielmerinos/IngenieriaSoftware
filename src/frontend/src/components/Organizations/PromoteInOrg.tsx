@@ -1,9 +1,30 @@
+/*
+Nombre del programa: Impulsa tu futuro
+Copyright (C) 2025 - Autores:
+Merino Peña Kevin Ariel
+Ortíz Montiel Diego Iain
+Rodríguez Dimayuga Laura Itzel
+Sosa Romo Juan Mario
+Vargas Campos Miguel Angel
+
+Este programa es software libre: puede redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU v3 publicada por
+la Free Software Foundation.
+
+Este programa se distribuye con la esperanza de que sea útil,
+pero SIN NINGUNA GARANTÍA; sin incluso la garantía implícita de
+COMERCIABILIDAD o IDONEIDAD PARA UN PROPÓSITO PARTICULAR.
+Consulte la Licencia Pública General de GNU para más detalles.
+
+Debería haber recibido una copia de la Licencia Pública General de GNU
+junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
+*/
+
 import React, { useState, useEffect } from 'react';
 import { XIcon, ShieldCheckIcon, UserCircleIcon } from '@heroicons/react/outline';
 import apiInstance from '../../services/axiosInstance';
 import { useAuth } from '../../contexts/AuthContext';
 
-// --- Interfaces (sin cambios) ---
 interface User {
   id: number;
   username: string;
@@ -16,7 +37,6 @@ interface Membership {
   is_admin: boolean;
 }
 
-// --- Props del componente (sin cambios) ---
 interface PromoteInOrgProps {
   organizationId: number | undefined;
   onClose: () => void;
@@ -28,7 +48,6 @@ const PromoteInOrg: React.FC<PromoteInOrgProps> = ({ organizationId, onClose }) 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- useEffect para cargar los miembros (ahora usa el endpoint correcto) ---
   useEffect(() => {
     if (!organizationId) {
         setLoading(false);
@@ -40,7 +59,6 @@ const PromoteInOrg: React.FC<PromoteInOrgProps> = ({ organizationId, onClose }) 
       setLoading(true);
       setError(null);
       try {
-        // AJUSTE: Usamos la nueva URL que creamos en Django
         const response = await apiInstance.get(`/api/organizations/${organizationId}/memberships/`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
@@ -48,7 +66,6 @@ const PromoteInOrg: React.FC<PromoteInOrgProps> = ({ organizationId, onClose }) 
         console.log(response.data);
       } catch (err: any) {
         console.error("Error al cargar los miembros:", err);
-        // Mostrar el error que nos manda el backend si existe
         const errorMessage = err.response?.data?.error || "No se pudieron cargar los miembros.";
         setError(errorMessage);
       } finally {
@@ -60,20 +77,15 @@ const PromoteInOrg: React.FC<PromoteInOrgProps> = ({ organizationId, onClose }) 
   }, [organizationId, authToken]);
 
 
-  // --- Función para cambiar el rol (ahora usa el endpoint de toggle) ---
   const handleToggleAdminStatus = async (membershipId: number, currentIsAdmin: boolean) => {
     try {
-      // AJUSTE: Usamos el nuevo endpoint y método POST.
-      // El backend espera un cuerpo con "membership_id".
       await apiInstance.post(
         `/memberships/toggle-admin/`, 
-        { membership_id: membershipId }, // Enviamos el ID en el cuerpo
+        { membership_id: membershipId }, 
         {
           headers: { 'Authorization': `Bearer ${authToken}` }
         }
       );
-
-      // Actualizamos el estado local para reflejar el cambio en la UI sin recargar
       setMembers(prevMembers =>
         prevMembers.map(member =>
           member.id === membershipId
@@ -88,7 +100,6 @@ const PromoteInOrg: React.FC<PromoteInOrgProps> = ({ organizationId, onClose }) 
   };
 
 
-  // --- Renderizado (sin cambios, ya era correcto) ---
   const renderContent = () => {
     if (loading) {
       return (

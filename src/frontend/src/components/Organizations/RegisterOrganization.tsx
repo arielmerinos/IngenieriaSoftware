@@ -37,7 +37,6 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
   const popUpContext = usePopUp();
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Add state for logo preview
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const {
     register,
@@ -58,7 +57,6 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
 
   const watchLogo = watch('logo');
 
-  // Generate preview when logo changes
   useEffect(() => {
     if (watchLogo && watchLogo.length > 0) {
       const file = watchLogo[0];
@@ -163,7 +161,6 @@ export function RegisterOrganizationForm({ onUpdate }: RegisterOrganizationFormP
           Sitio Web
         </label>
         <input
-          // type="url"
           id="website"
           placeholder="https://www.miempresa.com"
           {...register('website', {

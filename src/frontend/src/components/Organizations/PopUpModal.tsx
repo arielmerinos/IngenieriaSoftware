@@ -66,19 +66,6 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
     };
   }, [onClose]);
 
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    const container = modalRef.current;
-    if (!container) return;
-    
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    
-    if (
-      (scrollTop === 0 && e.deltaY < 0) ||
-      (scrollTop + clientHeight >= scrollHeight && e.deltaY > 0)
-    ) {
-      // e.preventDefault();
-    }
-  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -90,7 +77,6 @@ const PopUpModal: React.FC<PopUpModalProps> = ({ onClose, children }) => {
       
       <div 
         ref={modalRef}
-        onWheel={handleWheel}
         className="
           relative
           w-full max-w-xl mx-2
