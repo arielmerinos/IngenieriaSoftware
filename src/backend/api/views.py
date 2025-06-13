@@ -638,7 +638,6 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_authenticated:
             raise PermissionDenied("Debes estar autenticado para realizar esta acción.")
         
-        # Verificar si el usuario es admin de esta organización
         is_admin = Membership.objects.filter(
             user=self.request.user,
             organization=organization,
@@ -686,7 +685,6 @@ class FollowOrganizationView(APIView):
 
         organization = get_object_or_404(Organization, id=organization_id)
 
-        # Obtiene o crea la Membership
         membership, created = Membership.objects.get_or_create(
             user=request.user,
             organization=organization,
@@ -697,13 +695,11 @@ class FollowOrganizationView(APIView):
         )
 
         if not created:
-            # Ya existía: alternamos is_active
             membership.is_active = not membership.is_active
             membership.save()
 
         serializer = MembershipSerializer(membership)
 
-        # Código HTTP: 201 si se creó, 200 si sólo se actualizó
         status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         return Response(serializer.data, status=status_code)
         
@@ -720,13 +716,10 @@ class ToggleAdminStatusView(APIView):
             return Response({"error": "Se requiere el ID de la membresía (membership_id)."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # La membresía que queremos cambiar
             membership_to_change = Membership.objects.get(id=membership_id)
         except Membership.DoesNotExist:
             return Response({"error": "La membresía no existe."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Verificación de permisos: El usuario que hace la petición DEBE ser admin de la misma organización
-        # para poder modificar otros miembros.
         is_requester_admin = Membership.objects.filter(
             organization=membership_to_change.organization,
             user=request.user,
@@ -736,7 +729,6 @@ class ToggleAdminStatusView(APIView):
         if not is_requester_admin:
             return Response({"error": "No tienes permisos para modificar roles en esta organización."}, status=status.HTTP_403_FORBIDDEN)
 
-        # La lógica del TOGGLE
         membership_to_change.is_admin = not membership_to_change.is_admin
         membership_to_change.save()
 

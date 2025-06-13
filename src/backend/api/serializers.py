@@ -122,7 +122,6 @@ class ScholarshipSerializer(serializers.ModelSerializer):
         type_data = validated_data.pop('type_ids', [])
         interests_data = validated_data.pop('interest_ids', [])
         country_data = validated_data.pop('country_ids', [])
-        # organization is handled by organization_id/source='organization'
         scholarship = Scholarship.objects.create(**validated_data)
         if type_data:
             scholarship.type.set(type_data)
