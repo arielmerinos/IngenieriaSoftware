@@ -63,6 +63,10 @@ services:
       - ./src/backend:/app
     command: >
       sh -c "
+            python manage.py makemigrations &&
+            python manage.py migrate &&
+            python populate_data.py &&
+            python manage.py test &&
             python manage.py runserver 0.0.0.0:8000"
 
   react-web:
