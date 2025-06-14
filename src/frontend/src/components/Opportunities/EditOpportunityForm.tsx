@@ -64,8 +64,9 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [serverError, setServerError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreviews, setImagePreviews] = useState<string | null>(null);
     const [memberships, setMemberships] = useState<{ id: number, organization: { id: number, name: string } }[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { authToken, user } = useAuth();
     const popUpContext = usePopUp();
