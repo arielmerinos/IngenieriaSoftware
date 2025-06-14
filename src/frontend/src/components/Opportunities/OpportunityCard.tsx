@@ -39,8 +39,10 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     }, [user, authToken]);
 
     // Format date to a more user-friendly format
-    const formatDate = (date: Date) => {
-        return date.toLocaleDateString('es-ES', {
+    const formatDate = (date: Date | string | undefined) => {
+        if (!date) return '';
+        const dateObject = typeof date === 'string' ? new Date(date) : date;
+        return dateObject.toLocaleDateString('es-ES', {
             day: 'numeric',
             month: 'short',
             year: 'numeric'
