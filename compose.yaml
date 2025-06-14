@@ -63,7 +63,7 @@ services:
       - ./src/backend:/app
     command: >
       sh -c "
-            python manage.py makemigrations &&
+            python manage.py makemigrations --merge &&
             python manage.py migrate &&
             python populate_data.py &&
             python manage.py test &&
