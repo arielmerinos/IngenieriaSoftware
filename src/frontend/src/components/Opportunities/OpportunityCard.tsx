@@ -26,6 +26,15 @@ import { HeartIcon as HeartOutline } from '@heroicons/react/outline';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
+// Utility function to ensure image URLs are absolute
+const ensureAbsoluteImageUrl = (url: string): string => {
+    if (!url) return '/call-placeholder.png';
+    if (url.startsWith('http')) return url;
+    
+    const baseUrl = 'http://localhost:8000';
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     const { user, authToken } = useAuth();
     const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -58,7 +67,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     // Check if scholarship is saved
     const checkSavedStatus = async () => {
         try {
-            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const API_BASE_URL = 'http://localhost:8000';
             const response = await fetch(`${API_BASE_URL}/user/saved-scholarships/`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
@@ -87,7 +96,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
         setIsLoading(true);
 
         try {
-            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const API_BASE_URL = 'http://localhost:8000';
             
             if (isSaved) {
                 // Unsave scholarship
@@ -123,6 +132,9 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
         }
     };
 
+    // Make sure we have the image URL in the correct format
+    const imageUrl = ensureAbsoluteImageUrl(item.image);
+
     return (
         <div className='
             h-full
@@ -140,7 +152,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                 {/* Image section */}
                 <div className='h-48 relative overflow-hidden'>
                     <img
-                        src={item.image}
+                        src={imageUrl}
                         alt={item.name}
                         className="w-full h-full object-cover"
                     />
