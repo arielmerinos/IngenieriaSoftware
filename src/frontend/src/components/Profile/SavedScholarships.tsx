@@ -81,12 +81,20 @@ const SavedScholarships: React.FC = () => {
   if (savedScholarships.length === 0) {
     return <div className="text-center py-6 text-gray-500">No tienes becas guardadas</div>;
   }
-
+  // Log the structure of the saved scholarships
+  console.log('Saved scholarships structure:', savedScholarships);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {savedScholarships.map((saved) => (
-        <OpportunityCard key={saved.id} item={saved.scholarship_data} />
-      ))}
+      {savedScholarships.map((saved) => {
+        const scholarship = saved.scholarship_data || saved;
+        return (
+          <OpportunityCard 
+            key={saved.id} 
+            item={scholarship} 
+          />
+        );
+      })}
     </div>
   );
 };

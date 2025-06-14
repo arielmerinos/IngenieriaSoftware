@@ -20,8 +20,9 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import { Opportunity } from '../../types/opportunity';
-import { CalendarIcon, GlobeIcon, UserIcon, HeartIcon as HeartIconOutline } from '@heroicons/react/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/solid';
+import { CalendarIcon, GlobeIcon, UserIcon } from '@heroicons/react/outline';
+import { HeartIcon } from '@heroicons/react/solid';
+import { HeartIcon as HeartOutline } from '@heroicons/react/outline';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -158,16 +159,15 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                             </span>
                         ))}
                     </div>
-                    
-                    {/* Heart button */}
+                      {/* Heart button */}
                     <button 
                         onClick={toggleSaveStatus}
                         className="absolute top-2 left-2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 focus:outline-none"
                     >
                         {isSaved ? (
-                            <HeartIconSolid className="h-5 w-5 text-red-500" />
+                            <HeartIcon className="h-5 w-5 text-red-500" />
                         ) : (
-                            <HeartIconOutline className="h-5 w-5 text-gray-500 hover:text-red-500" />
+                            <HeartOutline className="h-5 w-5 text-gray-500 hover:text-red-500" />
                         )}
                     </button>
                 </div>
