@@ -39,7 +39,7 @@ from rest_framework.exceptions import PermissionDenied
 # Imports nuestros
 from .models import (
     Scholarship, UserData, Organization, Membership, Category,
-    Type, Country, Interest
+    Type, Country, Interest, SavedScholarship
 )
 
 from .models.scholarship import Comment
@@ -47,7 +47,7 @@ from .models.scholarship import Comment
 from .serializers import (
     UserSerializer, ScholarshipSerializer, OrganizationSerializer, 
     MembershipSerializer, CategorySerializer, UserDataSerializer, 
-    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, PublicUserProfileSerializer, CommentSerializer
+    TypeSerializer, CountrySerializer, InterestSerializer, ActivitySerializer, PublicUserProfileSerializer, CommentSerializer, SavedScholarshipSerializer
 )
 
 # Imports de Notifiaciones
