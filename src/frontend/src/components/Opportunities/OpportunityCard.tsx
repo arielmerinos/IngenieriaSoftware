@@ -142,7 +142,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                         className="w-full h-full object-cover"
                     />
                     
-                    {/* Type tags overlaid on the image */}
+                    {/* Type tags overlaid on the image */}                    {/* Type tags */}
                     <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
                         {item.type.map((type, index) => (
                             <span
@@ -158,6 +158,18 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                             </span>
                         ))}
                     </div>
+                    
+                    {/* Heart button */}
+                    <button 
+                        onClick={toggleSaveStatus}
+                        className="absolute top-2 left-2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 focus:outline-none"
+                    >
+                        {isSaved ? (
+                            <HeartIconSolid className="h-5 w-5 text-red-500" />
+                        ) : (
+                            <HeartIconOutline className="h-5 w-5 text-gray-500 hover:text-red-500" />
+                        )}
+                    </button>
                 </div>
                 
                 {/* Content section */}
