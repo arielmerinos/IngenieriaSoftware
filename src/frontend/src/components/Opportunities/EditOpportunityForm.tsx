@@ -20,7 +20,7 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import { useEffect, useState, useRef} from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePopUp } from '../../contexts/PopUpContext';
@@ -95,7 +95,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
         if (watchImage && watchImage[0]) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImagePreview(reader.result as string);
+                setImagePreviews([reader.result as string]);
             };
             reader.readAsDataURL(watchImage[0]);
         }
@@ -178,7 +178,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
 
                 // Initialize the image preview if there's an existing image
                 if (opportunity.image) {
-                    setImagePreview(opportunity.image);
+                    setImagePreviews([opportunity.image]);
                 }
                 const typeIds = opportunityData.type.map((t: any) => t.id);
                 const interestIds = opportunityData.interests.map((i: any) => i.id);
@@ -418,10 +418,10 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                 </label>
                 <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg">
                     <div className="space-y-1 text-center">
-                        {imagePreviews.length > 0 || opportunity?.image ? (
-                            <div className="flex flex-col items-center"> 
+                        {(imagePreviews?.length > 0 || opportunity?.image) ? (
+                            <div className="flex flex-col items-center">
                                 <img
-                                    src={imagePreviews[0] || opportunity?.image}
+                                    src={imagePreviews?.[0] || opportunity?.image || ''}
                                     alt="Preview"
                                     className="h-40 object-cover rounded-lg shadow-md mb-3"
                                 />
