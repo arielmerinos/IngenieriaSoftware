@@ -143,7 +143,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   <p className="text-xl text-gray-600 dark:text-gray-300 mt-2">
                     Estudiante
                   </p>
-                  <p className="text-gray-500 dark:text-gray-400 mt-1">@{username}</p>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">👤{username}</p>
                   <div className="flex items-center space-x-4 mt-3 text-gray-500 dark:text-gray-400">
                     {student?.birthday && (
                       <span className="flex items-center">
