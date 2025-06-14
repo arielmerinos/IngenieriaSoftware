@@ -35,7 +35,8 @@ from api.views import (
     OrganizationViewSet, UserMembershipAdminView, 
     UserNotificationView, PublicUserProfileView,
     UserNotificationView, OrganizationMembershipsView,
-    CommentView, CommentEditView
+    CommentView, CommentEditView,
+    SavedScholarshipView, UserSavedScholarshipsView
 )
 
 # Nueva manera de agregar rutas hechas automaticamente
@@ -84,10 +85,12 @@ urlpatterns = [
     path('user/notifications/', UserNotificationView.as_view(), name='user-notifications'),
 
     #endpointss para el perfil de usuario
-    path('api/user/<int:id>/profile/', PublicUserProfileView.as_view(), name='public-user-profile'),
-
-    # Endpoints para comentarios
+    path('api/user/<int:id>/profile/', PublicUserProfileView.as_view(), name='public-user-profile'),    # Endpoints para comentarios
     path('scholarships/<int:pk>/comment/', CommentView.as_view(), name='scholarship-comments'),
     path('comment/<int:pk>', CommentEditView.as_view(), name='comment-operations'),
+
+    # Endpoints para becas guardadas
+    path('scholarships/save/', SavedScholarshipView.as_view(), name='save-scholarship'),
+    path('user/saved-scholarships/', UserSavedScholarshipsView.as_view(), name='user-saved-scholarships'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

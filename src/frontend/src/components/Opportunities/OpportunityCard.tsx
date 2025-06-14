@@ -20,9 +20,23 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import { Opportunity } from '../../types/opportunity';
-import { CalendarIcon, GlobeIcon, UserIcon } from '@heroicons/react/outline';
+import { CalendarIcon, GlobeIcon, UserIcon, HeartIcon as HeartIconOutline } from '@heroicons/react/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/solid';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
+    const { user, authToken } = useAuth();
+    const [isSaved, setIsSaved] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    // Check if scholarship is saved when component mounts
+    useEffect(() => {
+        if (user && authToken) {
+            checkSavedStatus();
+        }
+    }, [user, authToken]);
+
     // Format date to a more user-friendly format
     const formatDate = (date: Date) => {
         return date.toLocaleDateString('es-ES', {
@@ -36,6 +50,74 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     const truncateContent = (text: string, maxLength: number) => {
         if (text.length <= maxLength) return text;
         return text.substr(0, maxLength) + '...';
+    };
+
+    // Check if scholarship is saved
+    const checkSavedStatus = async () => {
+        try {
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            const response = await fetch(`${API_BASE_URL}/user/saved-scholarships/`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const saved = data.some((saved: any) => saved.scholarship === item.id);
+                setIsSaved(saved);
+            }
+        } catch (error) {
+            console.error('Error checking saved status:', error);
+        }
+    };
+
+    // Toggle saved status
+    const toggleSaveStatus = async (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent card click event
+        
+        if (!user || !authToken) {
+            alert('Debes iniciar sesión para guardar becas');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+            
+            if (isSaved) {
+                // Unsave scholarship
+                const response = await fetch(`${API_BASE_URL}/scholarships/save/?scholarship_id=${item.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    setIsSaved(false);
+                }
+            } else {
+                // Save scholarship
+                const response = await fetch(`${API_BASE_URL}/scholarships/save/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ scholarship_id: item.id })
+                });
+
+                if (response.ok) {
+                    setIsSaved(true);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling saved status:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

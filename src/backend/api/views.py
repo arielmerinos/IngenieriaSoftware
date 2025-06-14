@@ -871,3 +871,62 @@ class CommentEditView(APIView):
         comment.delete()
         
         return Response(status=status.HTTP_200_OK)
+
+class SavedScholarshipView(APIView):
+    """
+    Vista para guardar y eliminar becas guardadas.
+    POST: Guardar una beca
+    DELETE: Eliminar una beca guardada
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        """Guardar una beca"""
+        scholarship_id = request.data.get('scholarship_id')
+        if not scholarship_id:
+            return Response({"error": "Se requiere el ID de la beca"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar que la beca existe
+        try:
+            scholarship = Scholarship.objects.get(pk=scholarship_id)
+        except Scholarship.DoesNotExist:
+            return Response({"error": "Beca no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Verificar si ya está guardada
+        if SavedScholarship.objects.filter(user=request.user, scholarship=scholarship).exists():
+            return Response({"message": "Esta beca ya está guardada"}, status=status.HTTP_200_OK)
+
+        # Guardar la beca
+        saved = SavedScholarship.objects.create(user=request.user, scholarship=scholarship)
+        serializer = SavedScholarshipSerializer(saved)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        """Eliminar una beca guardada"""
+        scholarship_id = request.query_params.get('scholarship_id')
+        if not scholarship_id:
+            return Response({"error": "Se requiere el ID de la beca"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar la beca guardada
+        try:
+            saved = SavedScholarship.objects.get(user=request.user, scholarship_id=scholarship_id)
+        except SavedScholarship.DoesNotExist:
+            return Response({"error": "Beca guardada no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Eliminar la beca guardada
+        saved.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserSavedScholarshipsView(APIView):
+    """
+    Vista para obtener las becas guardadas por un usuario.
+    GET: Obtener todas las becas guardadas por el usuario autenticado.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """Obtener todas las becas guardadas por el usuario"""
+        saved_scholarships = SavedScholarship.objects.filter(user=request.user)
+        serializer = SavedScholarshipSerializer(saved_scholarships, many=True)
+        return Response(serializer.data)
