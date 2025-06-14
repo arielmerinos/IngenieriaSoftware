@@ -25,6 +25,7 @@ from .category import Category
 from .type import Type
 from .country import Country
 from .interests import Interest
+from .saved_scholarship import SavedScholarship
 
 __all__ = [
     "Scholarship",
@@ -35,4 +36,5 @@ __all__ = [
     "Type",
     "Country",
     "Interest",
+    "SavedScholarship",
 ]

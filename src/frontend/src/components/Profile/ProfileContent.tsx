@@ -21,6 +21,8 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import React from 'react';
 import { ProfileData, EditForm } from '../types/profile';
+import { HeartIcon } from '@heroicons/react/solid';
+import SavedScholarships from './SavedScholarships';
 
 interface ProfileContentProps {
   profile: ProfileData;
@@ -181,10 +183,18 @@ const ProfileContent: React.FC<ProfileContentProps> = ({
                   </p>
                 )}
               </div>
-            )}
-          </section>
+            )}          </section>
 
-          
+          {/* Saved Scholarships Section */}
+          {isOwnProfile && (
+            <section className="mb-8">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                <HeartIcon className="w-6 h-6 text-red-500 mr-2" />
+                Oportunidades Guardadas
+              </h3>
+              <SavedScholarships />
+            </section>
+          )}
         </div>
       </div>
     </div>

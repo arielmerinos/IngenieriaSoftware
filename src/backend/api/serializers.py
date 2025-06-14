@@ -24,6 +24,7 @@ from django.core.validators import URLValidator, ValidationError
 from rest_framework import serializers
 from .models.scholarship import Scholarship
 from .models.scholarship import Comment
+from .models.saved_scholarship import SavedScholarship
 from .models.user_data import UserData
 from .models.organization import Organization
 from .models.organization import Membership
@@ -306,3 +307,46 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'scholarship', 'user', 'content', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+class SavedScholarshipSerializer(serializers.ModelSerializer):
+    scholarship = ScholarshipSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = SavedScholarship
+        fields = ['id', 'scholarship', 'user', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        scholarship_data = validated_data.pop('scholarship', None)
+        user_data = validated_data.pop('user', None)
+
+        # Ensure scholarship and user are provided
+        if not scholarship_data or not user_data:
+            raise serializers.ValidationError("Scholarship and user must be provided.")
+
+        # Create or get the scholarship instance
+        scholarship, created = Scholarship.objects.get_or_create(**scholarship_data)
+
+        # Create the saved scholarship entry
+        saved_scholarship = SavedScholarship.objects.create(
+            scholarship=scholarship,
+            user=request.user,
+            **validated_data
+        )
+
+        return saved_scholarship
+
+    def update(self, instance, validated_data):
+        instance.is_active = validated_data.get("is_active", instance.is_active)
+        instance.save()
+        return instance
+
+class SavedScholarshipSerializer(serializers.ModelSerializer):
+    scholarship_data = ScholarshipSerializer(source='scholarship', read_only=True)
+    
+    class Meta:
+        model = SavedScholarship
+        fields = ['id', 'user', 'scholarship', 'saved_date', 'scholarship_data']
+        read_only_fields = ['id', 'saved_date']

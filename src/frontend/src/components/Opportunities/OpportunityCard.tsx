@@ -21,22 +21,166 @@ junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import { Opportunity } from '../../types/opportunity';
 import { CalendarIcon, GlobeIcon, UserIcon } from '@heroicons/react/outline';
+import { HeartIcon } from '@heroicons/react/solid';
+import { HeartIcon as HeartOutline } from '@heroicons/react/outline';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+
+// Utility function to ensure image URLs are absolute
+const ensureAbsoluteImageUrl = (url: string): string => {
+    if (!url) return '/call-placeholder.png';
+    if (url.startsWith('http')) return url;
+    
+    const baseUrl = 'http://localhost:8000';
+    return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
+// Utility function to safely parse dates
+const safeParseDateString = (dateValue: any): Date | null => {
+    if (!dateValue) return null;
+    
+    // If it's already a Date object
+    if (dateValue instanceof Date) return dateValue;
+    
+    try {
+        // Try to parse the date string
+        const date = new Date(dateValue);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.warn('Invalid date:', dateValue);
+            return null;
+        }
+        
+        return date;
+    } catch (error) {
+        console.error('Error parsing date:', error, dateValue);
+        return null;
+    }
+};
 
 const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
+    const { user, authToken } = useAuth();
+    const [isSaved, setIsSaved] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    // Check if scholarship is saved when component mounts
+    useEffect(() => {
+        if (user && authToken) {
+            checkSavedStatus();
+        }
+    }, [user, authToken]);
+
     // Format date to a more user-friendly format
-    const formatDate = (date: Date) => {
-        return date.toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
+    const formatDate = (date: Date | string | undefined) => {
+        if (!date) return '';
+        
+        const parsedDate = safeParseDateString(date);
+        if (!parsedDate) return ''; // Return empty string if date is invalid
+        
+        try {
+            return parsedDate.toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error, date);
+            return ''; // Return empty string on formatting error
+        }
     };
 
     // Truncate content to a specific length
     const truncateContent = (text: string, maxLength: number) => {
+        if (!text) return '';
         if (text.length <= maxLength) return text;
         return text.substr(0, maxLength) + '...';
     };
+
+    // Check if scholarship is saved
+    const checkSavedStatus = async () => {
+        try {
+            const API_BASE_URL = 'http://localhost:8000';
+            const response = await fetch(`${API_BASE_URL}/user/saved-scholarships/`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const saved = data.some((saved: any) => saved.scholarship === item.id);
+                setIsSaved(saved);
+            }
+        } catch (error) {
+            console.error('Error checking saved status:', error);
+        }
+    };
+
+    // Toggle saved status
+    const toggleSaveStatus = async (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent card click event
+        
+        if (!user || !authToken) {
+            alert('Debes iniciar sesión para guardar becas');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const API_BASE_URL = 'http://localhost:8000';
+            
+            if (isSaved) {
+                // Unsave scholarship
+                const response = await fetch(`${API_BASE_URL}/scholarships/save/?scholarship_id=${item.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    setIsSaved(false);
+                }
+            } else {
+                // Save scholarship
+                const response = await fetch(`${API_BASE_URL}/scholarships/save/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ scholarship_id: item.id })
+                });
+
+                if (response.ok) {
+                    setIsSaved(true);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling saved status:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Make sure we have the image URL in the correct format
+    const imageUrl = ensureAbsoluteImageUrl(item.image);
+    
+    // Use either beginning/end or start_date/end_date depending on what's available
+    const startDate = item.beginning || item.start_date;
+    const endDate = item.end || item.end_date;
+    
+    // For debugging
+    console.log('Dates for', item.name, {
+        beginning: item.beginning,
+        start_date: item.start_date,
+        end: item.end,
+        end_date: item.end_date,
+        formatted_start: formatDate(startDate),
+        formatted_end: formatDate(endDate)
+    });
 
     return (
         <div className='
@@ -55,14 +199,14 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                 {/* Image section */}
                 <div className='h-48 relative overflow-hidden'>
                     <img
-                        src={item.image}
+                        src={imageUrl}
                         alt={item.name}
                         className="w-full h-full object-cover"
                     />
                     
                     {/* Type tags overlaid on the image */}
                     <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
-                        {item.type.map((type, index) => (
+                        {item.type && Array.isArray(item.type) && item.type.map((type, index) => (
                             <span
                                 key={index}
                                 className='
@@ -76,6 +220,17 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                             </span>
                         ))}
                     </div>
+                    {/* Heart button */}
+                    <button 
+                        onClick={toggleSaveStatus}
+                        className="absolute top-2 left-2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 focus:outline-none"
+                    >
+                        {isSaved ? (
+                            <HeartIcon className="h-5 w-5 text-red-500" />
+                        ) : (
+                            <HeartOutline className="h-5 w-5 text-gray-500 hover:text-red-500" />
+                        )}
+                    </button>
                 </div>
                 
                 {/* Content section */}
@@ -102,19 +257,19 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                     
                     {/* Description */}
                     <p className='text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow'>
-                        {truncateContent(item.content, 120)}
+                        {truncateContent(item.content || '', 120)}
                     </p>
                     
                     {/* Bottom metadata */}
                     <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
                         <div className='flex items-center text-xs text-gray-500 dark:text-gray-400'>
                             <CalendarIcon className="h-3 w-3 mr-1" />
-                            <span>{formatDate(item.beginning)} - {formatDate(item.end)}</span>
+                            <span>{formatDate(startDate)} - {formatDate(endDate)}</span>
                         </div>
                         
                         {/* Interest tags */}
                         <div className='flex flex-wrap gap-1 mt-2'>
-                            {item.interests.slice(0, 3).map((interest, index) => (
+                            {item.interests && Array.isArray(item.interests) && item.interests.slice(0, 3).map((interest, index) => (
                                 <span
                                     key={index}
                                     className='
@@ -127,7 +282,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                                     {interest}
                                 </span>
                             ))}
-                            {item.interests.length > 3 && (
+                            {item.interests && Array.isArray(item.interests) && item.interests.length > 3 && (
                                 <span className="text-xs text-gray-500 dark:text-gray-400">+{item.interests.length - 3}</span>
                             )}
                         </div>
