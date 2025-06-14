@@ -20,7 +20,7 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef} from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePopUp } from '../../contexts/PopUpContext';
@@ -99,6 +99,21 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
             reader.readAsDataURL(watchImage[0]);
         }
     }, [watchImage]);
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            setValue('image', files);
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+                if (typeof fileReader.result === 'string') {
+                    setImagePreviews([fileReader.result]);
+                }
+            };
+            fileReader.readAsDataURL(files[0]);
+        }
+    };
+
 
     // Fetch all necessary data (including memberships)
     useEffect(() => {
@@ -398,56 +413,64 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
             {/* Image Field */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Imagen de la Convocatoria (opcional)
+                    Imagen de la Convocatoria (Opcional)
                 </label>
-                <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg">
                     <div className="space-y-1 text-center">
-                        {imagePreview ? (
-                            <div className="flex flex-col items-center">
-                                <img 
-                                    src={imagePreview} 
-                                    alt="Preview" 
-                                    className="h-40 object-cover rounded-lg shadow-md mb-3" 
+                        {imagePreviews.length > 0 || opportunity?.image ? (
+                            <div className="flex flex-col items-center"> 
+                                <img
+                                    src={imagePreviews[0] || opportunity?.image}
+                                    alt="Preview"
+                                    className="h-40 object-cover rounded-lg shadow-md mb-3"
                                 />
-                                <button 
-                                    type="button" 
-                                    onClick={() => {
-                                        setValue('image', undefined as any);
-                                        // Only reset preview if it's from a new upload, not the existing image
-                                        if (watchImage) {
-                                            setImagePreview(opportunity.image);
-                                        }
-                                    }}
-                                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
-                                >
-                                    {watchImage ? 'Cancelar cambio' : 'Usar otra imagen'}
-                                </button>
+                                <div className="flex space-x-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                                    >
+                                        Usar otra imagen
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setValue('image', undefined);
+                                            setImagePreviews([]);
+                                        }}
+                                        className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                                    >
+                                        Eliminar imagen
+                                    </button>
+                                </div>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                />
                             </div>
                         ) : (
-                            <>
-                                <PhotographIcon className="mx-auto h-12 w-12 text-gray-400" />
-                                <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                                    <label className="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 focus-within:outline-none">
-                                        <span>Subir nueva imagen</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="sr-only"
-                                            {...register('image')}
-                                        />
-                                    </label>
-                                    <p className="pl-1">o arrastrar y soltar</p>
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    PNG, JPG, GIF hasta 10MB
+                            <div className="flex flex-col items-center">
+                                <PhotographIcon className="h-12 w-12 text-gray-400" />
+                                <p className="text-sm text-gray-500">
+                                    Click para subir una imagen
                                 </p>
-                            </>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                />
+                            </div>
                         )}
                     </div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Si no seleccionas una nueva imagen, se mantendrá la imagen actual.
-                </p>
+                {errors.image && (
+                    <span className="text-red-500 text-sm mt-1 block">{errors.image.message}</span>
+                )}
             </div>
 
             {/* Content Field */}
