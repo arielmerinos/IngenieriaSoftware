@@ -60,15 +60,35 @@ const SavedScholarships: React.FC = () => {
 
         const data = await response.json();
         
-        // Process data to ensure image URLs are absolute
+        // Process data to ensure image URLs are absolute and dates are properly formatted
         const processedData = data.map((item: SavedScholarship) => {
-          if (item.scholarship_data && item.scholarship_data.image) {
-            // If image URL is relative (doesn't start with http), make it absolute
-            if (!item.scholarship_data.image.startsWith('http')) {
+          if (item.scholarship_data) {
+            // Fix image URL
+            if (item.scholarship_data.image && !item.scholarship_data.image.startsWith('http')) {
               item.scholarship_data.image = `http://localhost:8000${
                 item.scholarship_data.image.startsWith('/') ? '' : '/'
               }${item.scholarship_data.image}`;
             }
+            
+            // Ensure dates are properly converted to Date objects
+            if (item.scholarship_data.start_date) {
+              item.scholarship_data.beginning = new Date(item.scholarship_data.start_date);
+            }
+            
+            if (item.scholarship_data.end_date) {
+              item.scholarship_data.end = new Date(item.scholarship_data.end_date);
+            }
+            
+            if (item.scholarship_data.publication_date) {
+              item.scholarship_data.published = new Date(item.scholarship_data.publication_date);
+            }
+            
+            // Log dates for debugging
+            console.log('Processed dates for', item.scholarship_data.name, {
+              start: item.scholarship_data.beginning,
+              end: item.scholarship_data.end,
+              publication: item.scholarship_data.published
+            });
           }
           return item;
         });
@@ -105,6 +125,15 @@ const SavedScholarships: React.FC = () => {
         // Make a final check to ensure image URL is absolute
         if (scholarship.image && !scholarship.image.startsWith('http')) {
           scholarship.image = `http://localhost:8000${scholarship.image.startsWith('/') ? '' : '/'}${scholarship.image}`;
+        }
+        
+        // Make a final check to ensure dates are properly set
+        if (!scholarship.beginning && scholarship.start_date) {
+          scholarship.beginning = new Date(scholarship.start_date);
+        }
+        
+        if (!scholarship.end && scholarship.end_date) {
+          scholarship.end = new Date(scholarship.end_date);
         }
         
         return (

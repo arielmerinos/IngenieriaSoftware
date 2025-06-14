@@ -35,6 +35,30 @@ const ensureAbsoluteImageUrl = (url: string): string => {
     return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
+// Utility function to safely parse dates
+const safeParseDateString = (dateValue: any): Date | null => {
+    if (!dateValue) return null;
+    
+    // If it's already a Date object
+    if (dateValue instanceof Date) return dateValue;
+    
+    try {
+        // Try to parse the date string
+        const date = new Date(dateValue);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.warn('Invalid date:', dateValue);
+            return null;
+        }
+        
+        return date;
+    } catch (error) {
+        console.error('Error parsing date:', error, dateValue);
+        return null;
+    }
+};
+
 const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     const { user, authToken } = useAuth();
     const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -50,16 +74,25 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
     // Format date to a more user-friendly format
     const formatDate = (date: Date | string | undefined) => {
         if (!date) return '';
-        const dateObject = typeof date === 'string' ? new Date(date) : date;
-        return dateObject.toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
+        
+        const parsedDate = safeParseDateString(date);
+        if (!parsedDate) return ''; // Return empty string if date is invalid
+        
+        try {
+            return parsedDate.toLocaleDateString('es-ES', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error, date);
+            return ''; // Return empty string on formatting error
+        }
     };
 
     // Truncate content to a specific length
     const truncateContent = (text: string, maxLength: number) => {
+        if (!text) return '';
         if (text.length <= maxLength) return text;
         return text.substr(0, maxLength) + '...';
     };
@@ -134,6 +167,20 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
 
     // Make sure we have the image URL in the correct format
     const imageUrl = ensureAbsoluteImageUrl(item.image);
+    
+    // Use either beginning/end or start_date/end_date depending on what's available
+    const startDate = item.beginning || item.start_date;
+    const endDate = item.end || item.end_date;
+    
+    // For debugging
+    console.log('Dates for', item.name, {
+        beginning: item.beginning,
+        start_date: item.start_date,
+        end: item.end,
+        end_date: item.end_date,
+        formatted_start: formatDate(startDate),
+        formatted_end: formatDate(endDate)
+    });
 
     return (
         <div className='
@@ -157,9 +204,9 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                         className="w-full h-full object-cover"
                     />
                     
-                    {/* Type tags overlaid on the image */}                    {/* Type tags */}
+                    {/* Type tags overlaid on the image */}
                     <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
-                        {item.type.map((type, index) => (
+                        {item.type && Array.isArray(item.type) && item.type.map((type, index) => (
                             <span
                                 key={index}
                                 className='
@@ -173,7 +220,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                             </span>
                         ))}
                     </div>
-                      {/* Heart button */}
+                    {/* Heart button */}
                     <button 
                         onClick={toggleSaveStatus}
                         className="absolute top-2 left-2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all duration-200 focus:outline-none"
@@ -210,19 +257,19 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                     
                     {/* Description */}
                     <p className='text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow'>
-                        {truncateContent(item.content, 120)}
+                        {truncateContent(item.content || '', 120)}
                     </p>
                     
                     {/* Bottom metadata */}
                     <div className="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700">
                         <div className='flex items-center text-xs text-gray-500 dark:text-gray-400'>
                             <CalendarIcon className="h-3 w-3 mr-1" />
-                            <span>{formatDate(item.beginning)} - {formatDate(item.end)}</span>
+                            <span>{formatDate(startDate)} - {formatDate(endDate)}</span>
                         </div>
                         
                         {/* Interest tags */}
                         <div className='flex flex-wrap gap-1 mt-2'>
-                            {item.interests.slice(0, 3).map((interest, index) => (
+                            {item.interests && Array.isArray(item.interests) && item.interests.slice(0, 3).map((interest, index) => (
                                 <span
                                     key={index}
                                     className='
@@ -235,7 +282,7 @@ const OpportunityCard: React.FC<Opportunity> = ({ item }) => {
                                     {interest}
                                 </span>
                             ))}
-                            {item.interests.length > 3 && (
+                            {item.interests && Array.isArray(item.interests) && item.interests.length > 3 && (
                                 <span className="text-xs text-gray-500 dark:text-gray-400">+{item.interests.length - 3}</span>
                             )}
                         </div>

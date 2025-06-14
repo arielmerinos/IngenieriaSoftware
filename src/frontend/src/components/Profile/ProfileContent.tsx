@@ -190,7 +190,7 @@ const ProfileContent: React.FC<ProfileContentProps> = ({
             <section className="mb-8">
               <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
                 <HeartIcon className="w-6 h-6 text-red-500 mr-2" />
-                Becas Guardadas
+                Oportunidades Guardadas
               </h3>
               <SavedScholarships />
             </section>
