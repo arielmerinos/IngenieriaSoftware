@@ -20,7 +20,7 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 import React from 'react';
-import { ProfileData, EditForm } from '../types/profile';
+import { ProfileData, EditForm } from '../../types/profile';
 
 interface ProfileHeaderProps {
   profile: ProfileData;

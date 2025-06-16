@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.0.0",
+    "react-hook-form": "^7.57.0"
+  }
+}
