@@ -189,20 +189,32 @@ const UserProfile: React.FC = () => {
       
       setIsEditing(false);
       
+      // Construir el objeto a enviar, omitiendo birthday si está vacío
+      const bodyData: Record<string, string> = {
+        first_name: editForm.first_name,
+        last_name: editForm.last_name,
+        email: editForm.email,
+        phone_number: editForm.phone_number,
+        bio: editForm.bio,
+      };
+
+      // Validar formato de fecha YYYY-MM-DD si birthday no está vacío
+      if (editForm.birthday) {
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(editForm.birthday)) {
+          alert('La fecha de nacimiento debe estar en el formato YYYY-MM-DD.');
+          return;
+        }
+        bodyData.birthday = editForm.birthday;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/user/`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          first_name: editForm.first_name,
-          last_name: editForm.last_name,
-          email: editForm.email,
-          phone_number: editForm.phone_number,
-          bio: editForm.bio,
-          birthday: editForm.birthday,
-        }),
+        body: JSON.stringify(bodyData),
       });
 
       if (response.ok) {
