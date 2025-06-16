@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useGrid } from '../../contexts/GridContext';
 import { usePopUp } from '../../contexts/PopUpContext';
@@ -133,6 +133,22 @@ const RegisterOpportunity: React.FC = () => {
         fetchData();
     }, [authContext.authToken, authContext.user?.id]);
 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            setValue('image', files);
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+                if (typeof fileReader.result === 'string') {
+                    setImagePreviews([fileReader.result]);
+                }
+            };
+            fileReader.readAsDataURL(files[0]);
+        }
+    };
+
     const submitHandler: SubmitHandler<FormData> = async (data) => {
         try {
             setLoading(true);
@@ -142,8 +158,7 @@ const RegisterOpportunity: React.FC = () => {
             const username = authContext.user?.username;
             
             if (!token || !username) {
-                setError('Usuario no autenticado');
-                return;
+                throw new Error('Authentication required');
             }
 
             const formData = new FormData();
@@ -156,13 +171,34 @@ const RegisterOpportunity: React.FC = () => {
             formData.append('created_by', username);
 
             // Add selected types, interests, and countries
-            selectedTypes.forEach((typeId) => formData.append('type_ids', typeId.toString()));
-            data.interests.forEach((interestId) => formData.append('interest_ids', interestId.toString()));
-            data.country.forEach((countryId) => formData.append('country_ids', countryId.toString()));
+            selectedTypes.forEach((typeId) => {
+                formData.append('type_ids', typeId.toString());
+            });
+            data.interests.forEach((interestId) => {
+                formData.append('interest_ids', interestId.toString());
+            });
+            data.country.forEach((countryId) => {
+                formData.append('country_ids', countryId.toString());
+            });
 
-            // Add image if selected
+            // Handle image with validation
             if (data.image && data.image.length > 0) {
-                formData.append('image', data.image[0]);
+                const file = data.image[0];
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    setError('Please upload only image files');
+                    return;
+                }
+                
+                // Validate file size (5MB limit)
+                const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                if (file.size > maxSize) {
+                    setError('Image size should be less than 5MB');
+                    return;
+                }
+                
+                formData.append('image', file);
             }
 
             // Add organization if selected
@@ -170,7 +206,6 @@ const RegisterOpportunity: React.FC = () => {
                 formData.append('organization_id', data.organization.toString());
             }
 
-            // Send request to server
             const response = await fetch('http://localhost:8000/scholarships/create/', {
                 method: 'POST',
                 headers: {
@@ -181,8 +216,7 @@ const RegisterOpportunity: React.FC = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Backend validation errors:', errorData);
-                throw new Error('Error al crear la oportunidad');
+                throw new Error(errorData.message || 'Failed to create opportunity');
             }
 
             const result = await response.json();
@@ -191,12 +225,10 @@ const RegisterOpportunity: React.FC = () => {
             // Update the grid with the new opportunity
             gridContext?.addElem(parseOpportunity(result));
             
-            // Show success message
             setSuccess(true);
             
-            // Close the form after a delay
             setTimeout(() => {
-                popUpContext.setOpen(false);
+                popUpContext?.closePopUp();
             }, 1500);
             
         } catch (error) {
@@ -356,16 +388,32 @@ const RegisterOpportunity: React.FC = () => {
                                     alt="Preview" 
                                     className="h-40 object-cover rounded-lg shadow-md mb-3" 
                                 />
-                                <button 
-                                    type="button" 
-                                    onClick={() => {
-                                        setValue('image', undefined as any);
-                                        setImagePreviews([]);
-                                    }}
-                                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
-                                >
-                                    Eliminar imagen
-                                </button>
+                                <div className="flex space-x-2">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                                    >
+                                        Usar otra imagen
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            setValue('image', undefined as any);
+                                            setImagePreviews([]);
+                                        }}
+                                        className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                                    >
+                                        Eliminar imagen
+                                    </button>
+                                </div>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                />
                             </div>
                         ) : (
                             <>

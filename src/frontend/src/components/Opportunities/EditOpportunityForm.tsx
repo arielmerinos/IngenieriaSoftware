@@ -20,7 +20,7 @@ Debería haber recibido una copia de la Licencia Pública General de GNU
 junto con este programa. Si no, consulte <https://www.gnu.org/licenses/>.
 */
 
-import { useEffect, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePopUp } from '../../contexts/PopUpContext';
@@ -64,8 +64,9 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [serverError, setServerError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreviews, setImagePreviews] = useState<string | null>(null);
     const [memberships, setMemberships] = useState<{ id: number, organization: { id: number, name: string } }[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { authToken, user } = useAuth();
     const popUpContext = usePopUp();
@@ -94,11 +95,26 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
         if (watchImage && watchImage[0]) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImagePreview(reader.result as string);
+                setImagePreviews([reader.result as string]);
             };
             reader.readAsDataURL(watchImage[0]);
         }
     }, [watchImage]);
+
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            setValue('image', files);
+            const fileReader = new FileReader();
+            fileReader.onload = () => {
+                if (typeof fileReader.result === 'string') {
+                    setImagePreviews([fileReader.result]);
+                }
+            };
+            fileReader.readAsDataURL(files[0]);
+        }
+    };
+
 
     // Fetch all necessary data (including memberships)
     useEffect(() => {
@@ -162,7 +178,7 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
 
                 // Initialize the image preview if there's an existing image
                 if (opportunity.image) {
-                    setImagePreview(opportunity.image);
+                    setImagePreviews([opportunity.image]);
                 }
                 const typeIds = opportunityData.type.map((t: any) => t.id);
                 const interestIds = opportunityData.interests.map((i: any) => i.id);
@@ -301,34 +317,113 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
     }
 
     return (
-        <form 
-            onSubmit={handleSubmit(submitHandler)} 
-            className="space-y-6 bg-white dark:bg-gray-800 rounded-xl p-6"
-        >
-            <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Editar Convocatoria</h2>
-            </div>
-            
-            {serverError && (
-                <div className="bg-red-100 dark:bg-red-900 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4 rounded">
-                    <p>{serverError}</p>
-                </div>
-            )}
-
-            {/* Name Field */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nombre de la Convocatoria
-                </label>
-                <div className="relative">
-                    <input
-                        type="text"
-                        {...register('name', { required: 'El nombre es obligatorio' })}
-                        className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+        <form onSubmit={handleSubmit(submitHandler)}>
+            {/* Title section */}
+            <div className="space-y-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Nombre de la Convocatoria
+                    </label>
+                    <textarea
+                        {...register('name')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white resize-none"
+                        rows={2}
+                        style={{ 
+                            overflow: 'hidden', 
+                            textOverflow: 'ellipsis',
+                            wordWrap: 'break-word',
+                            maxHeight: '100px'
+                        }}
                     />
-                    <DocumentTextIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    {errors.name && (
+                        <span className="text-red-500 text-sm mt-1 block">{errors.name.message}</span>
+                    )}
                 </div>
-                {errors.name && <span className="text-red-500 text-sm mt-1 block">{errors.name.message}</span>}
+
+                {/* Content section */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Contenido
+                    </label>
+                    <textarea
+                        {...register('content')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        rows={4}
+                        style={{ 
+                            overflow: 'auto',
+                            wordWrap: 'break-word',
+                            maxHeight: '200px'
+                        }}
+                    />
+                    {errors.content && (
+                        <span className="text-red-500 text-sm mt-1 block">{errors.content.message}</span>
+                    )}
+                </div>
+
+                {/* Image section with proper layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Imagen de la Convocatoria (Opcional)
+                        </label>
+                        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg">
+                            <div className="space-y-1 text-center">
+                                {(imagePreviews?.length > 0 || opportunity?.image) ? (
+                                    <div className="flex flex-col items-center">
+                                        <img
+                                            src={imagePreviews?.[0] || opportunity?.image || ''}
+                                            alt="Preview"
+                                            className="h-40 object-cover rounded-lg shadow-md mb-3"
+                                        />
+                                        <div className="flex space-x-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                                            >
+                                                Usar otra imagen
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setValue('image', undefined);
+                                                    setImagePreviews([]);
+                                                }}
+                                                className="text-sm text-red-600 dark:text-red-400 hover:underline"
+                                            >
+                                                Eliminar imagen
+                                            </button>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center">
+                                        <PhotographIcon className="h-12 w-12 text-gray-400" />
+                                        <p className="text-sm text-gray-500">
+                                            Click para subir una imagen
+                                        </p>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleImageChange}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        {errors.image && (
+                            <span className="text-red-500 text-sm mt-1 block">{errors.image.message}</span>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Types Field with Creatable Select */}
@@ -393,86 +488,6 @@ const EditOpportunityForm: React.FC<EditOpportunityFormProps> = ({ opportunity, 
                     </div>
                     {errors.end_date && <span className="text-red-500 text-sm mt-1 block">{errors.end_date.message}</span>}
                 </div>
-            </div>
-
-            {/* Image Field */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Imagen de la Convocatoria (opcional)
-                </label>
-                <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
-                    <div className="space-y-1 text-center">
-                        {imagePreview ? (
-                            <div className="flex flex-col items-center">
-                                <img 
-                                    src={imagePreview} 
-                                    alt="Preview" 
-                                    className="h-40 object-cover rounded-lg shadow-md mb-3" 
-                                />
-                                <button 
-                                    type="button" 
-                                    onClick={() => {
-                                        setValue('image', undefined as any);
-                                        // Only reset preview if it's from a new upload, not the existing image
-                                        if (watchImage) {
-                                            setImagePreview(opportunity.image);
-                                        }
-                                    }}
-                                    className="text-sm text-red-600 dark:text-red-400 hover:underline"
-                                >
-                                    {watchImage ? 'Cancelar cambio' : 'Usar otra imagen'}
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <PhotographIcon className="mx-auto h-12 w-12 text-gray-400" />
-                                <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                                    <label className="relative cursor-pointer bg-white dark:bg-gray-700 rounded-md font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 focus-within:outline-none">
-                                        <span>Subir nueva imagen</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="sr-only"
-                                            {...register('image')}
-                                        />
-                                    </label>
-                                    <p className="pl-1">o arrastrar y soltar</p>
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    PNG, JPG, GIF hasta 10MB
-                                </p>
-                            </>
-                        )}
-                    </div>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Si no seleccionas una nueva imagen, se mantendrá la imagen actual.
-                </p>
-            </div>
-
-            {/* Content Field */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Descripción de la Convocatoria
-                </label>
-                <textarea 
-                    {...register('content', { 
-                        required: 'La descripción es obligatoria',
-                        minLength: {
-                            value: 50,
-                            message: 'La descripción debe tener al menos 50 caracteres'
-                        }
-                    })} 
-                    rows={5} 
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                ></textarea>
-                {errors.content ? (
-                    <span className="text-red-500 text-sm mt-1 block">{errors.content.message}</span>
-                ) : (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Incluye información relevante como requisitos, beneficios, y proceso de aplicación.
-                    </p>
-                )}
             </div>
 
             {/* Interests Field */}
