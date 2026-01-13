@@ -4,6 +4,15 @@ Aplicación web para estudiantes de niveles medio superior y superior que facili
 
 La especificación y el diseño se encuentran la wiki. 
 
+# Video Demo
+
+Puedes ver una demostración en video de la aplicación aquí:
+
+<video src="docs/impulsaTUfuturo.mp4" controls width="600">
+    Tu navegador no soporta la reproducción de videos.
+</video>
+
+O descarga y visualiza el archivo directamente: [docs/impulsaTUfuturo.mp4](docs/impulsaTUfuturo.mp4)
 
 # Ejecuta la aplicación 
 
